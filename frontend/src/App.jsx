@@ -1,35 +1,79 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Login from "./components/pages/Login";
+import Register from "./components/pages/Register";
+import ForgotPassword from "./components/pages/ForgotPassword";
+import Header from "./components/home/Header";
+import Footer from "./components/home/Footer";
+import UserCreateForm from "./components/profiles/CreateProfile";
+import Dashboard from "./components/pages/Dashbord";
+import { UserProfileProvider } from "./components/context/UseProfileContext";
+import EditProfile from "./components/profiles/EditProfile";
+import MatchHome from "./components/home/MatchHome";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <UserProfileProvider>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<MatchHome />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword/>} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/create-profile" element={<UserCreateForm />} />
+            <Route path="/profile/edit" element={<EditProfile/>} />
+          </Routes>
+        </main>
+        <Footer />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </UserProfileProvider>
+  );
 }
 
-export default App
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { useState } from 'react'
+// import reactLogo from './assets/react.svg'
+// import viteLogo from '/vite.svg'
+// import './App.css'
+
+// function App() {
+//   const [count, setCount] = useState(0)
+
+//   return (
+//     <>
+//      <h1 className="text-3xl font-bold text-gray-700 underline">
+//       Hello world!
+//     </h1>
+//        </>
+//   )
+// }
+
+// export default App
