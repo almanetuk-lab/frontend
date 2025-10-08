@@ -1,6 +1,6 @@
 /* src/pages/Login.jsx */
 import React, { useState } from "react";
-import { useAuth } from "../context/Authprovider";
+import { useAuth } from "../context/AuthProvider";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {

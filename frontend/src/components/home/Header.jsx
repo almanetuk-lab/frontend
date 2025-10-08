@@ -3,7 +3,7 @@
 /* src/components/Header.jsx */
 import React from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/Authprovider";
+import { useAuth } from "../context/AuthProvider";
 // import { useAuth } from "../context/AuthProvider";
 
 export default function Header() {
