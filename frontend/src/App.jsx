@@ -10,6 +10,7 @@ import Dashboard from "./components/pages/Dashbord";
 import { UserProfileProvider } from "./components/context/UseProfileContext";
 import EditProfile from "./components/profiles/EditProfile";
 import MatchHome from "./components/home/MatchHome";
+import AdminPage from "./components/admin/AdminPage";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create-profile" element={<UserCreateForm />} />
             <Route path="/profile/edit" element={<EditProfile/>} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </main>
         <Footer />
