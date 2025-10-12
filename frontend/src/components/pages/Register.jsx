@@ -47,7 +47,9 @@ export default function Register() {
       };
 
       // 🔗 Axios API call
+      console.log("here");
       const response = await registerUser(dataToSend);
+      console.log("after");
 
       console.log("Registration Response:", response);
 

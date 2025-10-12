@@ -20,15 +20,20 @@ import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+console.log("api_url : ",API_BASE_URL);
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
+ // withCredentials: true
 });
 
 export const registerUser = async (formData) => {
   try {
+    console.log(API_BASE_URL);
+    console.log(api);
     const response = await api.post("/api/register", formData);
     return response.data;
   } catch (error) {
@@ -69,7 +74,7 @@ export const updateUserProfile = async (profileData, token) => { // Removed user
     const response = await api.put(`/api/editProfile`, profileData, { // Changed URL to /api/editProfile
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+         Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
