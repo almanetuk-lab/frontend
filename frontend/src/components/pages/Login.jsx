@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/Authprovider";
-import { AuthProvider } from "../context/Authprovider";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Login() {
   const { login } = useAuth();
