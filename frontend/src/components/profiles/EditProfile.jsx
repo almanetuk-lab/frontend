@@ -44,6 +44,7 @@ export default function EditProfile() {
   useEffect(() => {
     const loadUserProfile = async () => {
       // Check if we have a token to fetch profile
+      console.log(authToken);
       if (!authToken) {
         setApiError("Authentication token not available. Please log in.");
         setLoading(false);
