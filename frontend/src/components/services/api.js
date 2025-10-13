@@ -1,80 +1,84 @@
-
-// import axios from 'axios';
-
-// // Axios create instance 
-// const api = axios.create({
-//   baseURL: 'https://backend-q0wc.onrender.com', // backend URL
-//   headers: {
-//     'Content-Type': 'application/json', // send the js data
-//   },
-// });
-
-// export default api;
-
-
-// --------------------------------------------------------------//
 // src/services/api.js
-
-
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const DEFAULT_BASE = "http://192.168.1.27:3435"; // backend IP + port
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
+// helper to set/remove Authorization header globally
+export const setAuthToken = (token) => {
+  if (token) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common["Authorization"];
+  }
+};
+
+const normalizeAuthResponse = (data = {}) => {
+  // backend may return different shapes; normalize to { token, refresh, user }
+  const token = data?.accessToken || data?.token || data?.access_token || null;
+  const refresh = data?.refreshToken || data?.refresh_token || null;
+
+  // user might be in user_profile, user, or user.profile_info
+  const user =
+    data?.user_profile ||
+    data?.user ||
+    (data?.user && data.user.profile_info) ||
+    (data?.user && data.user_profile) ||
+    null;
+
+  return { token, refresh, user };
+};
+
+// ---------- Login ----------
+export const loginUser = async ({ email, password }) => {
+  try {
+    const response = await api.post("/api/login", { email, password });
+    const data = response?.data ?? response;
+    return normalizeAuthResponse(data);
+  } catch (error) {
+    // rethrow so caller can read error.response etc.
+    throw error;
+  }
+};
+
+// ---------- Register ----------
 export const registerUser = async (formData) => {
   try {
     const response = await api.post("/api/register", formData);
-    return response.data;
+    const data = response?.data ?? response;
+    // backend earlier returned { message, user } — user may contain profile_info
+    // Normalize: if server didn't send token, we still return normalized object
+    const normalized = normalizeAuthResponse(data);
+    // If normalized.user is null but data.user exists, map it
+    if (!normalized.user && data?.user) {
+      // if server returned { user: { profile_info: {...}, email } }
+      const maybeUser = data.user.profile_info ? data.user.profile_info : data.user;
+      return { token: normalized.token, refresh: normalized.refresh, user: maybeUser };
+    }
+    return normalized;
   } catch (error) {
-    console.error("Registration Error:", error.response?.data || error.message);
     throw error;
   }
 };
 
-// =================================================================
-//                 API Functions for Profile Editing (Adjusted for user_id in body)
-// =================================================================
-
-// ✅ Function to fetch user profile data
-// Assuming GET /api/profile does NOT take userId in URL,
-// but rather expects userId to be derived from the token/session on backend.
-// If your GET /api/profile also needs user_id in BODY, you'd need to adjust this.
-// For now, assuming it fetches CURRENT user's profile based on auth token.
-export const fetchUserProfile = async (token) => { // Removed userId from parameters
+// ---------- Update Profile ----------
+// profileData can be JSON or FormData (for images)
+export const updateUserProfile = async (profileData, token) => {
   try {
-    const response = await api.get(`/api/profile`, { // Changed URL to /api/profile
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+    if (token) setAuthToken(token);
+    // axios will set content-type automatically for FormData
+    const response = await api.put("/api/editProfile", profileData);
+    const data = response?.data ?? response;
+    // Server returns { message, user, profile } — pick user/profile
+    const user = data?.user ?? data?.user_profile ?? null;
+    const profile = data?.profile ?? null;
+    return { user, profile, raw: data };
   } catch (error) {
-    console.error("Fetch User Profile Error:", error.response?.data || error.message);
-    throw error;
-  }
-};
-
-// ✅ Function to update user profile data (text fields and photo URL)
-// This will send user_id as part of the JSON body, not in the URL.
-export const updateUserProfile = async (profileData, token) => { // Removed userId from parameters
-  try {
-    // Assuming API endpoint is /api/editProfile as per your Postman screenshot
-    // profileData should now include 'user_id' as well.
-    const response = await api.put(`/api/editProfile`, profileData, { // Changed URL to /api/editProfile
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Update User Profile Error:", error.response?.data || error.message);
     throw error;
   }
 };
@@ -87,28 +91,65 @@ export default api;
 
 
 
- 
-// // src/services/api.js
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import axios from "axios";
 
-// // Base URL le raha hai .env se
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// const DEFAULT_BASE = "http://192.168.1.27:3435"; // backend IP + port
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE;
 
-// // Axios instance create
 // const api = axios.create({
 //   baseURL: API_BASE_URL,
-//   headers: {
-//     "Content-Type": "application/json",
-//   },
+//   headers: { "Content-Type": "application/json" },
 // });
 
-// // ✅ Example function for register
+// // helper to set/remove Authorization header globally
+// export const setAuthToken = (token) => {
+//   if (token) {
+//     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+//   } else {
+//     delete api.defaults.headers.common["Authorization"];
+//   }
+// };
+
+// // ---------- Login ----------
+// export const loginUser = async ({ email, password }) => {
+//   try {
+//     const response = await api.post("/api/login", { email, password });
+//     return response.data; // { user_profile, accessToken, refreshToken }
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
+// // ---------- Register ----------
 // export const registerUser = async (formData) => {
 //   try {
 //     const response = await api.post("/api/register", formData);
-//     return response.data;
+//     return response.data; // { user, accessToken, refreshToken }
 //   } catch (error) {
-//     console.error("Registration Error:", error.response?.data || error.message);
+//     throw error;
+//   }
+// };
+
+// // ---------- Update Profile ----------
+// export const updateUserProfile = async (profileData, token) => {
+//   try {
+//     setAuthToken(token);
+//     const response = await api.put("/api/editProfile", profileData);
+//     return response.data; // { user, profile }
+//   } catch (error) {
 //     throw error;
 //   }
 // };
@@ -131,80 +172,98 @@ export default api;
 
 
 
-
-
-
-
 // // src/services/api.js
 // import axios from "axios";
 
+// const DEFAULT_BASE = "http://192.168.1.27:3435"; // fallback if env missing
+// // const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE;
+
+
+// console.log("API baseURL (used):", API_BASE_URL);
+
 // const api = axios.create({
-//   baseURL: "http://192.168.1.27:3435", 
+//   baseURL: API_BASE_URL,
 //   headers: {
 //     "Content-Type": "application/json",
 //   },
 // });
 
-// export const registerUser = async (userData) => {
+// /* ---------- Login ---------- */
+// export const loginUser = async ({ email, password }) => {
 //   try {
-//     const response = await api.post("/api/register", userData);
+//     const response = await api.post("/api/login", { email, password });
+//     return response.data; // expect: { token, user }
+//   } catch (error) {
+//     console.error("Login Error:", error.response?.data || error.message);
+//     throw error;
+//   }
+// };
+
+
+// // helper to set/remove Authorization header globally
+// export function setAuthToken(token) {
+//   if (token) {
+//     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+//   } else {
+//     delete api.defaults.headers.common["Authorization"];
+//   }
+// }
+
+// /* ---------- Auth / Register ---------- */
+// export const registerUser = async (formData) => {
+//   try {
+//     const response = await api.post("/api/register", formData);
 //     return response.data;
 //   } catch (error) {
-//     
-//     if (error.response) {
-//    
-//       throw error.response.data || { message: "Server responded with an error." };
-//     } else if (error.request) {
-//      
-//       throw { message: "No response from server. Check network or server status." };
+//     console.error("Registration Error:", error.response?.data || error.message);
+//     throw error;
+//   }
+// };
+
+// /* ---------- Profile fetch/update (use api defaults for auth) ---------- */
+// // export const fetchUserProfile = async () => {
+// //   try {
+// //     const response = await api.get("/api/profile");
+// //     return response.data;
+// //   } catch (error) {
+// //     console.error("Fetch User Profile Error:", error.response?.data || error.message);
+// //     throw error;
+// //   }
+// // };
+
+// export const updateUserProfile = async (profileData) => {
+//   try {
+//     // If you need multipart/form-data, you can detect and send accordingly.
+//     // Here we send JSON. If profileData is FormData, axios will set header automatically.
+//     if (profileData instanceof FormData) {
+//       const response = await api.put("/api/editProfile", profileData, {
+//         headers: { "Content-Type": "multipart/form-data" },
+//       });
+//       return response.data;
 //     } else {
-//      
-//       throw { message: "Error setting up the request." };
+//       const response = await api.put("/api/editProfile", profileData);
+//       return response.data;
 //     }
-//   }
-// };
-
-// export default api;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // src/services/api.js
-// import axios from "axios";
-
-// // Axios instance
-// const api = axios.create({
-//   
-//   baseURL: "http://192.168.1.27:3435", 
-//   headers: {
-//     "Content-Type": "application/json",
-//   },
-// });
-
-// // ----- Register API -----
-// export const registerUser = async (userData) => {
-//   try {
-//  
-//     const response = await api.post("/api/register", userData); 
-//     return response.data;
 //   } catch (error) {
-//     // Agar backend koi error message bheje
-//     throw error.response?.data || { message: "Something went wrong!" };
+//     console.error("Update User Profile Error:", error.response?.data || error.message);
+//     throw error;
 //   }
-// };
+// }
 
 // export default api;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
