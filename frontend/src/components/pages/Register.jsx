@@ -55,10 +55,16 @@ export default function Register() {
         marital_status: form.marital_status,
       };
 
+
       const res = await registerUser(payload);
       // res might be response.data or data itself depending on api.js
       const data = res?.data ? res.data : res;
       const { token, refresh, user } = normalizeResponse(data);
+      // 🔗 Axios API call
+      console.log("here");
+      const response = await registerUser(dataToSend);
+      console.log("after");
+
 
       if (!token) {
         throw new Error("No token received from server. Registration may have failed.");

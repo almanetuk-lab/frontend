@@ -5,6 +5,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { loginUser, setAuthToken } from "../services/api";
 import { useUserProfile } from "../context/UseProfileContext"; // updateProfile context used across your app
 
+import { useAuth } from "../services/api"
+
+
 export default function Login() {
   const navigate = useNavigate();
   const { updateProfile } = useUserProfile(); // will update profile context after login

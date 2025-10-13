@@ -4,9 +4,18 @@ import axios from "axios";
 const DEFAULT_BASE = "http://192.168.1.27:3435"; // backend IP + port
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE;
 
+console.log("api_url : ",API_BASE_URL);
+
 const api = axios.create({
   baseURL: API_BASE_URL,
+
   headers: { "Content-Type": "application/json" },
+
+  headers: {
+    "Content-Type": "application/json",
+  },
+ // withCredentials: true
+
 });
 
 // helper to set/remove Authorization header globally
@@ -49,6 +58,8 @@ export const loginUser = async ({ email, password }) => {
 // ---------- Register ----------
 export const registerUser = async (formData) => {
   try {
+    console.log(API_BASE_URL);
+    console.log(api);
     const response = await api.post("/api/register", formData);
     const data = response?.data ?? response;
     // backend earlier returned { message, user } — user may contain profile_info
@@ -79,11 +90,37 @@ export const updateUserProfile = async (profileData, token) => {
     const profile = data?.profile ?? null;
     return { user, profile, raw: data };
   } catch (error) {
+
+
+    console.error("Fetch User Profile Error:", error.response?.data || error.message);
     throw error;
   }
 };
 
 export default api;
+
+
+
+// // ✅ Function to update user profile data (text fields and photo URL)
+// // This will send user_id as part of the JSON body, not in the URL.
+// export const updateUserProfile = async (profileData, token) => { // Removed userId from parameters
+//   try {
+//     // Assuming API endpoint is /api/editProfile as per your Postman screenshot
+//     // profileData should now include 'user_id' as well.
+//     const response = await api.put(`/api/editProfile`, profileData, { // Changed URL to /api/editProfile
+//       headers: {
+//         "Content-Type": "application/json",
+//          Authorization: `Bearer ${token}`,
+//       },
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Update User Profile Error:", error.response?.data || error.message);
+
+//     throw error;
+//   }
+// };
+
 
 
 
