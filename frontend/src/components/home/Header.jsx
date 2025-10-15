@@ -20,7 +20,7 @@ export default function Header() {
   return (
     <header className="bg-white shadow px-6 py-4 flex justify-between items-center">
       <Link to="/" className="text-xl font-bold text-gray-800">
-        Connetion Hub
+        MingleHub
       </Link>
 
       <nav className="flex items-center gap-4">

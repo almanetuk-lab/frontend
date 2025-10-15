@@ -9,8 +9,8 @@ import UserCreateForm from "./components/profiles/CreateProfile";
 import Dashboard from "./components/pages/Dashbord";
 import { UserProfileProvider } from "./components/context/UseProfileContext";
 import EditProfile from "./components/profiles/EditProfile";
-import MatchHome from "./components/home/MatchHome";
 import AdminPage from "./components/admin/AdminPage";
+import Home from "./components/pages/Home";
 
 export default function App() {
   return (
@@ -19,7 +19,7 @@ export default function App() {
         <Header />
         <main className="flex-grow">
           <Routes>
-            <Route path="/" element={<MatchHome />} />
+            <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword/>} />
