@@ -2,10 +2,11 @@
 import React from "react";
 import Header from "../home/Header";
 import Footer from "../home/Footer";
-import Hero from "../home/hero";
+// import Hero from "../home/Hero";
 import FeatureCard from "../home/FeaturesCards";
 import Spotlight from "../home/Spotlight";
 import CTA from "../home/CTA";
+import Hero from "../home/Hero";
 
 // Use local images from public/images folder
 const cards = [
