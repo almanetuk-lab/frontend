@@ -48,7 +48,7 @@ export default function ForgotPassword() {
           <div>
             <label className="block text-sm font-medium text-gray-600">
               Email
-            </label>
+            </label> 
             <input
               type="email"
               value={email}
