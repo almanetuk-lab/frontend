@@ -2,10 +2,10 @@
 import React from "react";
 import Header from "../home/Header";
 import Footer from "../home/Footer";
-import Hero from "../home/hero";
 import FeatureCard from "../home/FeaturesCards";
 import Spotlight from "../home/Spotlight";
 import CTA from "../home/CTA";
+import Heroo from "../home/Heroo";
 
 // Use local images from public/images folder
 const cards = [
@@ -52,7 +52,7 @@ export default function Home() {
     <div className="min-h-screen bg-white text-amber-900">
       {/* <Header /> */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
-        <Hero />
+        <Heroo />
 
         {/* Feature Cards */}
         <section className="space-y-10">

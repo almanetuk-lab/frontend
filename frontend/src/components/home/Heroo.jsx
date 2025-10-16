@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 import AOS from "aos";
 // import AOS from ''
 
-export default function Hero() {
+export default function Heroo() {
   const heroImage = "/images/ok.jpg"; // place your image in public/images
 
   useEffect(() => {
