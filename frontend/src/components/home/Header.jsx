@@ -18,8 +18,8 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow px-6 py-4 flex justify-between items-center">
-      <Link to="/" className="text-xl font-bold text-gray-800">
+    <header className="bg-gradient-to-r from-amber-500 to-amber-300 shadow px-6 py-4 flex justify-between items-center">
+      <Link to="/" className="text-xl font-bold text-white">
         MingleHub
       </Link>
 
@@ -49,13 +49,13 @@ export default function Header() {
           <>
             <Link
               to="/login"
-              className="text-gray-700 hover:text-indigo-600 font-medium"
-            >
+              className="text-white hover:text-amber-700 font-medium transition-translate"
+            > 
               Login
             </Link>
             <Link
               to="/register"
-              className="text-gray-700 hover:text-indigo-600 font-medium"
+              className="text-white hover:text-amber-700 font-medium"
             >
               Register
             </Link>

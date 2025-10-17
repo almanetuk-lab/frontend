@@ -1,7 +1,10 @@
 // src/pages/AdminPage.jsx
 import React, { useState } from "react";
+import axios from 'axios';
 
 export default function AdminPage() {
+
+    const [adminData, setAdminData] = useState(null);
   // mock data (UI preview ke liye)
   const [pendingUsers] = useState([
     { id: "u1", fullName: "Aman Sharma", email: "aman@example.com" },
@@ -9,8 +12,39 @@ export default function AdminPage() {
     { id: "u3", fullName: "Sahil Khan", email: "sahil@example.com" },
   ]);
 
+    useEffect(() => {
+    // Check if admin is logged in
+    const token = localStorage.getItem('adminToken');
+    const savedAdminData = localStorage.getItem('adminData');
+    
+    if (token && savedAdminData) {
+      setAdminData(JSON.parse(savedAdminData));
+    } else {
+      window.location.href = '/admin-login';
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminData');
+    window.location.href = '/admin-login';
+  };
+
+  if (!adminData) {
+    return <div>Loading...</div>;
+  }
+
+
   return (
+   
+      
     <div className="flex min-h-screen">
+
+         <header>
+        <h1>Welcome, {adminData.name}</h1>
+        <button onClick={handleLogout}>Logout</button>
+      </header> 
+
       {/* Sidebar */}
       <aside className="w-64 bg-gray-800 text-white p-6">
         <h2 className="text-2xl font-semibold mb-6">Admin Panel</h2>

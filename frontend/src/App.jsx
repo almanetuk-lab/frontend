@@ -9,9 +9,12 @@ import UserCreateForm from "./components/profiles/CreateProfile";
 import Dashboard from "./components/pages/Dashbord";
 import { UserProfileProvider } from "./components/context/UseProfileContext";
 import EditProfile from "./components/profiles/EditProfile";
-import AdminPage from "./components/admin/AdminPage";
 import Home from "./components/pages/Home";
 
+// Admin sertup
+import ProtectedRoute from './components/admin/ProtectedRoute';
+import AdminPage from "./components/admin/AdminPage";
+import AdminLogin from "./components/admin/AdminLogin";
 export default function App() {
   return (
     <UserProfileProvider>
@@ -26,8 +29,21 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create-profile" element={<UserCreateForm />} />
             <Route path="/profile/edit" element={<EditProfile/>} />
-            <Route path="/admin" element={<AdminPage />} />
+
+                {/* AdminRutes  */}
+              <Route path="/admin-login" element={<AdminLogin />} />
+        <Route 
+          path="/admin-dashboard" 
+          element={
+            <ProtectedRoute>
+              <AdminPage />
+            </ProtectedRoute>
+          } 
+        />
           </Routes>
+
+      
+
         </main>
         <Footer />
       </div>
