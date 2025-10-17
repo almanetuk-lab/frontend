@@ -51,7 +51,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white text-amber-900">
       {/* <Header /> */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 mt-5">
         <Heroo />
 
         {/* Feature Cards */}

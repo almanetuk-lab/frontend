@@ -1,37 +1,84 @@
-// src/context/UserProfileContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { getUserProfile } from "../services/api";
 
 const UserProfileContext = createContext();
 
-export const useUserProfile = () => useContext(UserProfileContext);
+export const useUserProfile = () => {
+  const context = useContext(UserProfileContext);
+  if (!context) {
+    throw new Error("useUserProfile must be used within UserProfileProvider");
+  }
+  return context;
+};
 
 export const UserProfileProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load profile from backend on app start
+  const loadProfile = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const data = await getUserProfile();
+      console.log("Context API Response:", data); // Debug
+      
+      // ✅ CORRECT RESPONSE HANDLING
+      const userProfile = data?.data || data?.user || data?.user_profile || data;
+      
+      if (userProfile) {
+        console.log("Setting profile:", userProfile); // Debug
+        setProfile(userProfile);
+        localStorage.setItem("user", JSON.stringify(userProfile));
+      }
+    } catch (error) {
+      console.error("Failed to load profile:", error);
+      // Try to use cached data if available
+      const cachedUser = localStorage.getItem("user");
+      if (cachedUser) {
+        setProfile(JSON.parse(cachedUser));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const stored = localStorage.getItem("userProfile");
-    if (stored) {
-      try {
-        setProfile(JSON.parse(stored));
-      } catch (e) {
-        console.error("Failed to parse user profile from localStorage", e);
-        localStorage.removeItem("userProfile"); // Clear bad data
-      }
-    }
+    loadProfile();
   }, []);
 
-  const updateProfile = (data) => {
-    setProfile(data);
-    localStorage.setItem("userProfile", JSON.stringify(data));
+  const updateProfile = (newProfile) => {
+    console.log("Updating profile with:", newProfile); // Debug
+    setProfile(newProfile);
+    localStorage.setItem("user", JSON.stringify(newProfile));
   };
 
   const clearProfile = () => {
     setProfile(null);
-    localStorage.removeItem("userProfile");
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+  };
+
+  const refreshProfile = () => {
+    setLoading(true);
+    loadProfile();
   };
 
   return (
-    <UserProfileContext.Provider value={{ profile, updateProfile, clearProfile }}>
+    <UserProfileContext.Provider 
+      value={{ 
+        profile, 
+        updateProfile, 
+        clearProfile, 
+        refreshProfile,
+        loading 
+      }}
+    >
       {children}
     </UserProfileContext.Provider>
   );
@@ -43,36 +90,6 @@ export const UserProfileProvider = ({ children }) => {
 
 
 
-
-
-
-
-// import React, { createContext, useContext, useState, useEffect } from "react";
-
-// const UserProfileContext = createContext();
-
-// export const useUserProfile = () => useContext(UserProfileContext);
-
-// export const UserProfileProvider = ({ children }) => {
-//   const [profile, setProfile] = useState(null);
-
-//   // Load from localStorage on mount
-//   useEffect(() => {
-//     const stored = localStorage.getItem("userProfile");
-//     if (stored) setProfile(JSON.parse(stored));
-//   }, []);
-
-//   const updateProfile = (data) => {
-//     setProfile(data);
-//     localStorage.setItem("userProfile", JSON.stringify(data));
-//   };
-
-//   return (
-//     <UserProfileContext.Provider value={{ profile, updateProfile }}>
-//       {children}
-//     </UserProfileContext.Provider>
-//   );
-// };
 
 
 
