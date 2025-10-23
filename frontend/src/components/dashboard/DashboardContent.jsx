@@ -1,5 +1,3 @@
-
-// src/components/dashboard/DashboardHome.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StatCard from "../comman/StatCard";
@@ -118,13 +116,6 @@ export default function DashboardHome({ profile }) {
             )}
           </div>
         </header>
-
-
-
-        {/* Dashboard Content */}
-
-
-
         {/* Dashboard Content */}
 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
   {/* Left Column */}
