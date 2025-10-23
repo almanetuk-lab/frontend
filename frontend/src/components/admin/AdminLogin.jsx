@@ -7,33 +7,39 @@ const AdminLogin = () => {
     password: ''
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(''); // ✅ Ye line important hai - component level pe define karo
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      const response = await axios.post('YOUR_ADMIN_LOGIN_API', formData);
-      
-      // Save token and admin data
+  try {
+    // ✅ Environment variable se
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://backend-q0wc.onrender.com';
+    const response = await axios.post(
+      `${API_BASE_URL}/api/admin/login`, 
+      formData
+    );
+    
+    if (response.data.status === "success") {
       localStorage.setItem('adminToken', response.data.token);
       localStorage.setItem('adminData', JSON.stringify(response.data.admin));
-      
-      // Redirect to admin dashboard
       window.location.href = '/admin-dashboard';
-      
-    } catch (error) {
-      console.error('Login failed:', error);
-      setError('Login failed! Please check your credentials.');
-    } finally {
-      setLoading(false);
+    } else {
+      setError(response.data.message || 'Login failed!');
     }
-  };
+    
+  } catch (error) {
+    console.error('Login failed:', error);
+    setError('Login failed! Please check your credentials.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white-600  px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white/45 to-white/100 px-4 py-8">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-100">
         
         {/* Header */}
@@ -47,7 +53,7 @@ const AdminLogin = () => {
           <p className="text-gray-600 text-sm">Sign in to your administrator account</p>
         </div>
 
-        {/* Error Message */}
+        {/* ✅ Error Message - Ab error variable accessible hai */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <span className="text-red-500 text-lg">⚠️</span>
@@ -74,7 +80,7 @@ const AdminLogin = () => {
             />
           </div>
 
-          {/* Password Field */}
+           {/* Password Field */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
@@ -92,6 +98,7 @@ const AdminLogin = () => {
           </div>
 
           {/* Login Button */}
+        {/* Login Button */}
           <button 
             type="submit" 
             disabled={loading}
@@ -131,54 +138,4 @@ export default AdminLogin;
 
 
 
-// // AdminLogin.jsx
-// import { useState } from 'react';
-// import axios from 'axios';
 
-// const AdminLogin = () => {
-//   const [formData, setFormData] = useState({
-//     email: '',
-//     password: ''
-//   });
-
-//   const handleLogin = async (e) => {
-//     e.preventDefault();
-    
-//     try {
-//       const response = await axios.post('YOUR_ADMIN_LOGIN_API', formData);
-      
-//       // Save token to localStorage/sessionStorage
-//       localStorage.setItem('adminToken', response.data.token);
-//       localStorage.setItem('adminData', JSON.stringify(response.data.admin));
-      
-//       // Redirect to admin dashboard
-//       window.location.href = '/admin-dashboard';
-      
-//     } catch (error) {
-//       console.error('Login failed:', error);
-//       alert('Login failed! Please check credentials.');
-//     }
-//   };
-
-//   return (
-//     <div className="admin-login-container">
-//       <form onSubmit={handleLogin}>
-//         <input 
-//           type="email" 
-//           placeholder="Admin Email"
-//           value={formData.email}
-//           onChange={(e) => setFormData({...formData, email: e.target.value})}
-//         />
-//         <input 
-//           type="password" 
-//           placeholder="Password"
-//           value={formData.password}
-//           onChange={(e) => setFormData({...formData, password: e.target.value})}
-//         />
-//         <button type="submit">Admin Login</button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default AdminLogin;
