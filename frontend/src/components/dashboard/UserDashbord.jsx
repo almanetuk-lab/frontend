@@ -1,13 +1,12 @@
 // src/components/dashboard/UserDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom"; // ✅ No BrowserRouter here
-import { useUserProfile } from "../context/useProfileContext";
+import { useUserProfile } from "../context/UseProfileContext";
 import { getUserProfile } from "../services/api";
 import Sidebar from "./Sidebar";
 
 // Dashboard Components
-import DashbordHome from "./DashboardContent";
-import MessagesSection from "./MessagesSection";
+import MessagesSection from "./MessagesSection"; 
 
 // Profile Components
 import EditProfilePage from "../profiles/EditProfile";
@@ -18,6 +17,7 @@ import ProfilePage from "../profiles/ProfilePage";
 import MatchesPage from "../MatchSystem/MatchesPage";
 import MemberPage from "../pages/MemberPage";
 import AdvancedSearch from "./SearchSection";
+import DashboardHome from "./DashboardContent";
 
 export default function UserDashboard() {
   const { profile, updateProfile, loading } = useUserProfile();
