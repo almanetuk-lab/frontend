@@ -22,22 +22,26 @@ export default function ProfilePage() {
     );
   }
 
-  console.log("🔵 Profile Data in ProfilePage:", profile); // Debug
+  console.log("🔵 Profile Data in ProfilePage:", profile);
 
-  // ✅ FIX: Format date for display
+  // Format date for display
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return "";
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-IN'); // Indian format: DD/MM/YYYY
+      return date.toLocaleDateString('en-IN');
     } catch (error) {
       return dateString || "";
     }
   };
 
-  // ✅ FIX: Check if value exists properly
+  // Check if value exists
   const hasValue = (value) => {
-    return value !== null && value !== undefined && value !== "" && value !== "null" && value !== "undefined";
+    if (value === null || value === undefined || value === "") return false;
+    if (typeof value === 'number' && !isNaN(value)) return true;
+    if (typeof value === 'string' && value.trim() !== "") return true;
+    if (Array.isArray(value) && value.length > 0) return true;
+    return false;
   };
 
   return (
@@ -54,7 +58,7 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* Profile Header with Photo */}
+        {/* Profile Header */}
         <div className="flex flex-col items-center md:flex-row md:items-start gap-6 mb-8 p-6 bg-gray-50 rounded-lg">
           {profile.profile_picture_url || profile.profilePhoto ? (
             <img
@@ -86,7 +90,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Profile Details Grid */}
+        {/* Profile Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Personal Information */}
           <div className="space-y-6">
@@ -165,9 +169,8 @@ function Section({ title, children }) {
   );
 }
 
-// ✅ FIXED Info Item Component
+// Info Item Component
 function InfoItem({ label, value, full = false }) {
-  // ✅ IMPROVED VALUE CHECK
   const hasValue = (val) => {
     if (val === null || val === undefined || val === "") return false;
     if (typeof val === 'number' && !isNaN(val)) return true;
@@ -194,6 +197,10 @@ function InfoItem({ label, value, full = false }) {
     </div>
   );
 }
+
+
+
+
 
 
 
