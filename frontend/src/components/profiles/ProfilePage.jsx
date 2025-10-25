@@ -22,6 +22,24 @@ export default function ProfilePage() {
     );
   }
 
+  console.log("🔵 Profile Data in ProfilePage:", profile); // Debug
+
+  // ✅ FIX: Format date for display
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return "";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-IN'); // Indian format: DD/MM/YYYY
+    } catch (error) {
+      return dateString || "";
+    }
+  };
+
+  // ✅ FIX: Check if value exists properly
+  const hasValue = (value) => {
+    return value !== null && value !== undefined && value !== "" && value !== "null" && value !== "undefined";
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
@@ -51,16 +69,19 @@ export default function ProfilePage() {
           )}
           <div className="text-center md:text-left flex-1">
             <h1 className="text-3xl font-bold text-gray-800">
-              {profile.full_name || profile.fullName || "No Name"}
+              {hasValue(profile.full_name) ? profile.full_name : "No Name"}
             </h1>
             <p className="text-xl text-gray-600 mt-2">
-              {profile.profession || profile.headline || "No Profession"}
+              {hasValue(profile.headline) ? profile.headline : 
+               hasValue(profile.profession) ? profile.profession : "No Profession"}
             </p>
             <p className="text-gray-500 mt-1">
-              {profile.city || "No Location"} • {profile.age || "N/A"} years
+              {hasValue(profile.city) ? profile.city : "No Location"} • 
+              {hasValue(profile.age) ? ` ${profile.age} years` : " Age not specified"}
             </p>
             <p className="text-gray-500">
-              {profile.gender || "Gender not specified"} • {profile.marital_status || "Marital status not specified"}
+              {hasValue(profile.gender) ? profile.gender : "Gender not specified"} • 
+              {hasValue(profile.marital_status) ? profile.marital_status : "Marital status not specified"}
             </p>
           </div>
         </div>
@@ -70,23 +91,25 @@ export default function ProfilePage() {
           {/* Personal Information */}
           <div className="space-y-6">
             <Section title="Personal Information">
-              <InfoItem label="Full Name" value={profile.full_name || profile.fullName} />
+              <InfoItem label="Full Name" value={profile.full_name} />
               <InfoItem label="Email" value={profile.email} />
               <InfoItem label="Phone" value={profile.phone} />
-              <InfoItem label="Date of Birth" value={profile.date_of_birth} />
+              <InfoItem label="Date of Birth" value={formatDateForDisplay(profile.dob)} />
               <InfoItem label="Age" value={profile.age} />
               <InfoItem label="Gender" value={profile.gender} />
               <InfoItem label="Marital Status" value={profile.marital_status} />
               <InfoItem label="City" value={profile.city} />
+              <InfoItem label="Address" value={profile.address} full />
             </Section>
           </div>
 
           {/* Professional Information */}
           <div className="space-y-6">
             <Section title="Professional Information">
+              <InfoItem label="Headline" value={profile.headline} />
               <InfoItem label="Profession" value={profile.profession} />
               <InfoItem label="Company" value={profile.company} />
-              <InfoItem label="Experience" value={profile.experience ? `${profile.experience} years` : ""} />
+              <InfoItem label="Experience" value={hasValue(profile.experience) ? `${profile.experience} years` : ""} />
               <InfoItem label="Education" value={profile.education} />
             </Section>
 
@@ -96,8 +119,16 @@ export default function ProfilePage() {
             </Section>
 
             <Section title="Skills & Interests">
-              <InfoItem label="Skills" value={profile.skills} full />
-              <InfoItem label="Interests" value={profile.interests} full />
+              <InfoItem 
+                label="Skills" 
+                value={Array.isArray(profile.skills) ? profile.skills.join(", ") : profile.skills} 
+                full 
+              />
+              <InfoItem 
+                label="Interests" 
+                value={Array.isArray(profile.interests) ? profile.interests.join(", ") : profile.interests} 
+                full 
+              />
             </Section>
           </div>
         </div>
@@ -134,9 +165,18 @@ function Section({ title, children }) {
   );
 }
 
-// Info Item Component
+// ✅ FIXED Info Item Component
 function InfoItem({ label, value, full = false }) {
-  if (!value) {
+  // ✅ IMPROVED VALUE CHECK
+  const hasValue = (val) => {
+    if (val === null || val === undefined || val === "") return false;
+    if (typeof val === 'number' && !isNaN(val)) return true;
+    if (typeof val === 'string' && val.trim() !== "") return true;
+    if (Array.isArray(val) && val.length > 0) return true;
+    return false;
+  };
+
+  if (!hasValue(value)) {
     return (
       <div className={full ? "col-span-2" : ""}>
         <p className="text-sm font-semibold text-gray-500">{label}</p>
@@ -148,7 +188,14 @@ function InfoItem({ label, value, full = false }) {
   return (
     <div className={full ? "col-span-2" : ""}>
       <p className="text-sm font-semibold text-gray-500 mb-1">{label}</p>
-      <p className="text-gray-700">{value}</p>
+      <p className="text-gray-700">
+        {Array.isArray(value) ? value.join(", ") : value}
+      </p>
     </div>
   );
 }
+
+
+
+
+
