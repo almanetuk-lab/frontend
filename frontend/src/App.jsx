@@ -4,6 +4,9 @@ import { UserProfileProvider } from "./components/context/UseProfileContext";
 import Header from "./components/home/Header";
 import Footer from "./components/home/Footer";
 
+
+
+
 // Auth Pages
 import Login from "./components/pages/Login";
 import Register from "./components/pages/Register";
