@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
+// import { useNavigate } from 'react-router-dom';
+
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -25,7 +27,9 @@ const handleLogin = async (e) => {
     if (response.data.status === "success") {
       localStorage.setItem('adminToken', response.data.token);
       localStorage.setItem('adminData', JSON.stringify(response.data.admin));
-      window.location.href = '/admin-dashboard';
+      // navigate('/admin-dashboard');
+      // window.location.href = '/admin-dashboard';
+       window.location.href = '/#/admin-dashboard';
     } else {
       setError(response.data.message || 'Login failed!');
     }
@@ -97,7 +101,7 @@ const handleLogin = async (e) => {
             />
           </div>
 
-          {/* Login Button */}
+        
         {/* Login Button */}
           <button 
             type="submit" 
