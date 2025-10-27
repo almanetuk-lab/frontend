@@ -45,7 +45,7 @@ export default function Header() {
                   to="/"
                   className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200"
                 >
-                  About 
+                  About
                 </Link>
               </li>
               {isLoggedIn && (
@@ -79,7 +79,7 @@ export default function Header() {
               )}
               <li>
                 <Link
-                  to="/contact"
+                  to="/foter"
                   className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200"
                 >
                   Contact Us
@@ -114,6 +114,14 @@ export default function Header() {
               <div className="flex items-center gap-3">
             
                 {/* Auth Buttons */}
+
+                 <Link
+                  to="/admin-Login"
+                  className="text-gray-700 hover:text-pink-600 font-medium transition-colors duration-200 px-3 py-1"
+                >
+                 Admin Login
+                </Link>
+
                 <Link
                   to="/login"
                   className="text-gray-700 hover:text-pink-600 font-medium transition-colors duration-200 px-3 py-1"
