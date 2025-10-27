@@ -97,10 +97,10 @@ export const adminAPI = {
   login: (credentials) => api.post('/api/admin/login', credentials),
   
   // Future APIs - aap add karte jayenge
-  getPendingUsers: () => api.get('/api/admin/pending-users'),
-  updateUserStatus: (userId, status) => api.put(`/api/admin/users/${userId}/status`, { status }),
+//   getPendingUsers: () => api.get('/api/admin/pending-users'),
+//   updateUserStatus: (userId, status) => api.put(`/api/admin/users/${userId}/status`, { status }),
   
-};
+ };
 
 export default api;
 

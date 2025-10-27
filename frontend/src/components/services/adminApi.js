@@ -40,14 +40,14 @@ api.interceptors.response.use(
 // Admin APIs
 export const adminAPI = {
   // Login (already working)
-  login: (credentials) => api.post('/api/admin/login', credentials),
-  
+  // login: (credentials) => api.post('/api/admin/login', credentials),
+
   // Get All Users (jab ban jayegi)
   getUsers: () => api.get('/api/admin/users'),
   
   // Approve User - POST /api/admin/approvedUser
   approveUser: (userId, adminId) => 
-    api.post('/api/admin/approvedUser', { 
+    api.post('/api/admin/approveUser', { 
       id: userId, 
       approved_by: adminId 
     }),

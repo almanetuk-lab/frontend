@@ -1,23 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { adminAPI } from '../services/adminApi';
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
-  const [userStatusFilter, setUserStatusFilter] = useState('In Process');
+  const [userStatusFilter, setUserStatusFilter] = useState('in process');
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [usersData, setUsersData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Dummy data with new status system
-  const usersData = [
-    { id: 1, name: 'Aman Sharma', email: 'aman@example.com', profession: 'Software Engineer', status: 'In Process' },
-    { id: 2, name: 'Riya Patel', email: 'riya@example.com', profession: 'Doctor', status: 'In Process' },
-    { id: 3, name: 'ritik', email: 'ritik@example.com', profession: 'Student', status: 'Approve' },
-    { id: 4, name: 'imran', email: 'imran@example.com', profession: 'Business', status: 'On Hold' },
-    { id: 5, name: 'celina', email: 'celina@example.com', profession: 'Teacher', status: 'In Process' },
-    { id: 6, name: 'test', email: 'test@example.com', profession: 'Tester', status: 'Approve' },
-    { id: 7, name: 'almanet', email: 'almanet@example.com', profession: 'Developer', status: 'Deactivate' },
-  ];
+  // Fetch users from API
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await adminAPI.getUsers();
+      if (response.data.status === "success") {
+        setUsersData(response.data.users);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      alert('Error fetching users: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Filter users based on status
   const filteredUsers = usersData.filter(user => 
     userStatusFilter === 'all' ? true : user.status === userStatusFilter
   );
@@ -36,7 +44,7 @@ const AdminDashboard = () => {
       if (response.data.status === "success") {
         // Update local state
         setUsersData(prev => prev.map(user => 
-          user.id === userId ? { ...user, status: 'Approve' } : user
+          user.id === userId ? { ...user, status: 'approve' } : user
         ));
         setShowUserModal(false);
         alert('User approved successfully!');
@@ -57,7 +65,7 @@ const AdminDashboard = () => {
       if (response.data.message === "User placed on hold") {
         // Update local state
         setUsersData(prev => prev.map(user => 
-          user.id === userId ? { ...user, status: 'On Hold' } : user
+          user.id === userId ? { ...user, status: 'on hold' } : user
         ));
         setShowUserModal(false);
         alert('User put on hold successfully!');
@@ -78,7 +86,7 @@ const AdminDashboard = () => {
       if (response.data.status === "success") {
         // Update local state
         setUsersData(prev => prev.map(user => 
-          user.id === userId ? { ...user, status: 'Deactivate' } : user
+          user.id === userId ? { ...user, status: 'deactivate' } : user
         ));
         setShowUserModal(false);
         alert('User deactivated successfully!');
@@ -117,7 +125,7 @@ const AdminDashboard = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium">{selectedUser.name}</p>
+                  <p className="text-gray-900 font-medium">{selectedUser.full_name || 'No Name'}</p>
                 </div>
               </div>
 
@@ -142,9 +150,9 @@ const AdminDashboard = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                    ${selectedUser.status === 'Approve' ? 'bg-green-100 text-green-800' : 
-                      selectedUser.status === 'In Process' ? 'bg-yellow-100 text-yellow-800' : 
-                      selectedUser.status === 'On Hold' ? 'bg-orange-100 text-orange-800' :
+                    ${selectedUser.status === 'approve' ? 'bg-green-100 text-green-800' : 
+                      selectedUser.status === 'in process' ? 'bg-yellow-100 text-yellow-800' : 
+                      selectedUser.status === 'on hold' ? 'bg-orange-100 text-orange-800' :
                       'bg-red-100 text-red-800'}`}>
                     {selectedUser.status}
                   </span>
@@ -200,6 +208,13 @@ const AdminDashboard = () => {
     );
   };
 
+  // Stats calculations
+  const totalUsers = usersData.length;
+  const inProcessUsers = usersData.filter(u => u.status === 'in process').length;
+  const approvedUsers = usersData.filter(u => u.status === 'approve').length;
+  const onHoldUsers = usersData.filter(u => u.status === 'on hold').length;
+  const deactivatedUsers = usersData.filter(u => u.status === 'deactivate').length;
+
   // Main Content Render
   const renderContent = () => {
     switch (activeSection) {
@@ -210,19 +225,15 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-700">Total Users</h3>
-                <p className="text-3xl font-bold text-blue-600 mt-2">{usersData.length}</p>
+                <p className="text-3xl font-bold text-blue-600 mt-2">{totalUsers}</p>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-700">In Process Users</h3>
-                <p className="text-3xl font-bold text-yellow-600 mt-2">
-                  {usersData.filter(u => u.status === 'In Process').length}
-                </p>
+                <p className="text-3xl font-bold text-yellow-600 mt-2">{inProcessUsers}</p>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-700">Approved Users</h3>
-                <p className="text-3xl font-bold text-green-600 mt-2">
-                  {usersData.filter(u => u.status === 'Approve').length}
-                </p>
+                <p className="text-3xl font-bold text-green-600 mt-2">{approvedUsers}</p>
               </div>
             </div>
             
@@ -247,64 +258,82 @@ const AdminDashboard = () => {
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">All Users</option>
-                  <option value="In Process">In Process</option>
-                  <option value="Approve">Approve</option>
-                  <option value="On Hold">On Hold</option>
-                  <option value="Deactivate">Deactivate</option>
+                  <option value="in process">In Process</option>
+                  <option value="approve">Approve</option>
+                  <option value="on hold">On Hold</option>
+                  <option value="deactivate">Deactivate</option>
                 </select>
               </div>
             </div>
 
-            {/* Users Table */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{user.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                          ${user.status === 'Approve' ? 'bg-green-100 text-green-800' : 
-                            user.status === 'In Process' ? 'bg-yellow-100 text-yellow-800' : 
-                            user.status === 'On Hold' ? 'bg-orange-100 text-orange-800' :
-                            'bg-red-100 text-red-800'}`}>
-                          {user.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => handleViewDetails(user)}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                        >
-                          View User Details
-                        </button>
-                      </td>
+            {loading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              </div>
+            ) : (
+              /* Users Table */
+              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Profession
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredUsers.map((user) => (
+                      <tr key={user.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{user.full_name || 'No Name'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">{user.profession || 'Not specified'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            ${user.status === 'approve' ? 'bg-green-100 text-green-800' : 
+                              user.status === 'in process' ? 'bg-yellow-100 text-yellow-800' : 
+                              user.status === 'on hold' ? 'bg-orange-100 text-orange-800' :
+                              'bg-red-100 text-red-800'}`}>
+                            {user.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => handleViewDetails(user)}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                
+                {filteredUsers.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No users found</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* User Details Modal */}
             {showUserModal && <UserDetailsModal />}
@@ -341,6 +370,11 @@ const AdminDashboard = () => {
         );
     }
   };
+
+  // Fetch users on component mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -441,119 +475,109 @@ export default AdminDashboard;
 
 
 
+
+
+
+
+
+
+
+
+
 // import { useState } from 'react';
 // import { adminAPI } from '../services/adminApi';
 
 // const AdminDashboard = () => {
 //   const [activeSection, setActiveSection] = useState('dashboard');
-//   const [userStatusFilter, setUserStatusFilter] = useState('pending');
+//   const [userStatusFilter, setUserStatusFilter] = useState('In Process');
 //   const [selectedUser, setSelectedUser] = useState(null);
 //   const [showUserModal, setShowUserModal] = useState(false);
 
-//   // Dummy data with additional fields
-// const usersData = [
-//   { id: 1, name: 'Aman Sharma', email: 'aman@example.com', status: 'In Process' },
-//   { id: 2, name: 'Riya Patel', email: 'riya@example.com', status: 'Approve' },
-//   { id: 3, name: 'ritik', email: 'ritik@example.com', status: 'On Hold' },
-//   { id: 4, name: 'imran', email: 'imran@example.com', status: 'Deactivate' },
-//   // ... baki users
-// ];
+//   // Dummy data with new status system
+//   const usersData = [
+//     { id: 1, name: 'Aman Sharma', email: 'aman@example.com', profession: 'Software Engineer', status: 'In Process' },
+//     { id: 2, name: 'Riya Patel', email: 'riya@example.com', profession: 'Doctor', status: 'In Process' },
+//     { id: 3, name: 'ritik', email: 'ritik@example.com', profession: 'Student', status: 'Approve' },
+//     { id: 4, name: 'imran', email: 'imran@example.com', profession: 'Business', status: 'On Hold' },
+//     { id: 5, name: 'celina', email: 'celina@example.com', profession: 'Teacher', status: 'In Process' },
+//     { id: 6, name: 'test', email: 'test@example.com', profession: 'Tester', status: 'Approve' },
+//     { id: 7, name: 'almanet', email: 'almanet@example.com', profession: 'Developer', status: 'Deactivate' },
+//   ];
 
-//  const filteredUsers = usersData.filter(user => 
-//   userStatusFilter === 'all' ? true : user.status === userStatusFilter
-// );
+//   const filteredUsers = usersData.filter(user => 
+//     userStatusFilter === 'all' ? true : user.status === userStatusFilter
+//   );
 
 //   const handleViewDetails = (user) => {
 //     setSelectedUser(user);
 //     setShowUserModal(true);
 //   };
 
-//   const handleApprove = (userId) => {
-//     console.log(`Approve user: ${userId}`);
-//     // API integration yahan aayegi
-//     setShowUserModal(false);
+//   // API Integration Functions
+//   const handleApprove = async (userId) => {
+//     try {
+//       const adminData = JSON.parse(localStorage.getItem('adminData'));
+//       const response = await adminAPI.approveUser(userId, adminData.id);
+      
+//       if (response.data.status === "success") {
+//         // Update local state
+//         setUsersData(prev => prev.map(user => 
+//           user.id === userId ? { ...user, status: 'Approve' } : user
+//         ));
+//         setShowUserModal(false);
+//         alert('User approved successfully!');
+//       }
+//     } catch (error) {
+//       console.error('Approve error:', error);
+//       alert('Error approving user: ' + (error.response?.data?.message || error.message));
+//     }
 //   };
 
-//   const handleReject = (userId) => {
-//     console.log(`Reject user: ${userId}`);
-//     // API integration yahan aayegi
-//     setShowUserModal(false);
+//   const handleOnHold = async (userId) => {
+//     try {
+//       const reason = prompt("Please enter reason for putting user on hold:");
+//       if (!reason) return;
+
+//       const response = await adminAPI.onHoldUser(userId, reason);
+      
+//       if (response.data.message === "User placed on hold") {
+//         // Update local state
+//         setUsersData(prev => prev.map(user => 
+//           user.id === userId ? { ...user, status: 'On Hold' } : user
+//         ));
+//         setShowUserModal(false);
+//         alert('User put on hold successfully!');
+//       }
+//     } catch (error) {
+//       console.error('On Hold error:', error);
+//       alert('Error putting user on hold: ' + (error.response?.data?.message || error.message));
+//     }
 //   };
 
-//   const handleOnHold = (userId) => {
-//     console.log(`On Hold user: ${userId}`);
-//     // API integration yahan aayegi
-//     setShowUserModal(false);
+//   const handleDeactivate = async (userId) => {
+//     try {
+//       const reason = prompt("Please enter reason for deactivation:");
+//       if (!reason) return;
+
+//       const response = await adminAPI.deactivateUser(userId, reason);
+      
+//       if (response.data.status === "success") {
+//         // Update local state
+//         setUsersData(prev => prev.map(user => 
+//           user.id === userId ? { ...user, status: 'Deactivate' } : user
+//         ));
+//         setShowUserModal(false);
+//         alert('User deactivated successfully!');
+//       }
+//     } catch (error) {
+//       console.error('Deactivate error:', error);
+//       alert('Error deactivating user: ' + (error.response?.data?.message || error.message));
+//     }
 //   };
 
 //   // User Details Modal
 //   const UserDetailsModal = () => {
 //     if (!selectedUser) return null;
-
-
-// // Axious functions Api intigration 
-
-// const handleApprove = async (userId) => {
-//   try {
-//     const adminData = JSON.parse(localStorage.getItem('adminData'));
-//     const response = await adminAPI.approveUser(userId, adminData.id);
-    
-//     if (response.data.status === "success") {
-//       // Update local state
-//       setUsersData(prev => prev.map(user => 
-//         user.id === userId ? { ...user, status: 'Approve' } : user
-//       ));
-//       setShowUserModal(false);
-//       alert('User approved successfully!');
-//     }
-//   } catch (error) {
-//     console.error('Approve error:', error);
-//     alert('Error approving user: ' + (error.response?.data?.message || error.message));
-//   }
-// };
-
-// const handleOnHold = async (userId) => {
-//   try {
-//     const reason = prompt("Please enter reason for putting user on hold:");
-//     if (!reason) return;
-
-//     const response = await adminAPI.onHoldUser(userId, reason);
-    
-//     if (response.data.message === "User placed on hold") {
-//       // Update local state
-//       setUsersData(prev => prev.map(user => 
-//         user.id === userId ? { ...user, status: 'On Hold' } : user
-//       ));
-//       setShowUserModal(false);
-//       alert('User put on hold successfully!');
-//     }
-//   } catch (error) {
-//     console.error('On Hold error:', error);
-//     alert('Error putting user on hold: ' + (error.response?.data?.message || error.message));
-//   }
-// };
-
-// const handleDeactivate = async (userId) => {
-//   try {
-//     const reason = prompt("Please enter reason for deactivation:");
-//     if (!reason) return;
-
-//     const response = await adminAPI.deactivateUser(userId, reason);
-    
-//     if (response.data.status === "success") {
-//       // Update local state
-//       setUsersData(prev => prev.map(user => 
-//         user.id === userId ? { ...user, status: 'Deactivate' } : user
-//       ));
-//       setShowUserModal(false);
-//       alert('User deactivated successfully!');
-//     }
-//   } catch (error) {
-//     console.error('Deactivate error:', error);
-//     alert('Error deactivating user: ' + (error.response?.data?.message || error.message));
-//   }
-// };
-
 
 //     return (
 //       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -564,85 +588,96 @@ export default AdminDashboard;
 //               <h2 className="text-2xl font-bold text-gray-800">User Details</h2>
 //               <button
 //                 onClick={() => setShowUserModal(false)}
-//                 className="text-gray-500 hover:text-gray-700 text-2xl"
+//                 className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
 //               >
 //                 ×
 //               </button>
 //             </div>
+//             <p className="text-gray-600 text-sm mt-1">User ID: #{selectedUser.id}</p>
 //           </div>
 
 //           {/* User Information */}
 //           <div className="p-6 space-y-6">
 //             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//               {/* Name */}
 //               <div>
 //                 <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
 //                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-//                   <p className="text-gray-900">{selectedUser.name}</p>
+//                   <p className="text-gray-900 font-medium">{selectedUser.name}</p>
 //                 </div>
 //               </div>
 
+//               {/* Email */}
 //               <div>
-//                 <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+//                 <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
 //                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
 //                   <p className="text-gray-900">{selectedUser.email}</p>
 //                 </div>
 //               </div>
 
-//               <div>
-//                 <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-//                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-//                   <p className="text-gray-900">••••••••</p>
-//                 </div>
-//               </div>
-
+//               {/* Profession */}
 //               <div>
 //                 <label className="block text-sm font-medium text-gray-700 mb-2">Profession</label>
 //                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-//                   <p className="text-gray-900">{selectedUser.profession}</p>
+//                   <p className="text-gray-900">{selectedUser.profession || 'Not specified'}</p>
 //                 </div>
 //               </div>
 
+//               {/* Status */}
 //               <div>
-//                 <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+//                 <label className="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
 //                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
 //                   <span className={`px-3 py-1 rounded-full text-sm font-semibold
-//                     ${selectedUser.status === 'approved' ? 'bg-green-100 text-green-800' : 
-//                       selectedUser.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+//                     ${selectedUser.status === 'Approve' ? 'bg-green-100 text-green-800' : 
+//                       selectedUser.status === 'In Process' ? 'bg-yellow-100 text-yellow-800' : 
+//                       selectedUser.status === 'On Hold' ? 'bg-orange-100 text-orange-800' :
 //                       'bg-red-100 text-red-800'}`}>
 //                     {selectedUser.status}
 //                   </span>
 //                 </div>
 //               </div>
 
+//               {/* User ID */}
 //               <div>
 //                 <label className="block text-sm font-medium text-gray-700 mb-2">User ID</label>
 //                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-//                   <p className="text-gray-900 text-sm">#{selectedUser.id}</p>
+//                   <p className="text-gray-900 font-mono">#{selectedUser.id}</p>
+//                 </div>
+//               </div>
+
+//               {/* Registration Date */}
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700 mb-2">Registration Date</label>
+//                 <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+//                   <p className="text-gray-900">
+//                     {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : 'Not available'}
+//                   </p>
 //                 </div>
 //               </div>
 //             </div>
+
 //           </div>
 
 //           {/* Action Buttons */}
 //           <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
-//             <div className="flex flex-wrap gap-3 justify-end">
+//             <div className="flex flex-col sm:flex-row gap-3 justify-end">
 //               <button
 //                 onClick={() => handleOnHold(selectedUser.id)}
-//                 className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium"
+//                 className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium flex-1 sm:flex-none"
 //               >
-//                 On Hold
+//                 Put On Hold
 //               </button>
 //               <button
-//                 onClick={() => handleReject(selectedUser.id)}
-//                 className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+//                 onClick={() => handleDeactivate(selectedUser.id)}
+//                 className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex-1 sm:flex-none"
 //               >
-//                 Reject
+//                 Deactivate
 //               </button>
 //               <button
 //                 onClick={() => handleApprove(selectedUser.id)}
-//                 className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+//                 className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex-1 sm:flex-none"
 //               >
-//                 Approve
+//                 Approve User
 //               </button>
 //             </div>
 //           </div>
@@ -664,15 +699,15 @@ export default AdminDashboard;
 //                 <p className="text-3xl font-bold text-blue-600 mt-2">{usersData.length}</p>
 //               </div>
 //               <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-//                 <h3 className="text-lg font-semibold text-gray-700">Pending Users</h3>
+//                 <h3 className="text-lg font-semibold text-gray-700">In Process Users</h3>
 //                 <p className="text-3xl font-bold text-yellow-600 mt-2">
-//                   {usersData.filter(u => u.status === 'pending').length}
+//                   {usersData.filter(u => u.status === 'In Process').length}
 //                 </p>
 //               </div>
 //               <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
 //                 <h3 className="text-lg font-semibold text-gray-700">Approved Users</h3>
 //                 <p className="text-3xl font-bold text-green-600 mt-2">
-//                   {usersData.filter(u => u.status === 'approved').length}
+//                   {usersData.filter(u => u.status === 'Approve').length}
 //                 </p>
 //               </div>
 //             </div>
@@ -692,18 +727,17 @@ export default AdminDashboard;
               
 //               {/* Status Filter Dropdown */}
 //               <div className="flex gap-4">
-//                 <select  
-//                  value={userStatusFilter}
-//                  onChange={(e) => setUserStatusFilter(e.target.value)}
-//                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+//                 <select 
+//                   value={userStatusFilter}
+//                   onChange={(e) => setUserStatusFilter(e.target.value)}
+//                   className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 //                 >
-//             <option value="all">All Users</option>
-//               <option value="In Process">In Process</option>
-//              <option value="Approve">Approve</option>
-//             <option value="On Hold">On Hold</option>
-//              <option value="Deactivate">Deactivate</option>
-//            </select>
-              
+//                   <option value="all">All Users</option>
+//                   <option value="In Process">In Process</option>
+//                   <option value="Approve">Approve</option>
+//                   <option value="On Hold">On Hold</option>
+//                   <option value="Deactivate">Deactivate</option>
+//                 </select>
 //               </div>
 //             </div>
 
@@ -726,36 +760,35 @@ export default AdminDashboard;
 //                     </th>
 //                   </tr>
 //                 </thead>
-
-//               <tbody className="bg-white divide-y divide-gray-200">
-//   {filteredUsers.map((user) => (
-//     <tr key={user.id} className="hover:bg-gray-50">
-//       <td className="px-6 py-4 whitespace-nowrap">
-//         <div className="text-sm font-medium text-gray-900">{user.name}</div>
-//       </td>
-//       <td className="px-6 py-4 whitespace-nowrap">
-//         <div className="text-sm text-gray-500">{user.email}</div>
-//       </td>
-//       <td className="px-6 py-4 whitespace-nowrap">
-//         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-//           ${user.status === 'Approve' ? 'bg-green-100 text-green-800' : 
-//             user.status === 'In Process' ? 'bg-yellow-100 text-yellow-800' : 
-//             user.status === 'On Hold' ? 'bg-orange-100 text-orange-800' :
-//             'bg-red-100 text-red-800'}`}>
-//           {user.status}
-//         </span>
-//       </td>
-//       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-//         <button
-//           onClick={() => handleViewDetails(user)}
-//           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-//         >
-//           View User Details
-//         </button>
-//       </td>
-//     </tr>
-//   ))}
-// </tbody>
+//                 <tbody className="bg-white divide-y divide-gray-200">
+//                   {filteredUsers.map((user) => (
+//                     <tr key={user.id} className="hover:bg-gray-50">
+//                       <td className="px-6 py-4 whitespace-nowrap">
+//                         <div className="text-sm font-medium text-gray-900">{user.name}</div>
+//                       </td>
+//                       <td className="px-6 py-4 whitespace-nowrap">
+//                         <div className="text-sm text-gray-500">{user.email}</div>
+//                       </td>
+//                       <td className="px-6 py-4 whitespace-nowrap">
+//                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+//                           ${user.status === 'Approve' ? 'bg-green-100 text-green-800' : 
+//                             user.status === 'In Process' ? 'bg-yellow-100 text-yellow-800' : 
+//                             user.status === 'On Hold' ? 'bg-orange-100 text-orange-800' :
+//                             'bg-red-100 text-red-800'}`}>
+//                           {user.status}
+//                         </span>
+//                       </td>
+//                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+//                         <button
+//                           onClick={() => handleViewDetails(user)}
+//                           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+//                         >
+//                           View User Details
+//                         </button>
+//                       </td>
+//                     </tr>
+//                   ))}
+//                 </tbody>
 //               </table>
 //             </div>
 
@@ -764,7 +797,6 @@ export default AdminDashboard;
 //           </div>
 //         );
 
-//       // ... rest of the code (settings, logs) same as before
 //       case 'settings':
 //         return (
 //           <div className="p-6">
@@ -796,7 +828,6 @@ export default AdminDashboard;
 //     }
 //   };
 
-//   // ... rest of the component (sidebar, header) remains same
 //   return (
 //     <div className="flex h-screen bg-gray-100">
 //       {/* Sidebar */}
@@ -890,11 +921,6 @@ export default AdminDashboard;
 // };
 
 // export default AdminDashboard;
-
-
-
-
-
 
 
 
