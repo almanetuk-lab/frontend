@@ -1,10 +1,8 @@
 import React from "react";
-import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { HashRouter , Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { UserProfileProvider } from "./components/context/UseProfileContext";
 import Header from "./components/home/Header";
 import Footer from "./components/home/Footer";
-
-
 
 
 // Auth Pages
@@ -171,9 +169,12 @@ const LayoutWrapper = () => {
 
 export default function App() {
   return (
-    <UserProfileProvider>
+    <HashRouter>
+<UserProfileProvider>
       <LayoutWrapper />
     </UserProfileProvider>
+    </HashRouter>
+    
   );
 }
 
