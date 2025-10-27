@@ -235,11 +235,20 @@ const AdminDashboard = () => {
                 <h3 className="text-lg font-semibold text-gray-700">Approved Users</h3>
                 <p className="text-3xl font-bold text-green-600 mt-2">{approvedUsers}</p>
               </div>
+                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-700">On Hold user</h3>
+                <p className="text-3xl font-bold text-green-600 mt-2">{onHoldUsers}</p>
+              </div>
+                      <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-700">Deactivated user</h3>
+                <p className="text-3xl font-bold text-green-600 mt-2">{deactivatedUsers}</p>
+              </div>
+
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h3>
-              <p className="text-gray-600">Welcome to Admin Panel. Use the sidebar to navigate.</p>
+              <p className="text-gray-600">Welcome to Admin Panel</p>
             </div>
           </div>
         );
