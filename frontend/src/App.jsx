@@ -30,6 +30,7 @@ import AdvancedSearch from "./components/chatsystem/AdvancedSearch";
 // Match System
 import MatchesPage from './components/MatchSystem/MatchesPage';
 import MembersPage from "./components/pages/MemberPage";
+import Contact from "./components/pages/Contact";
 
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
@@ -66,7 +67,7 @@ const LayoutWrapper = () => {
       <Routes>
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route 
-          path="/admin-dashboard/*" 
+          path="/admin-dashboard" 
           element={
             <ProtectedRoute>
               <AdminPage />
@@ -122,12 +123,12 @@ const LayoutWrapper = () => {
               <EditProfile />
             </UserProtectedRoute>
           } />
-{/*           
-          <Route path="/profile" element={
+{           
+          <Route path="/Contact" element={
             <UserProtectedRoute>
-              <ProfilePage />
+              <Contact />
             </UserProtectedRoute>
-          } /> */}
+          } /> }
 
           {/* Chat Routes */}
           <Route path="/chat" element={

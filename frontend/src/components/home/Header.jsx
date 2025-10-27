@@ -35,7 +35,7 @@ export default function Header() {
               <li>
                 <Link
                   to="/"
-                  className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200"
+                  className="text-gray-600  hover:text-amber-600 font-medium transition-colors duration-200"
                 >
                   Home
                 </Link>
@@ -43,7 +43,7 @@ export default function Header() {
                   <li>
                 <Link
                   to="/"
-                  className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200"
+                  className="text-gray-600  hover:text-amber-600 font-medium transition-colors duration-200"
                 >
                   About
                 </Link>
@@ -53,7 +53,7 @@ export default function Header() {
                   <li>
                     <Link
                       to="/dashboard"
-                      className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200"
+                      className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
                     >
                       Dashboard
                     </Link>
@@ -61,7 +61,7 @@ export default function Header() {
                   <li>
                     <Link
                       to="/members"
-                      className="text-pink-600 font-medium  border-pink-600  transition-colors duration-200"
+                      className="text-amber-600 font-medium  border-amber-600  transition-colors duration-200"
                     >
                       Members
                     </Link>
@@ -69,7 +69,7 @@ export default function Header() {
                   <li>
                     <Link
                       to="edit-profile"
-                      className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200"
+                      className="text-gray-600  hover:text-amber-600font-medium transition-colors duration-200"
                     >
                       Edit Profile
                     </Link>
@@ -79,8 +79,8 @@ export default function Header() {
               )}
               <li>
                 <Link
-                  to="/foter"
-                  className="text-gray-600 hover:text-pink-600 font-medium transition-colors duration-200"
+                  to="/Contact"
+                  className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
                 >
                   Contact Us
                 </Link>
@@ -95,7 +95,7 @@ export default function Header() {
                 {/* User Welcome */}
                 <div className="hidden md:flex items-center gap-2 text-gray-700">
                   <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
-                    <span className="text-pink-600 font-semibold text-sm">
+                    <span className="text-amber-600 font-semibold text-sm">
                       {profile?.name?.charAt(0) || 'U'}
                     </span>
                   </div>
@@ -117,14 +117,14 @@ export default function Header() {
 
                  <Link
                   to="/admin-Login"
-                  className="text-gray-700 hover:text-pink-600 font-medium transition-colors duration-200 px-3 py-1"
+                  className="text-gray-700  hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
                 >
                  Admin Login
                 </Link>
 
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-pink-600 font-medium transition-colors duration-200 px-3 py-1"
+                  className="text-gray-700  hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
                 >
                   Login
                 </Link>
