@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../services/adminApi';
 
@@ -11,43 +12,21 @@ const AdminDashboard = () => {
 
   // Fetch users from API
 
-const fetchUsers = async () => {
-  try {
-    setLoading(true);
-    const response = await adminAPI.getUsers();
-    
-    if (response.data.status === "success") {
-      // UserDetails ko priority do, agar nahi hai toh users use karo
-      const dataToUse = response.data.userDetails && response.data.userDetails.length > 0 
-        ? response.data.userDetails 
-        : response.data.users;
-      
-      setUsersData(dataToUse);
-      console.log('Data set successfully:', dataToUse.length, 'users');
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await adminAPI.getUsers();
+      if (response.data.status === "success") {
+        setUsersData(response.data.users);
+        console.log('Full API Response:', response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      alert('Error fetching users: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error:', error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  // const fetchUsers = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await adminAPI.getUsers();
-  //     if (response.data.status === "success") {
-  //       setUsersData(response.data.users);
-  //       console.log('Full API Response:', response.data);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching users:', error);
-  //     alert('Error fetching users: ' + (error.response?.data?.message || error.message));
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  };
 
   // Filter users based on status
   const filteredUsers = usersData.filter(user => 
@@ -60,6 +39,7 @@ const fetchUsers = async () => {
   };
 
   // API Integration Functions
+
   const handleApprove = async (userId) => {
     try {
       const adminData = JSON.parse(localStorage.getItem('adminData'));
@@ -122,12 +102,14 @@ const fetchUsers = async () => {
   };
   
 
-
-
   //user models code new with proper user profile data 
   // UserDetailsModal component with ALL fields
-const UserDetailsModal = () => {
+
+  const UserDetailsModal = () => {
   if (!selectedUser) return null;
+
+  // Get the actual status from user data
+  const userStatus = selectedUser.status || 'in process';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -322,7 +304,7 @@ const UserDetailsModal = () => {
               </div>
             </div>
 
-            {/* Status Information */}
+            {/* Status Information - FIXED */}
             <div className="md:col-span-2 lg:col-span-3 mt-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Account Information</h3>
             </div>
@@ -331,11 +313,12 @@ const UserDetailsModal = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
               <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                  ${selectedUser.current_status === 'approve' || selectedUser.status === 'approve' ? 'bg-green-100 text-green-800' : 
-                    selectedUser.current_status === 'in process' || selectedUser.status === 'in process' ? 'bg-yellow-100 text-yellow-800' : 
-                    selectedUser.current_status === 'on hold' || selectedUser.status === 'on hold' ? 'bg-orange-100 text-orange-800' :
-                    'bg-red-100 text-red-800'}`}>
-                  {selectedUser.current_status || selectedUser.status}
+                  ${userStatus === 'approve' ? 'bg-green-100 text-green-800' : 
+                    userStatus === 'in process' ? 'bg-yellow-100 text-yellow-800' : 
+                    userStatus === 'on hold' ? 'bg-orange-100 text-orange-800' :
+                    userStatus === 'deactivate' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'}`}>
+                  {userStatus.toUpperCase()}
                 </span>
               </div>
             </div>
@@ -389,11 +372,12 @@ const UserDetailsModal = () => {
     </div>
   );
 };
-  
-
 
 // --------------------------old code----------------------------------------//
-  // // User Details Modal
+
+
+  // User Details Modal
+
   // const UserDetailsModal = () => {
   //   if (!selectedUser) return null;
 
@@ -506,6 +490,7 @@ const UserDetailsModal = () => {
   // ---------------------------------------------------------------//
 
   // Stats calculations
+ 
   const totalUsers = usersData.length;
   const inProcessUsers = usersData.filter(u => u.status === 'in process').length;
   const approvedUsers = usersData.filter(u => u.status === 'approve').length;
@@ -549,102 +534,308 @@ const UserDetailsModal = () => {
             </div>
           </div>
         );
+// -----------------------------------------------------------------
 
-      case 'users':
-        return (
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-              
-              {/* Status Filter Dropdown */}
-              <div className="flex gap-4">
-                <select 
-                  value={userStatusFilter}
-                  onChange={(e) => setUserStatusFilter(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">All Users</option>
-                  <option value="in process">In Process</option>
-                  <option value="approve">Approve</option>
-                  <option value="on hold">On Hold</option>
-                  <option value="deactivate">Deactivate</option>
-                </select>
-              </div>
+case 'users':
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+        
+        {/* Status Filter Dropdown */}
+        <div className="flex gap-4">
+          <select 
+            value={userStatusFilter}
+            onChange={(e) => setUserStatusFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">All Users</option>
+            <option value="in process">In Process</option>
+            <option value="approve">Approve</option>
+            <option value="on hold">On Hold</option>
+            <option value="deactivate">Deactivate</option>
+          </select>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      ) : (
+
+        /* Users Table */
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Profession
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredUsers.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{user.full_name || 'No Name'}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">{user.email}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">{user.profession || 'Not specified'}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                      ${user.status === 'approve' ? 'bg-green-100 text-green-800 border border-green-200' : 
+                        user.status === 'in process' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' : 
+                        user.status === 'on hold' ? 'bg-orange-100 text-orange-800 border border-orange-200' :
+                        user.status === 'deactivate' ? 'bg-red-100 text-red-800 border border-red-200' :
+                        'bg-gray-100 text-gray-800 border border-gray-200'}`}>
+                      {user.status ? user.status.toUpperCase() : 'PENDING'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => handleViewDetails(user)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          
+          {filteredUsers.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No users found</p>
             </div>
+          )}
+        </div>
+      )}
 
-            {loading ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-              </div>
-            ) : (
-              /* Users Table */
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Email
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Profession
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredUsers.map((user) => (
-                      <tr key={user.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{user.full_name || 'No Name'}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">{user.email}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">{user.profession || 'Not specified'}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                            ${user.status === 'approve' ? 'bg-green-100 text-green-800' : 
-                              user.status === 'in process' ? 'bg-yellow-100 text-yellow-800' : 
-                              user.status === 'on hold' ? 'bg-orange-100 text-orange-800' :
-                              'bg-red-100 text-red-800'}`}>
-                            {user.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={() => handleViewDetails(user)}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                          >
-                            View Details
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+      {/* User Details Modal */}
+      {showUserModal && <UserDetailsModal />}
+    </div>
+  );
+
+
+// case 'users':
+//   return (
+//     <div className="p-6">
+//       <div className="flex justify-between items-center mb-6">
+//         <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+        
+//         {/* Status Filter Dropdown */}
+//         <div className="flex gap-4">
+//           <select 
+//             value={userStatusFilter}
+//             onChange={(e) => setUserStatusFilter(e.target.value)}
+//             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//           >
+//             <option value="all">All Users</option>
+//             <option value="in process">In Process</option>
+//             <option value="approve">Approve</option>
+//             <option value="on hold">On Hold</option>
+//             <option value="deactivate">Deactivate</option>
+//           </select>
+//         </div>
+//       </div>
+
+//       {loading ? (
+//         <div className="flex justify-center items-center py-8">
+//           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+//         </div>
+//       ) : (
+
+//         /* Users Table */
+//         <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+//           <table className="min-w-full divide-y divide-gray-200">
+//             <thead className="bg-gray-50">
+//               <tr>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Name
+//                 </th>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Email
+//                 </th>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Profession
+//                 </th>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Status
+//                 </th>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Actions
+//                 </th>
+//               </tr>
+//             </thead>
+//             <tbody className="bg-white divide-y divide-gray-200">
+//               {filteredUsers && filteredUsers.length > 0 ? filteredUsers.map((user) => {
+//                 // Debugging - console log each user's status
+//                 console.log("User:", user.full_name, "Status:", user.status);
                 
-                {filteredUsers.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">No users found</p>
-                  </div>
-                )}
-              </div>
-            )}
+//                 return (
+//                   <tr key={user.id} className="hover:bg-gray-50">
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <div className="text-sm font-medium text-gray-900">{user.full_name || 'No Name'}</div>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <div className="text-sm text-gray-500">{user.email}</div>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <div className="text-sm text-gray-500">{user.profession || 'Not specified'}</div>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+//                         ${user.status === 'approve' ? 'bg-green-100 text-green-800' : 
+//                           user.status === 'in process' ? 'bg-yellow-100 text-yellow-800' : 
+//                           user.status === 'on hold' ? 'bg-orange-100 text-orange-800' :
+//                           user.status === 'deactivate' ? 'bg-red-100 text-red-800' :
+//                           'bg-gray-100 text-gray-800'}`}>
+//                         {user.status || 'Pending'}
+//                       </span>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+//                       <button
+//                         onClick={() => handleViewDetails(user)}
+//                         className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+//                       >
+//                         View Details
+//                       </button>
+//                     </td>
+//                   </tr>
+//                 );
+//               }) : (
+//                 <tr>
+//                   <td colSpan="5" className="px-6 py-4 text-center">
+//                     <div className="text-gray-500">No users found</div>
+//                   </td>
+//                 </tr>
+//               )}
+//             </tbody>
+//           </table>
+//         </div>
+//       )}
 
-            {/* User Details Modal */}
-            {showUserModal && <UserDetailsModal />}
-          </div>
-        );
+//       {/* User Details Modal */}
+//       {showUserModal && <UserDetailsModal />}
+//     </div>
+//   );
+
+
+
+      // case 'users':
+      //   return (
+      //     <div className="p-6">
+      //       <div className="flex justify-between items-center mb-6">
+      //         <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+              
+      //         {/* Status Filter Dropdown */}
+      //         <div className="flex gap-4">
+      //           <select 
+      //             value={userStatusFilter}
+      //             onChange={(e) => setUserStatusFilter(e.target.value)}
+      //             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      //           >
+      //             <option value="all">All Users</option>
+      //             <option value="in process">In Process</option>
+      //             <option value="approve">Approve</option>
+      //             <option value="on hold">On Hold</option>
+      //             <option value="deactivate">Deactivate</option>
+      //           </select>
+      //         </div>
+      //       </div>
+
+      //       {loading ? (
+      //         <div className="flex justify-center items-center py-8">
+      //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      //         </div>
+      //       ) : (
+
+      //         /* Users Table */
+      //         <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+      //           <table className="min-w-full divide-y divide-gray-200">
+      //             <thead className="bg-gray-50">
+      //               <tr>
+      //                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      //                   Name
+      //                 </th>
+      //                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      //                   Email
+      //                 </th>
+      //                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      //                   Profession
+      //                 </th>
+      //                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      //                   Status
+      //                 </th>
+      //                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      //                   Actions
+      //                 </th>
+      //               </tr>
+      //             </thead>
+      //             <tbody className="bg-white divide-y divide-gray-200">
+      //               {filteredUsers.map((user) => (
+      //                 <tr key={user.id} className="hover:bg-gray-50">
+      //                   <td className="px-6 py-4 whitespace-nowrap">
+      //                     <div className="text-sm font-medium text-gray-900">{user.full_name || 'No Name'}</div>
+      //                   </td>
+      //                   <td className="px-6 py-4 whitespace-nowrap">
+      //                     <div className="text-sm text-gray-500">{user.email}</div>
+      //                   </td>
+      //                   <td className="px-6 py-4 whitespace-nowrap">
+      //                     <div className="text-sm text-gray-500">{user.profession || 'Not specified'}</div>
+      //                   </td>
+      //                   <td className="px-6 py-4 whitespace-nowrap">
+      //                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+      //                       ${user.status === 'approve' ? 'bg-green-100 text-green-800' : 
+      //                         user.status === 'in process' ? 'bg-yellow-100 text-yellow-800' : 
+      //                         user.status === 'on hold' ? 'bg-orange-100 text-orange-800' :
+      //                         'bg-red-100 text-red-800'}`}>
+      //                       {user.status}
+      //                     </span>
+      //                   </td>
+      //                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+      //                     <button
+      //                       onClick={() => handleViewDetails(user)}
+      //                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+      //                     >
+      //                       View Details
+      //                     </button>
+      //                   </td>
+      //                 </tr>
+      //               ))}
+      //             </tbody>
+      //           </table>
+                
+      //           {filteredUsers.length === 0 && (
+      //             <div className="text-center py-8">
+      //               <p className="text-gray-500">No users found</p>
+      //             </div>
+      //           )}
+      //         </div>
+      //       )}
+
+      //       {/* User Details Modal */}
+      //       {showUserModal && <UserDetailsModal />}
+      //     </div>
+      //   );
 
       case 'settings':
         return (
@@ -779,6 +970,9 @@ export default AdminDashboard;
 
 
 
+
+
+// old code hai 
 
 
 
@@ -1025,83 +1219,83 @@ export default AdminDashboard;
 //           </div>
 //         );
 
-//       case 'users':
-//         return (
-//           <div className="p-6">
-//             <div className="flex justify-between items-center mb-6">
-//               <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+      // case 'users':
+      //   return (
+      //     <div className="p-6">
+      //       <div className="flex justify-between items-center mb-6">
+      //         <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
               
-//               {/* Status Filter Dropdown */}
-//               <div className="flex gap-4">
-//                 <select 
-//                   value={userStatusFilter}
-//                   onChange={(e) => setUserStatusFilter(e.target.value)}
-//                   className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-//                 >
-//                   <option value="all">All Users</option>
-//                   <option value="In Process">In Process</option>
-//                   <option value="Approve">Approve</option>
-//                   <option value="On Hold">On Hold</option>
-//                   <option value="Deactivate">Deactivate</option>
-//                 </select>
-//               </div>
-//             </div>
+      //         {/* Status Filter Dropdown */}
+      //         <div className="flex gap-4">
+      //           <select 
+      //             value={userStatusFilter}
+      //             onChange={(e) => setUserStatusFilter(e.target.value)}
+      //             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      //           >
+      //             <option value="all">All Users</option>
+      //             <option value="In Process">In Process</option>
+      //             <option value="Approve">Approve</option>
+      //             <option value="On Hold">On Hold</option>
+      //             <option value="Deactivate">Deactivate</option>
+      //           </select>
+      //         </div>
+      //       </div>
 
-//             {/* Users Table */}
-//             <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-//               <table className="min-w-full divide-y divide-gray-200">
-//                 <thead className="bg-gray-50">
-//                   <tr>
-//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                       Name
-//                     </th>
-//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                       Email
-//                     </th>
-//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                       Status
-//                     </th>
-//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-//                       Actions
-//                     </th>
-//                   </tr>
-//                 </thead>
-//                 <tbody className="bg-white divide-y divide-gray-200">
-//                   {filteredUsers.map((user) => (
-//                     <tr key={user.id} className="hover:bg-gray-50">
-//                       <td className="px-6 py-4 whitespace-nowrap">
-//                         <div className="text-sm font-medium text-gray-900">{user.name}</div>
-//                       </td>
-//                       <td className="px-6 py-4 whitespace-nowrap">
-//                         <div className="text-sm text-gray-500">{user.email}</div>
-//                       </td>
-//                       <td className="px-6 py-4 whitespace-nowrap">
-//                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-//                           ${user.status === 'Approve' ? 'bg-green-100 text-green-800' : 
-//                             user.status === 'In Process' ? 'bg-yellow-100 text-yellow-800' : 
-//                             user.status === 'On Hold' ? 'bg-orange-100 text-orange-800' :
-//                             'bg-red-100 text-red-800'}`}>
-//                           {user.status}
-//                         </span>
-//                       </td>
-//                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-//                         <button
-//                           onClick={() => handleViewDetails(user)}
-//                           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-//                         >
-//                           View User Details
-//                         </button>
-//                       </td>
-//                     </tr>
-//                   ))}
-//                 </tbody>
-//               </table>
-//             </div>
+      //       {/* Users Table */}
+      //       <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+      //         <table className="min-w-full divide-y divide-gray-200">
+      //           <thead className="bg-gray-50">
+      //             <tr>
+      //               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      //                 Name
+      //               </th>
+      //               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      //                 Email
+      //               </th>
+      //               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      //                 Status
+      //               </th>
+      //               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      //                 Actions
+      //               </th>
+      //             </tr>
+      //           </thead>
+      //           <tbody className="bg-white divide-y divide-gray-200">
+      //             {filteredUsers.map((user) => (
+      //               <tr key={user.id} className="hover:bg-gray-50">
+      //                 <td className="px-6 py-4 whitespace-nowrap">
+      //                   <div className="text-sm font-medium text-gray-900">{user.name}</div>
+      //                 </td>
+      //                 <td className="px-6 py-4 whitespace-nowrap">
+      //                   <div className="text-sm text-gray-500">{user.email}</div>
+      //                 </td>
+      //                 <td className="px-6 py-4 whitespace-nowrap">
+      //                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+      //                     ${user.status === 'Approve' ? 'bg-green-100 text-green-800' : 
+      //                       user.status === 'In Process' ? 'bg-yellow-100 text-yellow-800' : 
+      //                       user.status === 'On Hold' ? 'bg-orange-100 text-orange-800' :
+      //                       'bg-red-100 text-red-800'}`}>
+      //                     {user.status}
+      //                   </span>
+      //                 </td>
+      //                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+      //                   <button
+      //                     onClick={() => handleViewDetails(user)}
+      //                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+      //                   >
+      //                     View User Details
+      //                   </button>
+      //                 </td>
+      //               </tr>
+      //             ))}
+      //           </tbody>
+      //         </table>
+      //       </div>
 
-//             {/* User Details Modal */}
-//             {showUserModal && <UserDetailsModal />}
-//           </div>
-//         );
+      //       {/* User Details Modal */}
+      //       {showUserModal && <UserDetailsModal />}
+      //     </div>
+      //   );
 
 //       case 'settings':
 //         return (
