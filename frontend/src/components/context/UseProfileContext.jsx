@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { getUserProfile } from "../services/api";
+import { getUserProfile, loginUser } from "../services/api";
+import { useNavigate } from "react-router-dom";
 
+// UserProfile Context
 const UserProfileContext = createContext();
 
 export const useUserProfile = () => {
@@ -17,22 +19,30 @@ export const UserProfileProvider = ({ children }) => {
 
   const loadProfile = async () => {
     const token = localStorage.getItem("accessToken");
+    
     if (!token) {
+      console.log("🚫 No token found - skipping profile load");
       setLoading(false);
       return;
     }
 
     try {
-      // First check cached data
-      const cachedUser = localStorage.getItem("user");
-      const cachedProfile = cachedUser ? JSON.parse(cachedUser) : null;
-
-      if (cachedProfile) {
-        console.log("✅ Using cached profile data");
-        setProfile(cachedProfile);
+      console.log("🔄 Loading profile data...");
+      
+      // ✅ Pehle cached data check karo
+      const cachedUser = localStorage.getItem("userProfile");
+      if (cachedUser) {
+        try {
+          const cachedProfile = JSON.parse(cachedUser);
+          console.log("📂 Using cached profile data");
+          setProfile(cachedProfile);
+        } catch (parseError) {
+          console.error("❌ Error parsing cached data:", parseError);
+          localStorage.removeItem("userProfile");
+        }
       }
 
-      // Then call API for fresh data
+      // ✅ Fir API se fresh data lo
       const data = await getUserProfile();
       let userProfile = data?.data;
       
@@ -60,8 +70,8 @@ export const UserProfileProvider = ({ children }) => {
           
           // Additional Info
           about: userProfile.about || "",
-          skills: userProfile.skills || [],
-          interests: userProfile.interests || [],
+          skills: Array.isArray(userProfile.skills) ? userProfile.skills : (userProfile.skills || []),
+          interests: Array.isArray(userProfile.interests) ? userProfile.interests : (userProfile.interests || []),
           
           // System Fields
           id: userProfile.id || null,
@@ -70,47 +80,92 @@ export const UserProfileProvider = ({ children }) => {
           
           // Profile Picture
           profile_picture_url: userProfile.profile_picture_url || "",
-          profilePhoto: userProfile.profilePhoto || ""
+          profilePhoto: userProfile.profilePhoto || "",
+          
+          // Timestamp
+          last_updated: new Date().toISOString()
         };
         
+        console.log("✅ Setting complete profile:", completeProfile);
         setProfile(completeProfile);
-        localStorage.setItem("user", JSON.stringify(completeProfile));
+        localStorage.setItem("userProfile", JSON.stringify(completeProfile));
       }
     } catch (error) {
-      console.error("Failed to load profile:", error);
+      console.error("❌ API Error:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadProfile();
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      loadProfile();
+    } else {
+      console.log("⏸️ No token - profile loading skipped");
+      setLoading(false);
+      
+      // ✅ Logout par bhi cached data show karo (read-only mode)
+      const cachedProfile = localStorage.getItem("userProfile");
+      if (cachedProfile) {
+        try {
+          const profileData = JSON.parse(cachedProfile);
+          console.log("👀 Showing cached profile (read-only)");
+          setProfile(profileData);
+        } catch (error) {
+          console.error("Error parsing cached profile:", error);
+        }
+      }
+    }
   }, []);
 
-  const updateProfile = (newProfile) => {
-    console.log("🔄 Updating profile:", newProfile);
-    setProfile(newProfile);
-    localStorage.setItem("user", JSON.stringify(newProfile));
+  const updateProfile = (newProfileData) => {
+    console.log("🔄 Updating profile with:", newProfileData);
+    
+    const updatedProfile = {
+      ...profile,
+      ...newProfileData,
+      last_updated: new Date().toISOString()
+    };
+    
+    console.log("✅ Final updated profile:", updatedProfile);
+    setProfile(updatedProfile);
+    localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
   };
 
+  // ✅ FIXED: Logout par sirf tokens clear karo, profile data nahi
   const clearProfile = () => {
-    setProfile(null);
-    localStorage.removeItem("user");
+    console.log("🚪 Clearing authentication tokens only");
+    setProfile(null); // UI ke liye profile hide karo
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    // ❌ userProfile ko clear mat karo - data persist rahega
   };
 
   const refreshProfile = () => {
+    console.log("🔄 Manually refreshing profile");
     setLoading(true);
     loadProfile();
   };
 
+  const hasCompleteProfile = () => {
+    return profile && profile.is_submitted && profile.full_name && profile.email;
+  };
+
+  const value = {
+    profile,
+    updateProfile,
+    clearProfile,
+    refreshProfile,
+    loading,
+    hasCompleteProfile: hasCompleteProfile()
+  };
+
   return (
-    <UserProfileContext.Provider 
-      value={{ profile, updateProfile, clearProfile, refreshProfile, loading }}
-    >
+    <UserProfileContext.Provider value={value}>
       {children}
     </UserProfileContext.Provider>
   );
 };
+
 
