@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import api, { loginUser } from "../services/api";
+import { loginUser } from "../services/api";
 import { useUserProfile } from "../context/UseProfileContext";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { updateProfile } = useUserProfile();
+  const { updateProfile, refreshProfile } = useUserProfile();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,7 +17,6 @@ export default function Login() {
     setError("");
 
     try {
-      // Use loginUser function instead of direct api.post
       const { token, refresh, user } = await loginUser({ email, password });
 
       if (!token) throw new Error("No token received from server");
@@ -25,10 +24,17 @@ export default function Login() {
       // Save tokens & user info
       localStorage.setItem("accessToken", token);
       if (refresh) localStorage.setItem("refreshToken", refresh);
+      
+      // Update profile context
       if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
+        console.log("✅ Login successful, updating profile context");
         updateProfile(user);
       }
+
+      // Auto refresh profile data from API
+      setTimeout(() => {
+        refreshProfile();
+      }, 500);
 
       alert("Login successful!");
       navigate("/dashboard");
@@ -44,6 +50,15 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  // ✅ Agar user already logged in hai to directly dashboard redirect karo
+  React.useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      console.log("🔄 User already logged in, redirecting to dashboard");
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-100 flex items-center justify-center px-4">
@@ -111,6 +126,38 @@ export default function Login() {
     </div>
   );
 }
+
+// ✅ Alag Logout Component for Header/Other pages
+export function LogoutButton() {
+  const { clearProfile } = useUserProfile();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    console.log("🚪 Logging out...");
+    
+    // Clear authentication only, keep profile data
+    clearProfile();
+    
+    alert("Logged out successfully!");
+    navigate("/login");
+    
+    // Optional: Page refresh for clean state
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
+
+  return (
+    <button 
+      onClick={handleLogout} 
+      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+    >
+      Logout
+    </button>
+  );
+}
+
+
 
 
 
