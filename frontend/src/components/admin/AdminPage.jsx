@@ -10,20 +10,44 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
 
   // Fetch users from API
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await adminAPI.getUsers();
-      if (response.data.status === "success") {
-        setUsersData(response.data.users);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      alert('Error fetching users: ' + (error.response?.data?.message || error.message));
-    } finally {
-      setLoading(false);
+
+const fetchUsers = async () => {
+  try {
+    setLoading(true);
+    const response = await adminAPI.getUsers();
+    
+    if (response.data.status === "success") {
+      // UserDetails ko priority do, agar nahi hai toh users use karo
+      const dataToUse = response.data.userDetails && response.data.userDetails.length > 0 
+        ? response.data.userDetails 
+        : response.data.users;
+      
+      setUsersData(dataToUse);
+      console.log('Data set successfully:', dataToUse.length, 'users');
     }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  // const fetchUsers = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await adminAPI.getUsers();
+  //     if (response.data.status === "success") {
+  //       setUsersData(response.data.users);
+  //       console.log('Full API Response:', response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching users:', error);
+  //     alert('Error fetching users: ' + (error.response?.data?.message || error.message));
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // Filter users based on status
   const filteredUsers = usersData.filter(user => 
@@ -96,117 +120,390 @@ const AdminDashboard = () => {
       alert('Error deactivating user: ' + (error.response?.data?.message || error.message));
     }
   };
+  
 
-  // User Details Modal
-  const UserDetailsModal = () => {
-    if (!selectedUser) return null;
 
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-          {/* Modal Header */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-800">User Details</h2>
-              <button
-                onClick={() => setShowUserModal(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-              >
-                ×
-              </button>
-            </div>
-            <p className="text-gray-600 text-sm mt-1">User ID: #{selectedUser.id}</p>
+
+  //user models code new with proper user profile data 
+  // UserDetailsModal component with ALL fields
+const UserDetailsModal = () => {
+  if (!selectedUser) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        {/* Modal Header */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-800">User Details</h2>
+            <button onClick={() => setShowUserModal(false)} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
           </div>
+          <p className="text-gray-600 text-sm mt-1">User ID: #{selectedUser.user_id || selectedUser.id}</p>
+        </div>
 
-          {/* User Information */}
-          <div className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-medium">{selectedUser.full_name || 'No Name'}</p>
-                </div>
+        {/* User Information - ALL FIELDS */}
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            {/* Personal Information */}
+            <div className="md:col-span-2 lg:col-span-3">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Personal Information</h3>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900 font-medium">{selectedUser.full_name || 'No Name'}</p>
               </div>
+            </div>
 
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900">{selectedUser.email}</p>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.email}</p>
               </div>
+            </div>
 
-              {/* Profession */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Profession</label>
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900">{selectedUser.profession || 'Not specified'}</p>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.phone || 'Not provided'}</p>
               </div>
+            </div>
 
-              {/* Status */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold
-                    ${selectedUser.status === 'approve' ? 'bg-green-100 text-green-800' : 
-                      selectedUser.status === 'in process' ? 'bg-yellow-100 text-yellow-800' : 
-                      selectedUser.status === 'on hold' ? 'bg-orange-100 text-orange-800' :
-                      'bg-red-100 text-red-800'}`}>
-                    {selectedUser.status}
-                  </span>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.gender || 'Not specified'}</p>
               </div>
+            </div>
 
-              {/* User ID */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">User ID</label>
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900 font-mono">#{selectedUser.id}</p>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Marital Status</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.marital_status || 'Not specified'}</p>
               </div>
+            </div>
 
-              {/* Registration Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Registration Date</label>
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-gray-900">
-                    {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : 'Not available'}
-                  </p>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">
+                  {selectedUser.dob ? new Date(selectedUser.dob).toLocaleDateString() : 'Not specified'}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.age || 'Not specified'}</p>
+              </div>
+            </div>
+
+            {/* Professional Information */}
+            <div className="md:col-span-2 lg:col-span-3 mt-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Professional Information</h3>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Profession</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.profession || 'Not specified'}</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Headline</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.headline || 'Not specified'}</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Education</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.education || 'Not specified'}</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.company || 'Not specified'}</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Experience</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">
+                  {selectedUser.experience ? `${selectedUser.experience} year(s)` : 'Not specified'}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Profile Submitted</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                  selectedUser.is_submitted ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {selectedUser.is_submitted ? 'Yes' : 'No'}
+                </span>
+              </div>
+            </div>
+
+            {/* Location Information */}
+            <div className="md:col-span-2 lg:col-span-3 mt-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Location Information</h3>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.city || 'Not specified'}</p>
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">{selectedUser.address || 'Not specified'}</p>
+              </div>
+            </div>
+
+            {/* Skills & Interests */}
+            <div className="md:col-span-2 lg:col-span-3 mt-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Skills & Interests</h3>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Skills</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                {selectedUser.skills && selectedUser.skills.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedUser.skills.map((skill, index) => (
+                      <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No skills specified</p>
+                )}
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Interests</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                {selectedUser.interests && selectedUser.interests.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedUser.interests.map((interest, index) => (
+                      <span key={index} className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                        {interest}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No interests specified</p>
+                )}
+              </div>
+            </div>
+
+            {/* About Section */}
+            <div className="md:col-span-2 lg:col-span-3">
+              <label className="block text-sm font-medium text-gray-700 mb-2">About</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900 whitespace-pre-line">
+                  {selectedUser.about || 'No description provided'}
+                </p>
+              </div>
+            </div>
+
+            {/* Status Information */}
+            <div className="md:col-span-2 lg:col-span-3 mt-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Account Information</h3>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <span className={`px-3 py-1 rounded-full text-sm font-semibold
+                  ${selectedUser.current_status === 'approve' || selectedUser.status === 'approve' ? 'bg-green-100 text-green-800' : 
+                    selectedUser.current_status === 'in process' || selectedUser.status === 'in process' ? 'bg-yellow-100 text-yellow-800' : 
+                    selectedUser.current_status === 'on hold' || selectedUser.status === 'on hold' ? 'bg-orange-100 text-orange-800' :
+                    'bg-red-100 text-red-800'}`}>
+                  {selectedUser.current_status || selectedUser.status}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Registration Date</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">
+                  {selectedUser.registration_date ? new Date(selectedUser.registration_date).toLocaleDateString() : 
+                   selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : 'Not available'}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Last Updated</label>
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-900">
+                  {selectedUser.updated_at ? new Date(selectedUser.updated_at).toLocaleDateString() : 'Not available'}
+                </p>
               </div>
             </div>
 
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
-            <div className="flex flex-col sm:flex-row gap-3 justify-end">
-              <button
-                onClick={() => handleOnHold(selectedUser.id)}
-                className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium flex-1 sm:flex-none"
-              >
-                Put On Hold
-              </button>
-              <button
-                onClick={() => handleDeactivate(selectedUser.id)}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex-1 sm:flex-none"
-              >
-                Deactivate
-              </button>
-              <button
-                onClick={() => handleApprove(selectedUser.id)}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex-1 sm:flex-none"
-              >
-                Approve User
-              </button>
-            </div>
+        {/* Action Buttons */}
+        <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+          <div className="flex flex-col sm:flex-row gap-3 justify-end">
+            <button
+              onClick={() => handleOnHold(selectedUser.user_id || selectedUser.id)}
+              className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium flex-1 sm:flex-none"
+            >
+              Put On Hold
+            </button>
+            <button
+              onClick={() => handleDeactivate(selectedUser.user_id || selectedUser.id)}
+              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex-1 sm:flex-none"
+            >
+              Deactivate
+            </button>
+            <button
+              onClick={() => handleApprove(selectedUser.user_id || selectedUser.id)}
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex-1 sm:flex-none"
+            >
+              Approve User
+            </button>
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
+  
+
+
+// --------------------------old code----------------------------------------//
+  // // User Details Modal
+  // const UserDetailsModal = () => {
+  //   if (!selectedUser) return null;
+
+  //   return (
+  //     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  //       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+  //         {/* Modal Header */}
+  //         <div className="p-6 border-b border-gray-200">
+  //           <div className="flex justify-between items-center">
+  //             <h2 className="text-2xl font-bold text-gray-800">User Details</h2>
+  //             <button
+  //               onClick={() => setShowUserModal(false)}
+  //               className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+  //             >
+  //               ×
+  //             </button>
+  //           </div>
+  //           <p className="text-gray-600 text-sm mt-1">User ID: #{selectedUser.id}</p>
+  //         </div>
+
+  //         {/* User Information */}
+  //         <div className="p-6 space-y-6">
+  //           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  //             {/* Name */}
+  //             <div>
+  //               <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+  //               <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+  //                 <p className="text-gray-900 font-medium">{selectedUser.full_name || 'No Name'}</p>
+  //               </div>
+  //             </div>
+
+  //             {/* Email */}
+  //             <div>
+  //               <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+  //               <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+  //                 <p className="text-gray-900">{selectedUser.email}</p>
+  //               </div>
+  //             </div>
+
+  //             {/* Profession */}
+  //             <div>
+  //               <label className="block text-sm font-medium text-gray-700 mb-2">Profession</label>
+  //               <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+  //                 <p className="text-gray-900">{selectedUser.profession || 'Not specified'}</p>
+  //               </div>
+  //             </div>
+
+  //             {/* Status */}
+  //             <div>
+  //               <label className="block text-sm font-medium text-gray-700 mb-2">Current Status</label>
+  //               <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+  //                 <span className={`px-3 py-1 rounded-full text-sm font-semibold
+  //                   ${selectedUser.status === 'approve' ? 'bg-green-100 text-green-800' : 
+  //                     selectedUser.status === 'in process' ? 'bg-yellow-100 text-yellow-800' : 
+  //                     selectedUser.status === 'on hold' ? 'bg-orange-100 text-orange-800' :
+  //                     'bg-red-100 text-red-800'}`}>
+  //                   {selectedUser.status}
+  //                 </span>
+  //               </div>
+  //             </div>
+
+  //             {/* User ID */}
+  //             <div>
+  //               <label className="block text-sm font-medium text-gray-700 mb-2">User ID</label>
+  //               <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+  //                 <p className="text-gray-900 font-mono">#{selectedUser.id}</p>
+  //               </div>
+  //             </div>
+
+  //             {/* Registration Date */}
+  //             <div>
+  //               <label className="block text-sm font-medium text-gray-700 mb-2">Registration Date</label>
+  //               <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+  //                 <p className="text-gray-900">
+  //                   {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : 'Not available'}
+  //                 </p>
+  //               </div>
+  //             </div>
+  //           </div>
+
+  //         </div>
+
+  //         {/* Action Buttons */}
+  //         <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+  //           <div className="flex flex-col sm:flex-row gap-3 justify-end">
+  //             <button
+  //               onClick={() => handleOnHold(selectedUser.id)}
+  //               className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium flex-1 sm:flex-none"
+  //             >
+  //               Put On Hold
+  //             </button>
+  //             <button
+  //               onClick={() => handleDeactivate(selectedUser.id)}
+  //               className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex-1 sm:flex-none"
+  //             >
+  //               Deactivate
+  //             </button>
+  //             <button
+  //               onClick={() => handleApprove(selectedUser.id)}
+  //               className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex-1 sm:flex-none"
+  //             >
+  //               Approve User
+  //             </button>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+  // ---------------------------------------------------------------//
 
   // Stats calculations
   const totalUsers = usersData.length;
