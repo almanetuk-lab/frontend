@@ -44,6 +44,9 @@ export const adminAPI = {
 
   // Get All Users (jab ban jayegi)
   getUsers: () => api.get('/api/admin/users'),
+
+    // Get User Details by ID -
+  getUserDetails: (userId) => api.get(`/api/admin/getdetails/${userId}`),
   
   // Approve User - POST /api/admin/approvedUser
   approveUser: (userId, adminId) => 
