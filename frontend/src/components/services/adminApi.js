@@ -68,6 +68,10 @@ export const adminAPI = {
       user_id: userId, 
       reason: reason 
     }),
+
+      // SEARCH PROFILES - Add this line only
+  searchProfiles: (searchParams) => api.get('/search', { params: searchParams }),
+
 };
 
 export default api;
