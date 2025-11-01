@@ -90,7 +90,30 @@ export const getUserProfile = async () => {
   }
 };
 
-// Admin Login 
+// ✅ Image Upload API
+export const uploadImage = (formData) => {
+  return api.post('/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
+// ✅ Save Profile Image API
+export const saveProfileImage = (user_id, imageUrl) => {
+  return api.post('/saveProfileImage', {
+    user_id,
+    imageUrl,
+  });
+};
+
+// ✅ NEW: Remove Profile Image API
+export const removeProfileImage = (user_id) => {
+  return api.post('/remove/profile-picture', {
+    user_id,
+  });
+};
+
 
 // Admin APIs
 export const adminAPI = {
