@@ -39,7 +39,9 @@ export default function DashboardHome({ profile }) {
   ], []);
 
   return (
+
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+    
       <div className="max-w-7xl mx-auto">
         {/* Desktop Header */}
         <header className="hidden lg:block bg-white shadow-sm p-6 border-b border-gray-200 mb-6 rounded-2xl">
@@ -126,6 +128,7 @@ export default function DashboardHome({ profile }) {
               </div>
               
               {/* Profile Header */}
+
               <div className="flex flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6 sm:mb-8">
                 {/* Profile Picture */}
                 <div className="flex-shrink-0">
@@ -137,14 +140,15 @@ export default function DashboardHome({ profile }) {
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
+                    <div className="w-20 h-2 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
                       {profile?.full_name?.charAt(0) || profile?.name?.charAt(0) || 'U'}
                     </div>
                   )}
                 </div>
 
                 {/* Profile Info */}
-                <div className="flex-1 w-full min-w-0">
+                
+                 <div className="flex-1 w-full min-w-0">           
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 mb-4">
                     <div className="flex-1 min-w-0">
                       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2 truncate">
@@ -177,7 +181,7 @@ export default function DashboardHome({ profile }) {
                         <span className="sm:hidden">Edit</span>
                       </button>
                     </div>
-                  </div>
+                  </div> 
                 </div>
               </div>
 
