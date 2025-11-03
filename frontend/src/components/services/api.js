@@ -21,8 +21,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// RESPONSE INTERCEPTOR HATA DO - Not needed
-// api.interceptors.response.use(...)
+
 
 // Normalize response
 export const normalizeAuthResponse = (data = {}) => {
@@ -119,10 +118,7 @@ export const removeProfileImage = (user_id) => {
 export const adminAPI = {
   login: (credentials) => api.post('/api/admin/login', credentials),
   
-  // Future APIs - aap add karte jayenge
-//   getPendingUsers: () => api.get('/api/admin/pending-users'),
-//   updateUserStatus: (userId, status) => api.put(`/api/admin/users/${userId}/status`, { status }),
-  
+
  };
 
 export default api;
