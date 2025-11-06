@@ -23,6 +23,18 @@ export default function MessagesSection() {
   const messagesEndRef = useRef();
   const [socketConnected, setSocketConnected] = useState(false);
 
+  // ✅ Click outside to close reaction picker
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showReactionPicker && !event.target.closest('.reaction-picker') && !event.target.closest('.message-bubble')) {
+        setShowReactionPicker(null);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showReactionPicker]);
+
   // ✅ Get current user once
   useEffect(() => {
     try {
@@ -41,13 +53,12 @@ export default function MessagesSection() {
     }
   }, []);
 
-  // ✅ FIXED: STABLE SOCKET CONNECTION
+  // ✅ FIXED: SOCKET WITH REACTION HANDLING
   useEffect(() => {
     if (!currentUserId) return;
 
     console.log("🔌 Initializing socket for user:", currentUserId);
 
-    // Clean previous socket
     if (socketRef.current) {
       socketRef.current.disconnect();
     }
@@ -71,24 +82,45 @@ export default function MessagesSection() {
       setSocketConnected(false);
     });
 
-    // ✅ FIXED: SIMPLIFIED MESSAGE HANDLER - NO DUPLICATES
+    // ✅ FIXED: HANDLE NEW REACTIONS VIA SOCKET
+    socket.on('new_reaction', (reactionData) => {
+      console.log('🎭 New reaction received via socket:', reactionData);
+      if (reactionData && selectedUser) {
+        setReactions(prev => {
+          // Check if reaction already exists
+          const exists = prev.some(r => 
+            r.id === reactionData.id || 
+            (r.message_id === reactionData.message_id && r.user_id === reactionData.user_id && r.emoji === reactionData.emoji)
+          );
+          if (exists) {
+            console.log('🎭 Reaction already exists, updating...');
+            return prev.map(r => 
+              (r.message_id === reactionData.message_id && r.user_id === reactionData.user_id) 
+                ? reactionData 
+                : r
+            );
+          }
+          console.log('🎭 Adding new reaction to state');
+          return [...prev, reactionData];
+        });
+      }
+    });
+
+    // ✅ Handle incoming messages
     const handleIncomingMessage = (message) => {
       console.log('📩 Socket message received:', message);
       
       if (!selectedUser) return;
 
-      // Check if message belongs to current conversation
       const isRelevant = 
         (message.sender_id === currentUserId && message.receiver_id === selectedUser.id) ||
         (message.sender_id === selectedUser.id && message.receiver_id === currentUserId);
 
       if (isRelevant) {
         setMessages(prev => {
-          // Check if message already exists
           const exists = prev.some(m => m.id === message.id);
           if (exists) return prev;
 
-          // Remove any temporary messages from same sender with same content
           const filtered = prev.filter(m => 
             !m.isTemporary || 
             (m.isTemporary && m.content !== message.content)
@@ -103,6 +135,7 @@ export default function MessagesSection() {
 
     return () => {
       socket.off('new_message', handleIncomingMessage);
+      socket.off('new_reaction');
       socket.disconnect();
     };
   }, [currentUserId, selectedUser]);
@@ -136,7 +169,7 @@ export default function MessagesSection() {
     }
   }, [currentUserId]);
 
-  // ✅ FIXED: LOAD MESSAGES - PROPERLY HANDLE RESPONSE
+  // ✅ LOAD MESSAGES
   const loadMessages = async (otherUserId) => {
     if (!currentUserId) return;
     try {
@@ -146,7 +179,6 @@ export default function MessagesSection() {
       const response = await chatApi.getMessages(otherUserId, currentUserId);
       console.log('📝 Messages response:', response.data);
       
-      // Handle different response formats
       let messagesData = response.data;
       if (Array.isArray(response.data)) {
         messagesData = response.data;
@@ -156,7 +188,6 @@ export default function MessagesSection() {
         messagesData = [];
       }
 
-      // Filter for current conversation and sort
       const conversationMessages = messagesData
         .filter(msg => 
           (msg.sender_id === currentUserId && msg.receiver_id === otherUserId) ||
@@ -174,19 +205,21 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ Load reactions
+  // ✅ FIXED: LOAD REACTIONS PROPERLY
   const loadReactions = async (userId) => {
-    if (!currentUserId) return;
+    if (!currentUserId || !userId) return;
     try {
+      console.log(`🎭 Loading reactions for users: ${currentUserId} and ${userId}`);
       const res = await chatApi.getReactions(currentUserId, userId);
+      console.log('🎭 Reactions loaded from API:', res.data);
       setReactions(res.data || []);
     } catch (e) {
-      console.error('Load reactions error:', e);
+      console.error('❌ Load reactions error:', e);
       setReactions([]);
     }
   };
 
-  // ✅ FIXED: SELECT USER - PRESERVE OLD MESSAGES
+  // ✅ SELECT USER
   const handleUserSelect = async (user) => {
     if (!currentUserId) return;
     
@@ -199,19 +232,17 @@ export default function MessagesSection() {
     
     setSelectedUser(selectedUserData);
     
-    // Load messages for selected user
     await loadMessages(user.id);
     await loadReactions(user.id);
   };
 
-  // ✅ FIXED: SEND MESSAGE - NO DOUBLE MESSAGES
+  // ✅ SEND MESSAGE
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedUser || !currentUserId) return;
 
     const messageContent = newMessage.trim();
     console.log(`🚀 Sending: "${messageContent}" to ${selectedUser.name}`);
 
-    // Create temporary message
     const tempMsg = {
       id: `temp-${Date.now()}`,
       sender_id: currentUserId,
@@ -222,12 +253,10 @@ export default function MessagesSection() {
       isTemporary: true,
     };
 
-    // Add temporary message to UI
     setMessages(prev => [...prev, tempMsg]);
     setNewMessage("");
 
     try {
-      // Send via API
       const response = await chatApi.sendMessage({
         sender_id: currentUserId,
         receiver_id: selectedUser.id,
@@ -237,8 +266,6 @@ export default function MessagesSection() {
 
       console.log('✅ Message sent successfully');
 
-      // Wait for socket to deliver real message
-      // If not delivered in 3 seconds, replace manually
       setTimeout(() => {
         setMessages(prev => {
           const realMessageExists = prev.some(msg => 
@@ -259,20 +286,70 @@ export default function MessagesSection() {
 
     } catch (error) {
       console.error('❌ Send failed:', error);
-      // Remove temporary message on error
       setMessages(prev => prev.filter(msg => msg.id !== tempMsg.id));
       alert('Failed to send message');
     }
   };
 
-  // ✅ Reconnect socket
+  // ✅ FIXED: ADD REACTION - PROPER REAL-TIME HANDLING
+  const addReaction = async (messageId, emoji) => {
+    if (!currentUserId || !messageId) {
+      console.error('❌ Cannot add reaction: missing user ID or message ID');
+      return;
+    }
+
+    console.log(`🎭 Adding reaction: ${emoji} to message ${messageId} by user ${currentUserId}`);
+
+    try {
+      // Send reaction to backend
+      const response = await chatApi.addReaction({
+        message_id: messageId,
+        user_id: currentUserId,
+        emoji: emoji
+      });
+
+      console.log('✅ Reaction sent successfully:', response.data);
+
+      // Update local state immediately with the response from backend
+      if (response.data) {
+        setReactions(prev => {
+          const exists = prev.some(r => 
+            r.id === response.data.id || 
+            (r.message_id === response.data.message_id && r.user_id === response.data.user_id)
+          );
+          
+          if (exists) {
+            return prev.map(r => 
+              (r.message_id === response.data.message_id && r.user_id === response.data.user_id) 
+                ? response.data 
+                : r
+            );
+          }
+          return [...prev, response.data];
+        });
+      }
+
+      // Emit via socket for real-time update to other users
+      if (socketRef.current && response.data) {
+        socketRef.current.emit('send_reaction', response.data);
+      }
+
+      setShowReactionPicker(null);
+
+    } catch (err) {
+      console.error('❌ Reaction failed:', err);
+      alert('Failed to add reaction');
+    }
+  };
+
+  // ✅ RECONNECT SOCKET
   const reconnectSocket = () => {
     if (socketRef.current) {
       socketRef.current.connect();
     }
   };
 
-  // ✅ File upload
+  // ✅ FILE UPLOAD
   const handleFileUpload = async (file) => {
     if (!selectedUser || !currentUserId) return;
     
@@ -299,7 +376,6 @@ export default function MessagesSection() {
           attachment_url: uploadResponse.data.url
         });
         
-        // Remove temporary after successful send
         setTimeout(() => {
           setMessages(prev => prev.filter(msg => msg.id !== tempId));
         }, 1000);
@@ -312,22 +388,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ Add reaction
-  const addReaction = async (messageId, emoji) => {
-    if (!currentUserId) return;
-    try {
-      await chatApi.addReaction({
-        message_id: messageId,
-        user_id: currentUserId,
-        emoji: emoji
-      });
-      setShowReactionPicker(null);
-    } catch (err) {
-      console.error('Reaction failed:', err);
-    }
-  };
-
-  // ✅ File input
+  // ✅ FILE INPUT
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
     if (file && selectedUser && currentUserId) {
@@ -336,7 +397,7 @@ export default function MessagesSection() {
     e.target.value = '';
   };
 
-  // ✅ Search effect
+  // ✅ SEARCH EFFECT
   useEffect(() => {
     if (searchTerm.trim() && currentUserId) {
       const timeoutId = setTimeout(() => {
@@ -348,7 +409,7 @@ export default function MessagesSection() {
     }
   }, [searchTerm, searchUsers, currentUserId]);
 
-  // ✅ Enter key handler
+  // ✅ ENTER KEY HANDLER
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -356,7 +417,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ Format time
+  // ✅ FORMAT TIME
   const formatTime = (timestamp) => {
     if (!timestamp) return '';
     return new Date(timestamp).toLocaleTimeString('en-US', { 
@@ -366,12 +427,15 @@ export default function MessagesSection() {
     });
   };
 
-  // ✅ Get reactions for message
+  // ✅ FIXED: GET REACTIONS FOR MESSAGE
   const getMessageReactions = (messageId) => {
-    return reactions.filter(r => r.message_id === messageId);
+    if (!messageId) return [];
+    const messageReactions = reactions.filter(r => r.message_id === messageId);
+    console.log(`🎭 Reactions for message ${messageId}:`, messageReactions);
+    return messageReactions;
   };
 
-  // ✅ Render attachment
+  // ✅ RENDER ATTACHMENT
   const renderAttachment = (message) => {
     if (!message.attachment_url) return null;
     
@@ -436,7 +500,8 @@ export default function MessagesSection() {
             </button>
           )} | 
           <strong> Chatting with:</strong> {selectedUser?.name || 'None'} |
-          <strong> Messages:</strong> {messages.length}
+          <strong> Messages:</strong> {messages.length} |
+          <strong> Reactions:</strong> {reactions.length}
         </p>
       </div>
 
@@ -522,15 +587,14 @@ export default function MessagesSection() {
                         }`}
                       >
                         <div
-                          className={`max-w-xs lg:max-w-md relative ${
+                          className={`max-w-xs lg:max-w-md relative message-bubble ${
                             message.sender_id === currentUserId 
                               ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
                               : 'bg-white text-gray-800 shadow-sm border border-gray-200'
                           } rounded-2xl p-4 ${
                             message.isTemporary ? 'opacity-70 border-2 border-dashed border-yellow-400' : ''
                           }`}
-                          onMouseEnter={() => setShowReactionPicker(message.id)}
-                          onMouseLeave={() => setShowReactionPicker(null)}
+                          onClick={() => setShowReactionPicker(showReactionPicker === message.id ? null : message.id)}
                         >
                           {/* Sender name for received messages */}
                           {message.sender_id !== currentUserId && (
@@ -560,7 +624,8 @@ export default function MessagesSection() {
                             {getMessageReactions(message.id).map((reaction) => (
                               <span 
                                 key={reaction.id} 
-                                className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full"
+                                className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full border border-white border-opacity-30"
+                                title={`User ${reaction.user_id}`}
                               >
                                 {reaction.emoji}
                               </span>
@@ -569,11 +634,14 @@ export default function MessagesSection() {
 
                           {/* Reaction Picker */}
                           {showReactionPicker === message.id && (
-                            <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg p-2 flex gap-1">
+                            <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg p-2 flex gap-1 reaction-picker z-10">
                               {['❤️', '👍', '😂', '😮', '😢', '🎉'].map((emoji) => (
                                 <button
                                   key={emoji}
-                                  onClick={() => addReaction(message.id, emoji)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    addReaction(message.id, emoji);
+                                  }}
                                   className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition text-lg"
                                 >
                                   {emoji}
@@ -642,7 +710,6 @@ export default function MessagesSection() {
 
 
 
-
 // import React, { useState, useEffect, useRef, useCallback } from "react";
 // import { chatApi } from '../services/chatApi';
 // import io from 'socket.io-client';
@@ -659,137 +726,109 @@ export default function MessagesSection() {
 //   const [fileUploading, setFileUploading] = useState(false);
 //   const [loading, setLoading] = useState(false);
 //   const [showReactionPicker, setShowReactionPicker] = useState(null);
-  
-//   // ✅ DYNAMIC USER
+
 //   const [currentUserId, setCurrentUserId] = useState(null);
 //   const [currentUser, setCurrentUser] = useState(null);
-  
+
 //   const socketRef = useRef(null);
 //   const fileInputRef = useRef();
 //   const messagesEndRef = useRef();
 //   const [socketConnected, setSocketConnected] = useState(false);
 
-//   // ✅ GET USER FROM LOCALSTORAGE
+//   // ✅ Get current user once
 //   useEffect(() => {
-//     const getCurrentUser = () => {
-//       try {
-//         const storedUser = localStorage.getItem('currentUser');
-//         console.log("📦 localStorage data:", storedUser);
-        
-//         if (storedUser) {
-//           const userData = JSON.parse(storedUser);
-//           console.log("👤 CURRENT USER:", userData);
-          
-//           const userId = userData.user_id || userData.id;
-          
-//           if (userId) {
-//             setCurrentUser(userData);
-//             setCurrentUserId(userId);
-//             console.log("✅ Dynamic User ID Set:", userId);
-//           }
+//     try {
+//       const storedUser = localStorage.getItem('currentUser');
+//       if (storedUser) {
+//         const userData = JSON.parse(storedUser);
+//         const userId = userData.user_id || userData.id;
+//         if (userId) {
+//           setCurrentUser(userData);
+//           setCurrentUserId(userId);
+//           console.log("✅ User ID Set:", userId);
 //         }
-//       } catch (error) {
-//         console.error("❌ Error getting user:", error);
+//       }
+//     } catch (err) {
+//       console.error('Error getting user:', err);
+//     }
+//   }, []);
+
+//   // ✅ FIXED: STABLE SOCKET CONNECTION
+//   useEffect(() => {
+//     if (!currentUserId) return;
+
+//     console.log("🔌 Initializing socket for user:", currentUserId);
+
+//     // Clean previous socket
+//     if (socketRef.current) {
+//       socketRef.current.disconnect();
+//     }
+
+//     const socket = io(API_BASE_URL, {
+//       transports: ['websocket', 'polling'],
+//       reconnection: true,
+//       reconnectionAttempts: 5,
+//     });
+
+//     socketRef.current = socket;
+
+//     socket.on('connect', () => {
+//       console.log('✅ Socket connected');
+//       setSocketConnected(true);
+//       socket.emit('join', { userId: currentUserId });
+//     });
+
+//     socket.on('disconnect', () => {
+//       console.log('❌ Socket disconnected');
+//       setSocketConnected(false);
+//     });
+
+//     // ✅ FIXED: SIMPLIFIED MESSAGE HANDLER - NO DUPLICATES
+//     const handleIncomingMessage = (message) => {
+//       console.log('📩 Socket message received:', message);
+      
+//       if (!selectedUser) return;
+
+//       // Check if message belongs to current conversation
+//       const isRelevant = 
+//         (message.sender_id === currentUserId && message.receiver_id === selectedUser.id) ||
+//         (message.sender_id === selectedUser.id && message.receiver_id === currentUserId);
+
+//       if (isRelevant) {
+//         setMessages(prev => {
+//           // Check if message already exists
+//           const exists = prev.some(m => m.id === message.id);
+//           if (exists) return prev;
+
+//           // Remove any temporary messages from same sender with same content
+//           const filtered = prev.filter(m => 
+//             !m.isTemporary || 
+//             (m.isTemporary && m.content !== message.content)
+//           );
+
+//           return [...filtered, message];
+//         });
 //       }
 //     };
 
-//     getCurrentUser();
-//   }, []);
+//     socket.on('new_message', handleIncomingMessage);
 
-//   // ✅ FIXED: SOCKET CONNECTION - BETTER MANAGEMENT
-//   useEffect(() => {
-//     if (currentUserId) {
-//       console.log("🔌 INITIALIZING SOCKET for User ID:", currentUserId);
-      
-//       // Disconnect existing socket
-//       if (socketRef.current) {
-//         socketRef.current.disconnect();
-//         socketRef.current = null;
-//       }
-
-//       // Create new socket connection
-//       socketRef.current = io(API_BASE_URL, {
-//         transports: ['websocket', 'polling'],
-//         reconnection: true,
-//         reconnectionAttempts: 10,
-//         reconnectionDelay: 1000,
-//       });
-
-//       // Socket event handlers
-//       socketRef.current.on('connect', () => {
-//         console.log("✅ SOCKET CONNECTED - ID:", socketRef.current.id);
-//         setSocketConnected(true);
-        
-//         // Join user's personal room
-//         socketRef.current.emit('join', { userId: currentUserId });
-//         console.log("📢 Joined room for user:", currentUserId);
-//       });
-
-//       socketRef.current.on('disconnect', (reason) => {
-//         console.log("❌ SOCKET DISCONNECTED:", reason);
-//         setSocketConnected(false);
-//       });
-
-//       socketRef.current.on('connect_error', (error) => {
-//         console.error("❌ SOCKET CONNECTION ERROR:", error);
-//         setSocketConnected(false);
-//       });
-
-//       // ✅ FIXED: BETTER MESSAGE HANDLER - PREVENT DUPLICATES
-//       const messageHandler = (message) => {
-//         console.log("📩 SOCKET: NEW MESSAGE RECEIVED:", message);
-        
-//         if (selectedUser && currentUserId) {
-//           // ✅ SIMPLE CHECK: Is this message for current conversation?
-//           const isForCurrentConversation = 
-//             (message.sender_id === currentUserId && message.receiver_id === selectedUser.id) ||
-//             (message.sender_id === selectedUser.id && message.receiver_id === currentUserId);
-
-//           console.log("🔍 Message check:");
-//           console.log("Current User:", currentUserId);
-//           console.log("Selected User:", selectedUser.id);
-//           console.log("Message From:", message.sender_id, "To:", message.receiver_id);
-//           console.log("Is for current conversation?", isForCurrentConversation);
-
-//           if (isForCurrentConversation) {
-//             console.log("✅ ADDING TO UI");
-//             setMessages(prev => {
-//               const exists = prev.some(m => m.id === message.id);
-//               if (!exists) {
-//                 console.log("🆕 New message added from socket");
-//                 // Remove temporary messages
-//                 const filteredPrev = prev.filter(m => !m.isTemporary);
-//                 return [...filteredPrev, message];
-//               }
-//               console.log("⚠️ Message already exists in state");
-//               return prev;
-//             });
-//           }
-//         }
-//       };
-
-//       // Add event listener once
-//       socketRef.current.off('new_message'); // Remove existing listeners
-//       socketRef.current.on('new_message', messageHandler);
-
-//       return () => {
-//         // Cleanup only socket listeners, not the connection
-//         if (socketRef.current) {
-//           socketRef.current.off('new_message', messageHandler);
-//         }
-//       };
-//     }
+//     return () => {
+//       socket.off('new_message', handleIncomingMessage);
+//       socket.disconnect();
+//     };
 //   }, [currentUserId, selectedUser]);
 
-//   // ✅ AUTO-SCROLL
+//   // ✅ Auto-scroll
 //   useEffect(() => {
-//     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+//     if (messagesEndRef.current && messages.length > 0) {
+//       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+//     }
 //   }, [messages]);
 
-//   // ✅ SEARCH USERS
+//   // ✅ Search users
 //   const searchUsers = useCallback(async (query) => {
 //     if (!query.trim() || !currentUserId) return;
-    
 //     setLoading(true);
 //     try {
 //       const response = await chatApi.searchUsers(query);
@@ -800,56 +839,70 @@ export default function MessagesSection() {
 //           name: user.name || user.email?.split('@')[0] || 'User',
 //           email: user.email || 'No email',
 //         }));
-      
 //       setUsers(filteredUsers);
 //     } catch (error) {
-//       console.error("Search error:", error);
+//       console.error('Search error:', error);
 //       setUsers([]);
 //     } finally {
 //       setLoading(false);
 //     }
 //   }, [currentUserId]);
 
-//   // ✅ FIXED: LOAD MESSAGES - PERSIST MESSAGES
-//   const loadMessages = async (userId) => {
+//   // ✅ FIXED: LOAD MESSAGES - PROPERLY HANDLE RESPONSE
+//   const loadMessages = async (otherUserId) => {
 //     if (!currentUserId) return;
 //     try {
-//       console.log(`📨 LOADING MESSAGES: Current User ${currentUserId} ↔ Selected User ${userId}`);
+//       console.log(`📨 Loading messages between ${currentUserId} and ${otherUserId}`);
+//       setLoading(true);
       
-//       const response = await chatApi.getMessages(userId, currentUserId);
-//       console.log("📝 MESSAGES LOADED:", response.data);
+//       const response = await chatApi.getMessages(otherUserId, currentUserId);
+//       console.log('📝 Messages response:', response.data);
       
-//       if (response.data && Array.isArray(response.data)) {
-//         setMessages(response.data);
-//         console.log(`✅ ${response.data.length} messages loaded`);
+//       // Handle different response formats
+//       let messagesData = response.data;
+//       if (Array.isArray(response.data)) {
+//         messagesData = response.data;
+//       } else if (response.data && Array.isArray(response.data.messages)) {
+//         messagesData = response.data.messages;
 //       } else {
-//         console.log("❌ No messages array in response");
-//         setMessages([]);
+//         messagesData = [];
 //       }
-//     } catch (error) {
-//       console.error("❌ Load messages error:", error);
+
+//       // Filter for current conversation and sort
+//       const conversationMessages = messagesData
+//         .filter(msg => 
+//           (msg.sender_id === currentUserId && msg.receiver_id === otherUserId) ||
+//           (msg.sender_id === otherUserId && msg.receiver_id === currentUserId)
+//         )
+//         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+//       console.log(`✅ Loaded ${conversationMessages.length} messages`);
+//       setMessages(conversationMessages);
+//     } catch (err) {
+//       console.error('❌ Load messages error:', err);
 //       setMessages([]);
+//     } finally {
+//       setLoading(false);
 //     }
 //   };
 
-//   // ✅ LOAD REACTIONS
+//   // ✅ Load reactions
 //   const loadReactions = async (userId) => {
 //     if (!currentUserId) return;
 //     try {
-//       const response = await chatApi.getReactions(currentUserId, userId);
-//       setReactions(response.data || []);
-//     } catch (error) {
-//       console.error("Load reactions error:", error);
+//       const res = await chatApi.getReactions(currentUserId, userId);
+//       setReactions(res.data || []);
+//     } catch (e) {
+//       console.error('Load reactions error:', e);
 //       setReactions([]);
 //     }
 //   };
 
-//   // ✅ FIXED: SELECT USER - DON'T CLEAR MESSAGES IMMEDIATELY
+//   // ✅ FIXED: SELECT USER - PRESERVE OLD MESSAGES
 //   const handleUserSelect = async (user) => {
 //     if (!currentUserId) return;
     
-//     console.log("👤 SELECTING USER:", user);
-    
+//     console.log('👤 Selecting user:', user.name);
 //     const selectedUserData = {
 //       id: user.id,
 //       name: user.name || user.email?.split('@')[0] || 'User',
@@ -859,166 +912,119 @@ export default function MessagesSection() {
 //     setSelectedUser(selectedUserData);
     
 //     // Load messages for selected user
-//     await Promise.all([
-//       loadMessages(user.id),
-//       loadReactions(user.id)
-//     ]);
+//     await loadMessages(user.id);
+//     await loadReactions(user.id);
 //   };
 
-//   // ✅ FIXED: SEND MESSAGE - BETTER TEMPORARY MESSAGE HANDLING
+//   // ✅ FIXED: SEND MESSAGE - NO DOUBLE MESSAGES
 //   const handleSendMessage = async () => {
-//     if (!newMessage.trim() || !selectedUser || !currentUserId) {
-//       console.log("⚠️ Cannot send: Missing input or user");
-//       return;
-//     }
+//     if (!newMessage.trim() || !selectedUser || !currentUserId) return;
 
 //     const messageContent = newMessage.trim();
-//     console.log(`🚀 SENDING MESSAGE: "${messageContent}" to User ${selectedUser.id}`);
+//     console.log(`🚀 Sending: "${messageContent}" to ${selectedUser.name}`);
 
-//     // ✅ FIXED: Create temporary message with UNIQUE ID
+//     // Create temporary message
 //     const tempMsg = {
-//       id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // More unique ID
+//       id: `temp-${Date.now()}`,
 //       sender_id: currentUserId,
 //       receiver_id: selectedUser.id,
 //       content: messageContent,
 //       created_at: new Date().toISOString(),
 //       attachment_url: null,
 //       isTemporary: true,
-//       timestamp: new Date().toISOString()
 //     };
 
-//     // Add to UI immediately
+//     // Add temporary message to UI
 //     setMessages(prev => [...prev, tempMsg]);
 //     setNewMessage("");
 
 //     try {
-//       console.log("📤 Calling sendMessage API...");
-      
-//       const messagePayload = {
+//       // Send via API
+//       const response = await chatApi.sendMessage({
 //         sender_id: currentUserId,
 //         receiver_id: selectedUser.id,
 //         content: messageContent,
 //         attachment_url: null
-//       };
-      
-//       console.log("📦 Message payload:", messagePayload);
-      
-//       const response = await chatApi.sendMessage(messagePayload);
-      
-//       console.log("✅ MESSAGE SENT SUCCESSFULLY");
-//       console.log("📨 Response data:", response.data);
+//       });
 
-//       // ✅ FIXED: IMMEDIATE UI UPDATE - Replace temporary with real message
+//       console.log('✅ Message sent successfully');
+
+//       // Wait for socket to deliver real message
+//       // If not delivered in 3 seconds, replace manually
 //       setTimeout(() => {
 //         setMessages(prev => {
-//           // Remove temporary message
-//           const filtered = prev.filter(msg => msg.id !== tempMsg.id);
-//           // Check if real message already exists (from socket)
-//           const realMessageExists = filtered.some(msg => msg.id === response.data.id);
+//           const realMessageExists = prev.some(msg => 
+//             !msg.isTemporary && 
+//             msg.sender_id === currentUserId && 
+//             msg.content === messageContent
+//           );
           
-//           if (!realMessageExists) {
-//             console.log("🔄 Adding real message to UI");
-//             return [...filtered, response.data];
-//           } else {
-//             console.log("✅ Real message already exists from socket");
-//             return filtered;
+//           if (!realMessageExists && response.data) {
+//             console.log('🔄 Replacing temporary with real message');
+//             return prev.map(msg => 
+//               msg.id === tempMsg.id ? response.data : msg
+//             );
 //           }
+//           return prev;
 //         });
-//       }, 100);
+//       }, 3000);
 
-//       // ✅ FIXED: BETTER SOCKET EMIT FOR RECEIVER
-//       if (socketRef.current && socketRef.current.connected) {
-//         console.log("📢 EMITTING SOCKET EVENT TO RECEIVER:", selectedUser.id);
-        
-//         // Emit to receiver's room specifically
-//         socketRef.current.emit('private_message', {
-//           message: response.data,
-//           receiverId: selectedUser.id,
-//           senderId: currentUserId
-//         });
-        
-//         console.log("✅ Socket events emitted successfully");
-//       } else {
-//         console.log("⚠️ Socket not connected for real-time delivery");
-//       }
-      
 //     } catch (error) {
-//       console.error("❌ SEND MESSAGE FAILED:", error);
-//       console.error("❌ Error details:", error.response?.data || error.message);
-      
+//       console.error('❌ Send failed:', error);
 //       // Remove temporary message on error
 //       setMessages(prev => prev.filter(msg => msg.id !== tempMsg.id));
-//       alert(`Failed to send message: ${error.response?.data?.message || error.message}`);
+//       alert('Failed to send message');
 //     }
 //   };
 
-//   // ✅ MANUAL SOCKET RECONNECT
+//   // ✅ Reconnect socket
 //   const reconnectSocket = () => {
 //     if (socketRef.current) {
-//       console.log("🔄 Manual socket reconnect...");
 //       socketRef.current.connect();
 //     }
 //   };
 
-//   // ✅ FILE UPLOAD
+//   // ✅ File upload
 //   const handleFileUpload = async (file) => {
 //     if (!selectedUser || !currentUserId) return;
     
 //     setFileUploading(true);
-//     // ✅ FIXED: More unique temporary ID
-//     const tempMsgId = `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-//     const tempMsg = {
-//       id: tempMsgId,
-//       sender_id: currentUserId,
-//       receiver_id: selectedUser.id,
-//       content: `Sending: ${file.name}`,
-//       isTemporary: true,
-//       isUploading: true,
+//     const tempId = `file-${Date.now()}`;
+//     const tempMsg = { 
+//       id: tempId, 
+//       sender_id: currentUserId, 
+//       receiver_id: selectedUser.id, 
+//       content: `Sending: ${file.name}`, 
+//       isTemporary: true, 
+//       isUploading: true 
 //     };
-
+    
 //     setMessages(prev => [...prev, tempMsg]);
 
 //     try {
 //       const uploadResponse = await chatApi.uploadFile(file);
-//       if (uploadResponse.data.url) {
-//         const messageResponse = await chatApi.sendMessage({
+//       if (uploadResponse.data?.url) {
+//         await chatApi.sendMessage({
 //           sender_id: currentUserId,
 //           receiver_id: selectedUser.id,
 //           content: `File: ${file.name}`,
-//           attachment_url: uploadResponse.data.url,
+//           attachment_url: uploadResponse.data.url
 //         });
-
-//         // Update UI immediately
+        
+//         // Remove temporary after successful send
 //         setTimeout(() => {
-//           setMessages(prev => {
-//             const filtered = prev.filter(msg => msg.id !== tempMsgId);
-//             const realMessageExists = filtered.some(msg => msg.id === messageResponse.data.id);
-            
-//             if (!realMessageExists) {
-//               return [...filtered, messageResponse.data];
-//             }
-//             return filtered;
-//           });
-//         }, 100);
-
-//         // Emit socket event
-//         if (socketRef.current && socketRef.current.connected) {
-//           socketRef.current.emit('private_message', {
-//             message: messageResponse.data,
-//             receiverId: selectedUser.id,
-//             senderId: currentUserId
-//           });
-//         }
+//           setMessages(prev => prev.filter(msg => msg.id !== tempId));
+//         }, 1000);
 //       }
-//     } catch (error) {
-//       console.error("Upload failed:", error);
-//       setMessages(prev => prev.filter(msg => msg.id !== tempMsgId));
+//     } catch (err) {
+//       console.error('Upload failed:', err);
+//       setMessages(prev => prev.filter(msg => msg.id !== tempId));
 //     } finally {
 //       setFileUploading(false);
 //     }
 //   };
 
-//   // ✅ ADD REACTION
+//   // ✅ Add reaction
 //   const addReaction = async (messageId, emoji) => {
 //     if (!currentUserId) return;
 //     try {
@@ -1028,12 +1034,12 @@ export default function MessagesSection() {
 //         emoji: emoji
 //       });
 //       setShowReactionPicker(null);
-//     } catch (error) {
-//       console.error("Reaction failed:", error);
+//     } catch (err) {
+//       console.error('Reaction failed:', err);
 //     }
 //   };
 
-//   // ✅ FILE INPUT
+//   // ✅ File input
 //   const handleFileInputChange = (e) => {
 //     const file = e.target.files[0];
 //     if (file && selectedUser && currentUserId) {
@@ -1042,7 +1048,7 @@ export default function MessagesSection() {
 //     e.target.value = '';
 //   };
 
-//   // ✅ SEARCH EFFECT
+//   // ✅ Search effect
 //   useEffect(() => {
 //     if (searchTerm.trim() && currentUserId) {
 //       const timeoutId = setTimeout(() => {
@@ -1054,7 +1060,7 @@ export default function MessagesSection() {
 //     }
 //   }, [searchTerm, searchUsers, currentUserId]);
 
-//   // ✅ ENTER KEY
+//   // ✅ Enter key handler
 //   const handleKeyPress = (e) => {
 //     if (e.key === 'Enter' && !e.shiftKey) {
 //       e.preventDefault();
@@ -1062,22 +1068,22 @@ export default function MessagesSection() {
 //     }
 //   };
 
-//   // ✅ FORMAT TIME
+//   // ✅ Format time
 //   const formatTime = (timestamp) => {
 //     if (!timestamp) return '';
 //     return new Date(timestamp).toLocaleTimeString('en-US', { 
 //       hour: 'numeric', 
-//       minute: '2-digit',
+//       minute: '2-digit', 
 //       hour12: true 
 //     });
 //   };
 
-//   // ✅ GET REACTIONS
+//   // ✅ Get reactions for message
 //   const getMessageReactions = (messageId) => {
-//     return reactions.filter(reaction => reaction.message_id === messageId);
+//     return reactions.filter(r => r.message_id === messageId);
 //   };
 
-//   // ✅ RENDER ATTACHMENT
+//   // ✅ Render attachment
 //   const renderAttachment = (message) => {
 //     if (!message.attachment_url) return null;
     
@@ -1107,7 +1113,7 @@ export default function MessagesSection() {
 //     }
 //   };
 
-//   // ✅ SHOW LOGIN MESSAGE IF NO USER
+//   // Show login message if no user
 //   if (!currentUserId) {
 //     return (
 //       <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -1124,7 +1130,7 @@ export default function MessagesSection() {
 //   return (
 //     <div className="bg-white rounded-2xl shadow-lg p-6">
 //       <h2 className="text-2xl font-bold text-gray-800 mb-6">Messages</h2>
-      
+
 //       {/* Status */}
 //       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
 //         <p className="text-blue-800 text-sm">
@@ -1135,33 +1141,32 @@ export default function MessagesSection() {
 //           </span>
 //           {!socketConnected && (
 //             <button 
-//               onClick={reconnectSocket}
+//               onClick={reconnectSocket} 
 //               className="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
 //             >
 //               Reconnect
 //             </button>
-//           )}
-//           | 
+//           )} | 
 //           <strong> Chatting with:</strong> {selectedUser?.name || 'None'} |
 //           <strong> Messages:</strong> {messages.length}
 //         </p>
 //       </div>
-      
+
 //       <div className="bg-white rounded-2xl shadow-lg h-[600px] flex border border-gray-200">
 //         {/* Sidebar */}
 //         <div className="w-1/3 border-r border-gray-200 flex flex-col">
 //           <div className="p-4 border-b border-gray-200">
-//             <input
-//               type="text"
-//               placeholder="Search users..."
-//               value={searchTerm}
-//               onChange={(e) => setSearchTerm(e.target.value)}
-//               className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+//             <input 
+//               type="text" 
+//               placeholder="Search users..." 
+//               value={searchTerm} 
+//               onChange={(e) => setSearchTerm(e.target.value)} 
+//               className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm" 
 //             />
 //           </div>
-          
+
 //           <div className="flex-1 overflow-y-auto">
-//             {loading ? (
+//             {loading && searchTerm ? (
 //               <div className="p-4 text-center text-gray-500">Searching...</div>
 //             ) : users.length === 0 && searchTerm ? (
 //               <div className="p-4 text-center text-gray-500">No users found</div>
@@ -1208,16 +1213,22 @@ export default function MessagesSection() {
 
 //               {/* Messages */}
 //               <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
-//                 <div className="space-y-4">
-//                   {messages.length === 0 ? (
-//                     <div className="text-center text-gray-500 py-8">
-//                       <div className="text-4xl mb-2">💬</div>
-//                       <p>No messages yet. Start the conversation!</p>
-//                     </div>
-//                   ) : (
-//                     messages.map((message) => (
+//                 {loading ? (
+//                   <div className="flex items-center justify-center h-32">
+//                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+//                     <span className="ml-3 text-gray-600">Loading messages...</span>
+//                   </div>
+//                 ) : messages.length === 0 ? (
+//                   <div className="text-center text-gray-500 py-8">
+//                     <div className="text-4xl mb-2">💬</div>
+//                     <p className="font-medium">No messages yet</p>
+//                     <p className="text-sm">Start the conversation with {selectedUser.name}</p>
+//                   </div>
+//                 ) : (
+//                   <div className="space-y-4">
+//                     {messages.map((message) => (
 //                       <div
-//                         key={message.id} // ✅ FIXED: Unique key for each message
+//                         key={message.id}
 //                         className={`flex ${
 //                           message.sender_id === currentUserId ? 'justify-end' : 'justify-start'
 //                         }`}
@@ -1226,33 +1237,48 @@ export default function MessagesSection() {
 //                           className={`max-w-xs lg:max-w-md relative ${
 //                             message.sender_id === currentUserId 
 //                               ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
-//                               : 'bg-white text-gray-800 shadow-sm'
+//                               : 'bg-white text-gray-800 shadow-sm border border-gray-200'
 //                           } rounded-2xl p-4 ${
 //                             message.isTemporary ? 'opacity-70 border-2 border-dashed border-yellow-400' : ''
 //                           }`}
 //                           onMouseEnter={() => setShowReactionPicker(message.id)}
 //                           onMouseLeave={() => setShowReactionPicker(null)}
 //                         >
-//                           {message.content && <p className="break-words whitespace-pre-wrap">{message.content}</p>}
-                          
+//                           {/* Sender name for received messages */}
+//                           {message.sender_id !== currentUserId && (
+//                             <p className="text-xs font-medium text-gray-500 mb-1">
+//                               {selectedUser.name}
+//                             </p>
+//                           )}
+
+//                           {/* Message content */}
+//                           {message.content && (
+//                             <p className="break-words whitespace-pre-wrap">{message.content}</p>
+//                           )}
+
+//                           {/* Attachment */}
 //                           {renderAttachment(message)}
-                          
+
+//                           {/* Timestamp */}
 //                           <p className={`text-xs mt-2 ${
 //                             message.sender_id === currentUserId ? 'text-indigo-200' : 'text-gray-500'
 //                           }`}>
 //                             {formatTime(message.created_at)}
 //                             {message.isTemporary && ' • Sending...'}
 //                           </p>
-                          
+
 //                           {/* Reactions */}
 //                           <div className="flex flex-wrap gap-1 mt-2">
 //                             {getMessageReactions(message.id).map((reaction) => (
-//                               <span key={reaction.id} className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+//                               <span 
+//                                 key={reaction.id} 
+//                                 className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full"
+//                               >
 //                                 {reaction.emoji}
 //                               </span>
 //                             ))}
 //                           </div>
-                          
+
 //                           {/* Reaction Picker */}
 //                           {showReactionPicker === message.id && (
 //                             <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg p-2 flex gap-1">
@@ -1269,10 +1295,10 @@ export default function MessagesSection() {
 //                           )}
 //                         </div>
 //                       </div>
-//                     ))
-//                   )}
-//                   <div ref={messagesEndRef} />
-//                 </div>
+//                     ))}
+//                     <div ref={messagesEndRef} />
+//                   </div>
+//                 )}
 //               </div>
 
 //               {/* Input */}
@@ -1324,6 +1350,257 @@ export default function MessagesSection() {
 //     </div>
 //   );
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
