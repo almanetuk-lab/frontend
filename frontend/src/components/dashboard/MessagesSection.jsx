@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { chatApi } from '../services/chatApi';
 import io from 'socket.io-client';
@@ -468,47 +469,51 @@ export default function MessagesSection() {
   // Show login message if no user
   if (!currentUserId) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Messages</h2>
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🔒</div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">Please Login First</h3>
-          <p className="text-gray-500">You need to login to access messages</p>
+      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Messages</h2>
+        <div className="text-center py-8 sm:py-12">
+          <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🔒</div>
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">Please Login First</h3>
+          <p className="text-gray-500 text-sm sm:text-base">You need to login to access messages</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Messages</h2>
+    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Messages</h2>
 
-      {/* Status */}
+      {/* Status - Responsive */}
       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-blue-800 text-sm">
-          <strong>User:</strong> {currentUser?.full_name} (ID: {currentUserId}) | 
-          <strong> Socket:</strong> 
+        <p className="text-blue-800 text-xs sm:text-sm">
+          <span className="hidden sm:inline"><strong>User:</strong> {currentUser?.full_name} (ID: {currentUserId}) | </span>
+          <strong>Socket:</strong> 
           <span className={socketConnected ? "text-green-600" : "text-red-600"}>
             {socketConnected ? " 🟢 Connected" : " 🔴 Disconnected"}
           </span>
           {!socketConnected && (
             <button 
               onClick={reconnectSocket} 
-              className="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+              className="ml-1 sm:ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
             >
               Reconnect
             </button>
-          )} | 
-          <strong> Chatting with:</strong> {selectedUser?.name || 'None'} |
-          <strong> Messages:</strong> {messages.length} |
-          <strong> Reactions:</strong> {reactions.length}
+          )}
+          <span className="hidden sm:inline"> | <strong>Chatting with:</strong> {selectedUser?.name || 'None'}</span>
+          <span className="hidden md:inline"> | <strong>Messages:</strong> {messages.length}</span>
+          <span className="hidden lg:inline"> | <strong>Reactions:</strong> {reactions.length}</span>
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg h-[600px] flex border border-gray-200">
-        {/* Sidebar */}
-        <div className="w-1/3 border-r border-gray-200 flex flex-col">
-          <div className="p-4 border-b border-gray-200">
+      {/* Main Chat Container - Responsive Layout */}
+      <div className="bg-white rounded-2xl shadow-lg h-[500px] sm:h-[600px] flex flex-col lg:flex-row border border-gray-200">
+        
+        {/* Sidebar - Full width on mobile, 1/3 on desktop */}
+        <div className={`w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col ${
+          selectedUser ? 'hidden lg:flex' : 'flex'
+        }`}>
+          <div className="p-3 sm:p-4 border-b border-gray-200">
             <input 
               type="text" 
               placeholder="Search users..." 
@@ -528,17 +533,17 @@ export default function MessagesSection() {
                 <div
                   key={user.id}
                   onClick={() => handleUserSelect(user)}
-                  className={`p-4 cursor-pointer transition border-b border-gray-100 ${
+                  className={`p-3 sm:p-4 cursor-pointer transition border-b border-gray-100 ${
                     selectedUser?.id === user.id ? 'bg-indigo-50 border-indigo-200' : 'hover:bg-gray-50'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-sm sm:text-base">
                       {user.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-800 truncate">{user.name}</p>
-                      <p className="text-sm text-gray-600 truncate">{user.email}</p>
+                      <p className="font-medium text-gray-800 truncate text-sm sm:text-base">{user.name}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">{user.email}</p>
                     </div>
                   </div>
                 </div>
@@ -547,38 +552,56 @@ export default function MessagesSection() {
           </div>
         </div>
 
-        {/* Chat Area */}
-        <div className="flex-1 flex flex-col">
+        {/* Chat Area - Full width on mobile, 2/3 on desktop */}
+        <div className={`flex-1 flex flex-col ${
+          selectedUser ? 'flex' : 'hidden lg:flex'
+        }`}>
           {selectedUser ? (
             <>
-              {/* Header */}
-              <div className="p-4 border-b border-gray-200 bg-white">
+              {/* Header with back button for mobile */}
+              <div className="p-3 sm:p-4 border-b border-gray-200 bg-white flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold">
+                  {/* Back button for mobile */}
+                  <button 
+                    onClick={() => setSelectedUser(null)}
+                    className="lg:hidden p-2 text-gray-500 hover:text-gray-700"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">
                     {selectedUser.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-800">{selectedUser.name}</p>
-                    <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                    <p className="font-medium text-gray-800 text-sm sm:text-base">{selectedUser.name}</p>
+                    <p className="text-xs sm:text-sm text-gray-500">{selectedUser.email}</p>
                   </div>
+                </div>
+                
+                {/* Online status indicator */}
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-xs text-gray-500 hidden sm:inline">Online</span>
                 </div>
               </div>
 
-              {/* Messages */}
-              <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+              {/* Messages Area */}
+              <div className="flex-1 p-3 sm:p-4 overflow-y-auto bg-gray-50">
                 {loading ? (
                   <div className="flex items-center justify-center h-32">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                    <span className="ml-3 text-gray-600">Loading messages...</span>
+                    <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-indigo-600"></div>
+                    <span className="ml-3 text-gray-600 text-sm sm:text-base">Loading messages...</span>
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="text-center text-gray-500 py-8">
-                    <div className="text-4xl mb-2">💬</div>
-                    <p className="font-medium">No messages yet</p>
-                    <p className="text-sm">Start the conversation with {selectedUser.name}</p>
+                    <div className="text-3xl sm:text-4xl mb-2">💬</div>
+                    <p className="font-medium text-sm sm:text-base">No messages yet</p>
+                    <p className="text-xs sm:text-sm mt-1">Start the conversation with {selectedUser.name}</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {messages.map((message) => (
                       <div
                         key={message.id}
@@ -587,11 +610,11 @@ export default function MessagesSection() {
                         }`}
                       >
                         <div
-                          className={`max-w-xs lg:max-w-md relative message-bubble ${
+                          className={`max-w-[85%] sm:max-w-xs lg:max-w-md relative message-bubble ${
                             message.sender_id === currentUserId 
                               ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
                               : 'bg-white text-gray-800 shadow-sm border border-gray-200'
-                          } rounded-2xl p-4 ${
+                          } rounded-2xl p-3 sm:p-4 ${
                             message.isTemporary ? 'opacity-70 border-2 border-dashed border-yellow-400' : ''
                           }`}
                           onClick={() => setShowReactionPicker(showReactionPicker === message.id ? null : message.id)}
@@ -605,7 +628,7 @@ export default function MessagesSection() {
 
                           {/* Message content */}
                           {message.content && (
-                            <p className="break-words whitespace-pre-wrap">{message.content}</p>
+                            <p className="break-words whitespace-pre-wrap text-sm sm:text-base">{message.content}</p>
                           )}
 
                           {/* Attachment */}
@@ -642,7 +665,7 @@ export default function MessagesSection() {
                                     e.stopPropagation();
                                     addReaction(message.id, emoji);
                                   }}
-                                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition text-lg"
+                                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition text-base sm:text-lg"
                                 >
                                   {emoji}
                                 </button>
@@ -657,13 +680,13 @@ export default function MessagesSection() {
                 )}
               </div>
 
-              {/* Input */}
-              <div className="p-4 border-t border-gray-200 bg-white">
+              {/* Input Area */}
+              <div className="p-3 sm:p-4 border-t border-gray-200 bg-white">
                 <div className="flex gap-2">
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={fileUploading}
-                    className="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:opacity-50"
+                    className="px-3 py-2 sm:px-4 sm:py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:opacity-50 text-sm"
                   >
                     {fileUploading ? '📤' : '📎'}
                   </button>
@@ -680,12 +703,12 @@ export default function MessagesSection() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder={`Message ${selectedUser.name}...`}
                     onKeyPress={handleKeyPress}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="flex-1 px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!newMessage.trim()}
-                    className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 font-medium disabled:opacity-50"
+                    className="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 font-medium disabled:opacity-50 text-sm sm:text-base"
                   >
                     Send
                   </button>
@@ -695,9 +718,9 @@ export default function MessagesSection() {
           ) : (
             <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50">
               <div className="text-center">
-                <div className="text-6xl mb-4">💬</div>
-                <p className="text-lg font-medium">Select a user to start chatting</p>
-                <p className="text-sm mt-2">Search for users in the sidebar</p>
+                <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">💬</div>
+                <p className="text-base sm:text-lg font-medium">Select a user to start chatting</p>
+                <p className="text-xs sm:text-sm mt-2">Search for users in the sidebar</p>
               </div>
             </div>
           )}
@@ -706,6 +729,29 @@ export default function MessagesSection() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -735,6 +781,18 @@ export default function MessagesSection() {
 //   const messagesEndRef = useRef();
 //   const [socketConnected, setSocketConnected] = useState(false);
 
+//   // ✅ Click outside to close reaction picker
+//   useEffect(() => {
+//     const handleClickOutside = (event) => {
+//       if (showReactionPicker && !event.target.closest('.reaction-picker') && !event.target.closest('.message-bubble')) {
+//         setShowReactionPicker(null);
+//       }
+//     };
+
+//     document.addEventListener('click', handleClickOutside);
+//     return () => document.removeEventListener('click', handleClickOutside);
+//   }, [showReactionPicker]);
+
 //   // ✅ Get current user once
 //   useEffect(() => {
 //     try {
@@ -753,13 +811,12 @@ export default function MessagesSection() {
 //     }
 //   }, []);
 
-//   // ✅ FIXED: STABLE SOCKET CONNECTION
+//   // ✅ FIXED: SOCKET WITH REACTION HANDLING
 //   useEffect(() => {
 //     if (!currentUserId) return;
 
 //     console.log("🔌 Initializing socket for user:", currentUserId);
 
-//     // Clean previous socket
 //     if (socketRef.current) {
 //       socketRef.current.disconnect();
 //     }
@@ -783,24 +840,45 @@ export default function MessagesSection() {
 //       setSocketConnected(false);
 //     });
 
-//     // ✅ FIXED: SIMPLIFIED MESSAGE HANDLER - NO DUPLICATES
+//     // ✅ FIXED: HANDLE NEW REACTIONS VIA SOCKET
+//     socket.on('new_reaction', (reactionData) => {
+//       console.log('🎭 New reaction received via socket:', reactionData);
+//       if (reactionData && selectedUser) {
+//         setReactions(prev => {
+//           // Check if reaction already exists
+//           const exists = prev.some(r => 
+//             r.id === reactionData.id || 
+//             (r.message_id === reactionData.message_id && r.user_id === reactionData.user_id && r.emoji === reactionData.emoji)
+//           );
+//           if (exists) {
+//             console.log('🎭 Reaction already exists, updating...');
+//             return prev.map(r => 
+//               (r.message_id === reactionData.message_id && r.user_id === reactionData.user_id) 
+//                 ? reactionData 
+//                 : r
+//             );
+//           }
+//           console.log('🎭 Adding new reaction to state');
+//           return [...prev, reactionData];
+//         });
+//       }
+//     });
+
+//     // ✅ Handle incoming messages
 //     const handleIncomingMessage = (message) => {
 //       console.log('📩 Socket message received:', message);
       
 //       if (!selectedUser) return;
 
-//       // Check if message belongs to current conversation
 //       const isRelevant = 
 //         (message.sender_id === currentUserId && message.receiver_id === selectedUser.id) ||
 //         (message.sender_id === selectedUser.id && message.receiver_id === currentUserId);
 
 //       if (isRelevant) {
 //         setMessages(prev => {
-//           // Check if message already exists
 //           const exists = prev.some(m => m.id === message.id);
 //           if (exists) return prev;
 
-//           // Remove any temporary messages from same sender with same content
 //           const filtered = prev.filter(m => 
 //             !m.isTemporary || 
 //             (m.isTemporary && m.content !== message.content)
@@ -815,6 +893,7 @@ export default function MessagesSection() {
 
 //     return () => {
 //       socket.off('new_message', handleIncomingMessage);
+//       socket.off('new_reaction');
 //       socket.disconnect();
 //     };
 //   }, [currentUserId, selectedUser]);
@@ -848,7 +927,7 @@ export default function MessagesSection() {
 //     }
 //   }, [currentUserId]);
 
-//   // ✅ FIXED: LOAD MESSAGES - PROPERLY HANDLE RESPONSE
+//   // ✅ LOAD MESSAGES
 //   const loadMessages = async (otherUserId) => {
 //     if (!currentUserId) return;
 //     try {
@@ -858,7 +937,6 @@ export default function MessagesSection() {
 //       const response = await chatApi.getMessages(otherUserId, currentUserId);
 //       console.log('📝 Messages response:', response.data);
       
-//       // Handle different response formats
 //       let messagesData = response.data;
 //       if (Array.isArray(response.data)) {
 //         messagesData = response.data;
@@ -868,7 +946,6 @@ export default function MessagesSection() {
 //         messagesData = [];
 //       }
 
-//       // Filter for current conversation and sort
 //       const conversationMessages = messagesData
 //         .filter(msg => 
 //           (msg.sender_id === currentUserId && msg.receiver_id === otherUserId) ||
@@ -886,19 +963,21 @@ export default function MessagesSection() {
 //     }
 //   };
 
-//   // ✅ Load reactions
+//   // ✅ FIXED: LOAD REACTIONS PROPERLY
 //   const loadReactions = async (userId) => {
-//     if (!currentUserId) return;
+//     if (!currentUserId || !userId) return;
 //     try {
+//       console.log(`🎭 Loading reactions for users: ${currentUserId} and ${userId}`);
 //       const res = await chatApi.getReactions(currentUserId, userId);
+//       console.log('🎭 Reactions loaded from API:', res.data);
 //       setReactions(res.data || []);
 //     } catch (e) {
-//       console.error('Load reactions error:', e);
+//       console.error('❌ Load reactions error:', e);
 //       setReactions([]);
 //     }
 //   };
 
-//   // ✅ FIXED: SELECT USER - PRESERVE OLD MESSAGES
+//   // ✅ SELECT USER
 //   const handleUserSelect = async (user) => {
 //     if (!currentUserId) return;
     
@@ -911,19 +990,17 @@ export default function MessagesSection() {
     
 //     setSelectedUser(selectedUserData);
     
-//     // Load messages for selected user
 //     await loadMessages(user.id);
 //     await loadReactions(user.id);
 //   };
 
-//   // ✅ FIXED: SEND MESSAGE - NO DOUBLE MESSAGES
+//   // ✅ SEND MESSAGE
 //   const handleSendMessage = async () => {
 //     if (!newMessage.trim() || !selectedUser || !currentUserId) return;
 
 //     const messageContent = newMessage.trim();
 //     console.log(`🚀 Sending: "${messageContent}" to ${selectedUser.name}`);
 
-//     // Create temporary message
 //     const tempMsg = {
 //       id: `temp-${Date.now()}`,
 //       sender_id: currentUserId,
@@ -934,12 +1011,10 @@ export default function MessagesSection() {
 //       isTemporary: true,
 //     };
 
-//     // Add temporary message to UI
 //     setMessages(prev => [...prev, tempMsg]);
 //     setNewMessage("");
 
 //     try {
-//       // Send via API
 //       const response = await chatApi.sendMessage({
 //         sender_id: currentUserId,
 //         receiver_id: selectedUser.id,
@@ -949,8 +1024,6 @@ export default function MessagesSection() {
 
 //       console.log('✅ Message sent successfully');
 
-//       // Wait for socket to deliver real message
-//       // If not delivered in 3 seconds, replace manually
 //       setTimeout(() => {
 //         setMessages(prev => {
 //           const realMessageExists = prev.some(msg => 
@@ -971,20 +1044,70 @@ export default function MessagesSection() {
 
 //     } catch (error) {
 //       console.error('❌ Send failed:', error);
-//       // Remove temporary message on error
 //       setMessages(prev => prev.filter(msg => msg.id !== tempMsg.id));
 //       alert('Failed to send message');
 //     }
 //   };
 
-//   // ✅ Reconnect socket
+//   // ✅ FIXED: ADD REACTION - PROPER REAL-TIME HANDLING
+//   const addReaction = async (messageId, emoji) => {
+//     if (!currentUserId || !messageId) {
+//       console.error('❌ Cannot add reaction: missing user ID or message ID');
+//       return;
+//     }
+
+//     console.log(`🎭 Adding reaction: ${emoji} to message ${messageId} by user ${currentUserId}`);
+
+//     try {
+//       // Send reaction to backend
+//       const response = await chatApi.addReaction({
+//         message_id: messageId,
+//         user_id: currentUserId,
+//         emoji: emoji
+//       });
+
+//       console.log('✅ Reaction sent successfully:', response.data);
+
+//       // Update local state immediately with the response from backend
+//       if (response.data) {
+//         setReactions(prev => {
+//           const exists = prev.some(r => 
+//             r.id === response.data.id || 
+//             (r.message_id === response.data.message_id && r.user_id === response.data.user_id)
+//           );
+          
+//           if (exists) {
+//             return prev.map(r => 
+//               (r.message_id === response.data.message_id && r.user_id === response.data.user_id) 
+//                 ? response.data 
+//                 : r
+//             );
+//           }
+//           return [...prev, response.data];
+//         });
+//       }
+
+//       // Emit via socket for real-time update to other users
+//       if (socketRef.current && response.data) {
+//         socketRef.current.emit('send_reaction', response.data);
+//       }
+
+//       setShowReactionPicker(null);
+
+//     } catch (err) {
+//       console.error('❌ Reaction failed:', err);
+//       alert('Failed to add reaction');
+//     }
+//   };
+
+//   // ✅ RECONNECT SOCKET
 //   const reconnectSocket = () => {
 //     if (socketRef.current) {
 //       socketRef.current.connect();
 //     }
 //   };
 
-//   // ✅ File upload
+//   // ✅ FILE UPLOAD
 //   const handleFileUpload = async (file) => {
 //     if (!selectedUser || !currentUserId) return;
     
@@ -1011,7 +1134,6 @@ export default function MessagesSection() {
 //           attachment_url: uploadResponse.data.url
 //         });
         
-//         // Remove temporary after successful send
 //         setTimeout(() => {
 //           setMessages(prev => prev.filter(msg => msg.id !== tempId));
 //         }, 1000);
@@ -1024,22 +1146,7 @@ export default function MessagesSection() {
 //     }
 //   };
 
-//   // ✅ Add reaction
-//   const addReaction = async (messageId, emoji) => {
-//     if (!currentUserId) return;
-//     try {
-//       await chatApi.addReaction({
-//         message_id: messageId,
-//         user_id: currentUserId,
-//         emoji: emoji
-//       });
-//       setShowReactionPicker(null);
-//     } catch (err) {
-//       console.error('Reaction failed:', err);
-//     }
-//   };
-
-//   // ✅ File input
+//   // ✅ FILE INPUT
 //   const handleFileInputChange = (e) => {
 //     const file = e.target.files[0];
 //     if (file && selectedUser && currentUserId) {
@@ -1048,7 +1155,7 @@ export default function MessagesSection() {
 //     e.target.value = '';
 //   };
 
-//   // ✅ Search effect
+//   // ✅ SEARCH EFFECT
 //   useEffect(() => {
 //     if (searchTerm.trim() && currentUserId) {
 //       const timeoutId = setTimeout(() => {
@@ -1060,7 +1167,7 @@ export default function MessagesSection() {
 //     }
 //   }, [searchTerm, searchUsers, currentUserId]);
 
-//   // ✅ Enter key handler
+//   // ✅ ENTER KEY HANDLER
 //   const handleKeyPress = (e) => {
 //     if (e.key === 'Enter' && !e.shiftKey) {
 //       e.preventDefault();
@@ -1068,7 +1175,7 @@ export default function MessagesSection() {
 //     }
 //   };
 
-//   // ✅ Format time
+//   // ✅ FORMAT TIME
 //   const formatTime = (timestamp) => {
 //     if (!timestamp) return '';
 //     return new Date(timestamp).toLocaleTimeString('en-US', { 
@@ -1078,12 +1185,15 @@ export default function MessagesSection() {
 //     });
 //   };
 
-//   // ✅ Get reactions for message
+//   // ✅ FIXED: GET REACTIONS FOR MESSAGE
 //   const getMessageReactions = (messageId) => {
-//     return reactions.filter(r => r.message_id === messageId);
+//     if (!messageId) return [];
+//     const messageReactions = reactions.filter(r => r.message_id === messageId);
+//     console.log(`🎭 Reactions for message ${messageId}:`, messageReactions);
+//     return messageReactions;
 //   };
 
-//   // ✅ Render attachment
+//   // ✅ RENDER ATTACHMENT
 //   const renderAttachment = (message) => {
 //     if (!message.attachment_url) return null;
     
@@ -1148,7 +1258,8 @@ export default function MessagesSection() {
 //             </button>
 //           )} | 
 //           <strong> Chatting with:</strong> {selectedUser?.name || 'None'} |
-//           <strong> Messages:</strong> {messages.length}
+//           <strong> Messages:</strong> {messages.length} |
+//           <strong> Reactions:</strong> {reactions.length}
 //         </p>
 //       </div>
 
@@ -1234,15 +1345,14 @@ export default function MessagesSection() {
 //                         }`}
 //                       >
 //                         <div
-//                           className={`max-w-xs lg:max-w-md relative ${
+//                           className={`max-w-xs lg:max-w-md relative message-bubble ${
 //                             message.sender_id === currentUserId 
 //                               ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
 //                               : 'bg-white text-gray-800 shadow-sm border border-gray-200'
 //                           } rounded-2xl p-4 ${
 //                             message.isTemporary ? 'opacity-70 border-2 border-dashed border-yellow-400' : ''
 //                           }`}
-//                           onMouseEnter={() => setShowReactionPicker(message.id)}
-//                           onMouseLeave={() => setShowReactionPicker(null)}
+//                           onClick={() => setShowReactionPicker(showReactionPicker === message.id ? null : message.id)}
 //                         >
 //                           {/* Sender name for received messages */}
 //                           {message.sender_id !== currentUserId && (
@@ -1272,7 +1382,8 @@ export default function MessagesSection() {
 //                             {getMessageReactions(message.id).map((reaction) => (
 //                               <span 
 //                                 key={reaction.id} 
-//                                 className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full"
+//                                 className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full border border-white border-opacity-30"
+//                                 title={`User ${reaction.user_id}`}
 //                               >
 //                                 {reaction.emoji}
 //                               </span>
@@ -1281,11 +1392,14 @@ export default function MessagesSection() {
 
 //                           {/* Reaction Picker */}
 //                           {showReactionPicker === message.id && (
-//                             <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg p-2 flex gap-1">
+//                             <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg p-2 flex gap-1 reaction-picker z-10">
 //                               {['❤️', '👍', '😂', '😮', '😢', '🎉'].map((emoji) => (
 //                                 <button
 //                                   key={emoji}
-//                                   onClick={() => addReaction(message.id, emoji)}
+//                                   onClick={(e) => {
+//                                     e.stopPropagation();
+//                                     addReaction(message.id, emoji);
+//                                   }}
 //                                   className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition text-lg"
 //                                 >
 //                                   {emoji}
@@ -1350,10 +1464,6 @@ export default function MessagesSection() {
 //     </div>
 //   );
 // }
-
-
-
-
 
 
 
