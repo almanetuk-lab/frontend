@@ -28,6 +28,44 @@ const NotificationBell = () => {
       return null;
     }
   };
+  // ✅ FILE UPLOAD - Using updated endpoint
+const handleFileUpload = async (file) => {
+  if (!selectedUser || !currentUserId) return;
+  
+  setFileUploading(true);
+  const tempId = `file-${Date.now()}`;
+  const tempMsg = { 
+    id: tempId, 
+    sender_id: currentUserId, 
+    receiver_id: selectedUser.id, 
+    content: `Sending: ${file.name}`, 
+    isTemporary: true, 
+    isUploading: true 
+  };
+  
+  setMessages(prev => [...prev, tempMsg]);
+
+  try {
+    const uploadResponse = await chatApi.uploadFile(file); // ✅ This will now use /api/chat/upload
+    if (uploadResponse.data?.url) {
+      await chatApi.sendMessage({
+        sender_id: currentUserId,
+        receiver_id: selectedUser.id,
+        content: `File: ${file.name}`,
+        attachment_url: uploadResponse.data.url
+      });
+      
+      setTimeout(() => {
+        setMessages(prev => prev.filter(msg => msg.id !== tempId));
+      }, 1000);
+    }
+  } catch (err) {
+    console.error('Upload failed:', err);
+    setMessages(prev => prev.filter(msg => msg.id !== tempId));
+  } finally {
+    setFileUploading(false);
+  }
+};
 
   // Socket.IO connection
   useEffect(() => {
