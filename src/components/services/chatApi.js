@@ -48,23 +48,31 @@ export const chatApi = {
   getReactions: (userA, userB) => {
     return api.get(`/api/reactions?userA=${userA}&userB=${userB}`);
   },
-  // ✅ CHAT NOTIFICATION APIS
-getUnreadChats: (userId) => {
-  return api.get(`/api/notifications/unread/${userId}`);
-},
 
-getUnreadChatCount: (userId) => {
-  return api.get(`/api/notifications/count/${userId}`);
-},
+  // CHAT NOTIFICATION APIS
+// getUnreadChats: (userId) => {
+//   return api.get(`/api/notifications/unread/${userId}`);
+// },
+
+// getUnreadChatCount: (userId) => {
+//   return api.get(`/api/notifications/count/${userId}`);
+// },
 
 markChatAsRead: (notificationId) => {
   return api.put(`/api/notifications/read/${notificationId}`);
 },
 
-// ✅ ADD THIS MISSING API
+//  ADD THIS MISSING API
 getUserNotifications: (userId) => {
   return api.get(`/api/notifications/${userId}`);
-}
+},
+
+ //  YEH NAYI API ADD KARDI
+  markAllNotificationsAsRead: (userId) => {
+    return api.put(`/api/notifications/read/messages/${userId}`);
+  }
+
 };
+
   
 export default api;
