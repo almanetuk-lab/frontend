@@ -166,18 +166,18 @@ const handleFileUpload = async (file) => {
   };
 
   // ✅ FIXED: Get unread chat notifications count
-  const fetchUnreadCount = async () => {
-    const userId = getUserId();
-    if (!userId) return;
+  // const fetchUnreadCount = async () => {
+  //   const userId = getUserId();
+  //   if (!userId) return;
 
-    try {
-      const response = await chatApi.getUnreadChatCount(userId);
-      console.log('Unread count:', response.data);
-      setUnreadCount(response.data?.count || 0);
-    } catch (error) {
-      console.error('Error fetching unread count:', error);
-    }
-  };
+  //   try {
+  //     const response = await chatApi.getUnreadChatCount(userId);
+  //     console.log('Unread count:', response.data);
+  //     setUnreadCount(response.data?.count || 0);
+  //   } catch (error) {
+  //     console.error('Error fetching unread count:', error);
+  //   }
+  // };
 
   // ✅ FIXED: Get unread chat notifications
   const fetchUnreadChats = async () => {
@@ -192,6 +192,34 @@ const handleFileUpload = async (file) => {
       console.error('Error fetching unread chats:', error);
     }
   };
+
+  async function markAllNotificationsAsRead(userId) {
+  try {
+    const response = await chatAPI.markNotificationsAsRead(userId);
+    
+    if (response.data.success) {
+      console.log('Notifications marked as read:', response.data.message);
+      return {
+        success: true,
+        message: response.data.message,
+        updatedCount: response.data.updated
+      };
+    }
+    
+    return {
+      success: false,
+      message: 'Failed to mark notifications as read'
+    };
+    
+  } catch (error) {
+    console.error('Error marking notifications as read:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Network error'
+    };
+  }
+}
+
 
   // Toggle dropdown
   const toggleDropdown = () => {
@@ -227,7 +255,7 @@ const handleFileUpload = async (file) => {
 
   // ✅ Load initial unread count when component mounts
   useEffect(() => {
-    fetchUnreadCount();
+    // fetchUnreadCount();
   }, [profile]);
 
   return (
