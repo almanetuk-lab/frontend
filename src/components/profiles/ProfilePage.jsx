@@ -75,7 +75,9 @@ export default function ProfilePage() {
           )}
           <div className="text-center md:text-left flex-1">
             <h1 className="text-3xl font-bold text-gray-800">
-              {hasValue(profile.full_name) ? profile.full_name : "No Name"}
+              {hasValue(profile.first_name) || hasValue(profile.last_name) 
+                ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim()
+                : "No Name"}
             </h1>
             <p className="text-xl text-gray-600 mt-2">
               {hasValue(profile.headline) ? profile.headline : 
@@ -97,7 +99,10 @@ export default function ProfilePage() {
           {/* Personal Information */}
           <div className="space-y-6">
             <Section title="Personal Information">
-              <InfoItem label="Full Name" value={profile.full_name} />
+              {/* ✅ FIRST NAME ADD KIYA HAI */}
+              <InfoItem label="First Name" value={profile.first_name} />
+              {/* ✅ LAST NAME ADD KIYA HAI */}
+              <InfoItem label="Last Name" value={profile.last_name} />
               <InfoItem label="Email" value={profile.email} />
               <InfoItem label="Phone" value={profile.phone} />
               <InfoItem label="Date of Birth" value={formatDateForDisplay(profile.dob)} />
@@ -105,7 +110,11 @@ export default function ProfilePage() {
               <InfoItem label="Gender" value={profile.gender} />
               <InfoItem label="Marital Status" value={profile.marital_status} />
               <InfoItem label="City" value={profile.city} />
+              <InfoItem label="Country" value={profile.country} />
+              <InfoItem label="Pincode" value={profile.pincode} />
+              <InfoItem label="state" value={profile.state} />
               <InfoItem label="Address" value={profile.address} full />
+            
             </Section>
           </div>
 
@@ -206,33 +215,6 @@ function InfoItem({ label, value, full = false }) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // import React from "react";
 // import { useNavigate } from "react-router-dom";
 // import { useUserProfile } from "../context/UseProfileContext";
@@ -295,9 +277,10 @@ function InfoItem({ label, value, full = false }) {
 
 //         {/* Profile Header */}
 //         <div className="flex flex-col items-center md:flex-row md:items-start gap-6 mb-8 p-6 bg-gray-50 rounded-lg">
-//           {profile.profile_picture_url || profile.profilePhoto ? (
+//           {/* ✅ YAHI CHANGE KIYA HAI - image_url add kiya hai */}
+//           {profile.image_url || profile.profile_picture_url || profile.profilePhoto ? (
 //             <img
-//               src={profile.profile_picture_url || profile.profilePhoto}
+//               src={profile.image_url || profile.profile_picture_url || profile.profilePhoto}
 //               alt="Profile"
 //               className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
 //             />
@@ -308,7 +291,7 @@ function InfoItem({ label, value, full = false }) {
 //           )}
 //           <div className="text-center md:text-left flex-1">
 //             <h1 className="text-3xl font-bold text-gray-800">
-//               {hasValue(profile.full_name) ? profile.full_name : "No Name"}
+//               {hasValue(profile.first_name) ? profile.first_name : "No Name"}
 //             </h1>
 //             <p className="text-xl text-gray-600 mt-2">
 //               {hasValue(profile.headline) ? profile.headline : 
@@ -432,6 +415,30 @@ function InfoItem({ label, value, full = false }) {
 //     </div>
 //   );
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

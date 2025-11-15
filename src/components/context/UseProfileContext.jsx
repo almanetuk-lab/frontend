@@ -49,14 +49,20 @@ export const UserProfileProvider = ({ children }) => {
       if (userProfile) {
         console.log("🔵 Fresh data from API:", userProfile);
         
+        // ✅ FIXED: first_name aur last_name handle karo
         const completeProfile = {
-          // Personal Info
+          // Personal Info - FIXED NAME FIELDS
+          first_name: userProfile.first_name || "",
+          last_name: userProfile.last_name || "",
           full_name: userProfile.full_name || "",
           email: userProfile.email || "",
           phone: userProfile.phone || "",
           gender: userProfile.gender || "",
           marital_status: userProfile.marital_status || "",
           city: userProfile.city || "",
+          country: userProfile.country || "",
+          state: userProfile.state || "",
+          pincode: userProfile.pincode || "",
           address: userProfile.address || "",
           dob: userProfile.dob || "",
           age: userProfile.age || "",
@@ -78,10 +84,10 @@ export const UserProfileProvider = ({ children }) => {
           user_id: userProfile.user_id || null,
           is_submitted: userProfile.is_submitted || false,
           
-          // ✅ Profile Picture - IMPORTANT: image_url add karo
+          // ✅ Profile Picture
           profile_picture_url: userProfile.profile_picture_url || "",
           profilePhoto: userProfile.profilePhoto || "",
-          image_url: userProfile.image_url || "", // ✅ Ye line add karo
+          image_url: userProfile.image_url || "",
           
           // Timestamp
           last_updated: new Date().toISOString()
@@ -150,7 +156,7 @@ export const UserProfileProvider = ({ children }) => {
   };
 
   const hasCompleteProfile = () => {
-    return profile && profile.is_submitted && profile.full_name && profile.email;
+    return profile && profile.is_submitted && (profile.first_name || profile.full_name) && profile.email;
   };
 
   const value = {
@@ -168,13 +174,6 @@ export const UserProfileProvider = ({ children }) => {
     </UserProfileContext.Provider>
   );
 };
-
-
-
-
-
-
-
 
 
 
@@ -258,9 +257,10 @@ export const UserProfileProvider = ({ children }) => {
 //           user_id: userProfile.user_id || null,
 //           is_submitted: userProfile.is_submitted || false,
           
-//           // Profile Picture
+//           // ✅ Profile Picture - IMPORTANT: image_url add karo
 //           profile_picture_url: userProfile.profile_picture_url || "",
 //           profilePhoto: userProfile.profilePhoto || "",
+//           image_url: userProfile.image_url || "", // ✅ Ye line add karo
           
 //           // Timestamp
 //           last_updated: new Date().toISOString()
@@ -313,13 +313,13 @@ export const UserProfileProvider = ({ children }) => {
 //     localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
 //   };
 
-//   // ✅ FIXED: Logout par sirf tokens clear karo, profile data nahi
+//   // ✅ FIXED: Logout par profile data preserve karo
 //   const clearProfile = () => {
 //     console.log("🚪 Clearing authentication tokens only");
-//     setProfile(null); // UI ke liye profile hide karo
+//     // ❌ setProfile(null) MAT KARO - yeh line COMMENT karo ya remove karo
 //     localStorage.removeItem("accessToken");
 //     localStorage.removeItem("refreshToken");
-//     // ❌ userProfile ko clear mat karo - data persist rahega
+//     // ✅ userProfile ko preserve rahega - image bhi save rahegi
 //   };
 
 //   const refreshProfile = () => {
@@ -347,5 +347,9 @@ export const UserProfileProvider = ({ children }) => {
 //     </UserProfileContext.Provider>
 //   );
 // };
+
+
+
+
 
 
