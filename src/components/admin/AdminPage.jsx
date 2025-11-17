@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../services/adminApi';
+import AdminPlans from './AdminAllPlan.jsx';
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -9,6 +10,9 @@ const AdminDashboard = () => {
   const [usersData, setUsersData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [userDetailsLoading, setUserDetailsLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [plans, setPlans] = useState([]);
+
 
   const fetchUsers = async () => {
     try {
@@ -555,6 +559,12 @@ const AdminDashboard = () => {
           </div>
         );
 
+          case 'plans':
+        return (
+          <AdminPlans editingId={editingId} setEditingId={setEditingId} plans={plans} setPlans={setPlans}/>
+        );
+      
+          
       default:
         return (
           <div className="p-6">
@@ -578,7 +588,7 @@ const AdminDashboard = () => {
         </div>
         
         <nav className="mt-6">
-          {['dashboard', 'users', 'settings', 'logs'].map((section) => (
+          {['dashboard', 'users', 'settings', 'logs', 'plans'].map((section) => (
             <div key={section} className="px-6 py-3">
               <button
                 onClick={() => setActiveSection(section)}
