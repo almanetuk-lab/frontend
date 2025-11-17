@@ -215,7 +215,14 @@ const AdminDashboard = () => {
               </div>
 
               {[
-                { label: 'Full Name', value: selectedUser.full_name || 'No Name', className: 'font-medium' },
+                // { label: 'Full Name', value: selectedUser.firsr_name || 'No Name', className: 'font-medium' },
+               { 
+                label: 'Full Name', 
+                value: selectedUser.first_name && selectedUser.last_name 
+             ? `${selectedUser.first_name} ${selectedUser.last_name}`
+              : selectedUser.first_name || selectedUser.last_name || 'No Name', 
+               className: 'font-medium' 
+                },
                 { label: 'Email Address', value: selectedUser.email },
                 { label: 'Phone', value: selectedUser.phone || 'Not provided' },
                 { label: 'Gender', value: selectedUser.gender || 'Not specified' },
@@ -477,7 +484,12 @@ const AdminDashboard = () => {
                     {filteredUsers.map((user) => (
                       <tr key={user.user_id || user.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{user.full_name || 'No Name'}</div>
+                          <div className="text-sm font-medium text-gray-900"> {                      user.first_name && user.last_name 
+                         ? `${user.first_name} ${user.last_name}`
+                         : user.first_name || user.last_name || user.full_name || 'No Name'
+                            }
+</div>
+                          {/* <div className="text-sm font-medium text-gray-900">{user.full_name || 'No Name'}</div> */}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-500">{user.email}</div>
