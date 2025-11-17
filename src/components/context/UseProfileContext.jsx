@@ -1,8 +1,27 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { getUserProfile, loginUser } from "../services/api";
-import { useNavigate } from "react-router-dom";
 
-// UserProfile Context
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { getUserProfile } from "../services/api";
+
+// ✅ Agar export nahi mil raha toh yahan define karo
+const refreshAuthToken = async (refreshToken) => {
+  try {
+    console.log("🔄 Attempting token refresh...");
+    
+    const currentToken = localStorage.getItem("accessToken");
+    if (currentToken) {
+      console.log("✅ Using current token as fallback");
+      return { 
+        token: currentToken, 
+        refresh: refreshToken 
+      };
+    }
+    throw new Error("No token available for refresh");
+  } catch (error) {
+    console.error("❌ Token refresh failed:", error);
+    throw error;
+  }
+};
+
 const UserProfileContext = createContext();
 
 export const useUserProfile = () => {
@@ -17,41 +36,54 @@ export const UserProfileProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Token refresh function
+  const refreshToken = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      const currentToken = localStorage.getItem("accessToken");
+      
+      if (!refreshToken && !currentToken) {
+        throw new Error("No tokens available");
+      }
+      
+      const response = await refreshAuthToken(refreshToken || currentToken);
+      if (response.token) {
+        localStorage.setItem("accessToken", response.token);
+        if (response.refresh) {
+          localStorage.setItem("refreshToken", response.refresh);
+        }
+        return response.token;
+      }
+    } catch (error) {
+      console.error("❌ Token refresh failed:", error);
+      clearProfile();
+      throw error;
+    }
+  };
+
   const loadProfile = async () => {
-    const token = localStorage.getItem("accessToken");
+    let token = localStorage.getItem("accessToken");
     
     if (!token) {
-      console.log("🚫 No token found - skipping profile load");
+      console.log("🚫 No token found - clearing profile");
+      clearProfile();
       setLoading(false);
       return;
     }
 
     try {
-      console.log("🔄 Loading profile data...");
+      console.log("🔄 Loading FRESH profile data from API...");
       
-      // ✅ Pehle cached data check karo
-      const cachedUser = localStorage.getItem("userProfile");
-      if (cachedUser) {
-        try {
-          const cachedProfile = JSON.parse(cachedUser);
-          console.log("📂 Using cached profile data");
-          setProfile(cachedProfile);
-        } catch (parseError) {
-          console.error("❌ Error parsing cached data:", parseError);
-          localStorage.removeItem("userProfile");
-        }
-      }
-
-      // ✅ Fir API se fresh data lo
       const data = await getUserProfile();
-      let userProfile = data?.data;
+      console.log("📊 Raw API response:", data);
+      
+      let userProfile = data?.data || data;
       
       if (userProfile) {
         console.log("🔵 Fresh data from API:", userProfile);
         
-        // ✅ FIXED: first_name aur last_name handle karo
         const completeProfile = {
-          // Personal Info - FIXED NAME FIELDS
+          // Personal Info
           first_name: userProfile.first_name || "",
           last_name: userProfile.last_name || "",
           full_name: userProfile.full_name || "",
@@ -84,23 +116,61 @@ export const UserProfileProvider = ({ children }) => {
           user_id: userProfile.user_id || null,
           is_submitted: userProfile.is_submitted || false,
           
-          // ✅ Profile Picture
+          // Profile Picture
           profile_picture_url: userProfile.profile_picture_url || "",
           profilePhoto: userProfile.profilePhoto || "",
           image_url: userProfile.image_url || "",
           
-          // Timestamp
           last_updated: new Date().toISOString()
         };
         
-        console.log("✅ Setting complete profile:", completeProfile);
+        console.log("✅ Setting FRESH profile:", completeProfile);
         setProfile(completeProfile);
         localStorage.setItem("userProfile", JSON.stringify(completeProfile));
+      } else {
+        console.warn("⚠️ No user profile data in API response");
+        useCachedProfile();
       }
     } catch (error) {
       console.error("❌ API Error:", error);
+      
+      if (error.response?.status === 401 || error.message?.includes("token") || error.message?.includes("expired")) {
+        console.log("🔄 Token expired, attempting refresh...");
+        try {
+          const newToken = await refreshToken();
+          if (newToken) {
+            console.log("✅ Token refreshed, retrying profile load...");
+            await loadProfile();
+            return;
+          }
+        } catch (refreshError) {
+          console.error("❌ Token refresh failed, using cached data:", refreshError);
+          useCachedProfile();
+          return;
+        }
+      }
+      
+      useCachedProfile();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const useCachedProfile = () => {
+    const cachedUser = localStorage.getItem("userProfile");
+    if (cachedUser) {
+      try {
+        const cachedProfile = JSON.parse(cachedUser);
+        console.log("📂 Using cached profile data");
+        setProfile(cachedProfile);
+      } catch (parseError) {
+        console.error("❌ Error parsing cached data:", parseError);
+        localStorage.removeItem("userProfile");
+        setProfile(null);
+      }
+    } else {
+      console.log("📭 No cached data available");
+      setProfile(null);
     }
   };
 
@@ -109,20 +179,9 @@ export const UserProfileProvider = ({ children }) => {
     if (token) {
       loadProfile();
     } else {
-      console.log("⏸️ No token - profile loading skipped");
+      console.log("⏸️ No token - clearing profile data");
+      clearProfile();
       setLoading(false);
-      
-      // ✅ Logout par bhi cached data show karo (read-only mode)
-      const cachedProfile = localStorage.getItem("userProfile");
-      if (cachedProfile) {
-        try {
-          const profileData = JSON.parse(cachedProfile);
-          console.log("👀 Showing cached profile (read-only)");
-          setProfile(profileData);
-        } catch (error) {
-          console.error("Error parsing cached profile:", error);
-        }
-      }
     }
   }, []);
 
@@ -140,13 +199,13 @@ export const UserProfileProvider = ({ children }) => {
     localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
   };
 
-  // ✅ FIXED: Logout par profile data preserve karo
   const clearProfile = () => {
-    console.log("🚪 Clearing authentication tokens only");
-    // ❌ setProfile(null) MAT KARO - yeh line COMMENT karo ya remove karo
+    console.log("🚪 Clearing ALL user data");
+    setProfile(null);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
-    // ✅ userProfile ko preserve rahega - image bhi save rahegi
+    localStorage.removeItem("userProfile");
+    localStorage.removeItem("user");
   };
 
   const refreshProfile = () => {
@@ -177,11 +236,15 @@ export const UserProfileProvider = ({ children }) => {
 
 
 
-// import React, { createContext, useContext, useState, useEffect } from "react";
-// import { getUserProfile, loginUser } from "../services/api";
-// import { useNavigate } from "react-router-dom";
 
-// // UserProfile Context
+
+
+
+
+
+// import React, { createContext, useContext, useState, useEffect } from "react";
+// import { getUserProfile, refreshAuthToken } from "../services/api";
+
 // const UserProfileContext = createContext();
 
 // export const useUserProfile = () => {
@@ -196,32 +259,43 @@ export const UserProfileProvider = ({ children }) => {
 //   const [profile, setProfile] = useState(null);
 //   const [loading, setLoading] = useState(true);
 
+//   // ✅ Token refresh function
+//   const refreshToken = async () => {
+//     try {
+//       const refreshToken = localStorage.getItem("refreshToken");
+//       if (!refreshToken) {
+//         throw new Error("No refresh token available");
+//       }
+      
+//       const response = await refreshAuthToken(refreshToken);
+//       if (response.token) {
+//         localStorage.setItem("accessToken", response.token);
+//         if (response.refresh) {
+//           localStorage.setItem("refreshToken", response.refresh);
+//         }
+//         return response.token;
+//       }
+//     } catch (error) {
+//       console.error("❌ Token refresh failed:", error);
+//       // Clear all data on token refresh failure
+//       clearProfile();
+//       throw error;
+//     }
+//   };
+
 //   const loadProfile = async () => {
-//     const token = localStorage.getItem("accessToken");
+//     let token = localStorage.getItem("accessToken");
     
 //     if (!token) {
-//       console.log("🚫 No token found - skipping profile load");
-//       setLoading(false);
+//       console.log("🚫 No token found - clearing profile");
+//       clearProfile();
 //       return;
 //     }
 
 //     try {
-//       console.log("🔄 Loading profile data...");
+//       console.log("🔄 Loading FRESH profile data from API...");
       
-//       // ✅ Pehle cached data check karo
-//       const cachedUser = localStorage.getItem("userProfile");
-//       if (cachedUser) {
-//         try {
-//           const cachedProfile = JSON.parse(cachedUser);
-//           console.log("📂 Using cached profile data");
-//           setProfile(cachedProfile);
-//         } catch (parseError) {
-//           console.error("❌ Error parsing cached data:", parseError);
-//           localStorage.removeItem("userProfile");
-//         }
-//       }
-
-//       // ✅ Fir API se fresh data lo
+//       // ✅ Try to get fresh data from API
 //       const data = await getUserProfile();
 //       let userProfile = data?.data;
       
@@ -230,12 +304,17 @@ export const UserProfileProvider = ({ children }) => {
         
 //         const completeProfile = {
 //           // Personal Info
+//           first_name: userProfile.first_name || "",
+//           last_name: userProfile.last_name || "",
 //           full_name: userProfile.full_name || "",
 //           email: userProfile.email || "",
 //           phone: userProfile.phone || "",
 //           gender: userProfile.gender || "",
 //           marital_status: userProfile.marital_status || "",
 //           city: userProfile.city || "",
+//           country: userProfile.country || "",
+//           state: userProfile.state || "",
+//           pincode: userProfile.pincode || "",
 //           address: userProfile.address || "",
 //           dob: userProfile.dob || "",
 //           age: userProfile.age || "",
@@ -257,21 +336,54 @@ export const UserProfileProvider = ({ children }) => {
 //           user_id: userProfile.user_id || null,
 //           is_submitted: userProfile.is_submitted || false,
           
-//           // ✅ Profile Picture - IMPORTANT: image_url add karo
+//           // Profile Picture
 //           profile_picture_url: userProfile.profile_picture_url || "",
 //           profilePhoto: userProfile.profilePhoto || "",
-//           image_url: userProfile.image_url || "", // ✅ Ye line add karo
+//           image_url: userProfile.image_url || "",
           
-//           // Timestamp
 //           last_updated: new Date().toISOString()
 //         };
         
-//         console.log("✅ Setting complete profile:", completeProfile);
+//         console.log("✅ Setting FRESH profile:", completeProfile);
 //         setProfile(completeProfile);
 //         localStorage.setItem("userProfile", JSON.stringify(completeProfile));
 //       }
 //     } catch (error) {
 //       console.error("❌ API Error:", error);
+      
+//       // ✅ Check if token is invalid/expired
+//       if (error.response?.status === 401 || error.message?.includes("token") || error.message?.includes("expired")) {
+//         console.log("🔄 Token expired, attempting refresh...");
+//         try {
+//           const newToken = await refreshToken();
+//           if (newToken) {
+//             // Retry with new token
+//             console.log("✅ Token refreshed, retrying profile load...");
+//             await loadProfile();
+//             return;
+//           }
+//         } catch (refreshError) {
+//           console.error("❌ Token refresh failed, clearing data:", refreshError);
+//           clearProfile();
+//           return;
+//         }
+//       }
+      
+//       // ✅ API FAIL HONE PAR HI CACHED DATA USE KARO
+//       const cachedUser = localStorage.getItem("userProfile");
+//       if (cachedUser) {
+//         try {
+//           const cachedProfile = JSON.parse(cachedUser);
+//           console.log("📂 Using cached profile data (API failed)");
+//           setProfile(cachedProfile);
+//         } catch (parseError) {
+//           console.error("❌ Error parsing cached data:", parseError);
+//           localStorage.removeItem("userProfile");
+//         }
+//       } else {
+//         // No cached data available
+//         clearProfile();
+//       }
 //     } finally {
 //       setLoading(false);
 //     }
@@ -282,20 +394,8 @@ export const UserProfileProvider = ({ children }) => {
 //     if (token) {
 //       loadProfile();
 //     } else {
-//       console.log("⏸️ No token - profile loading skipped");
-//       setLoading(false);
-      
-//       // ✅ Logout par bhi cached data show karo (read-only mode)
-//       const cachedProfile = localStorage.getItem("userProfile");
-//       if (cachedProfile) {
-//         try {
-//           const profileData = JSON.parse(cachedProfile);
-//           console.log("👀 Showing cached profile (read-only)");
-//           setProfile(profileData);
-//         } catch (error) {
-//           console.error("Error parsing cached profile:", error);
-//         }
-//       }
+//       console.log("⏸️ No token - clearing profile data");
+//       clearProfile();
 //     }
 //   }, []);
 
@@ -313,13 +413,14 @@ export const UserProfileProvider = ({ children }) => {
 //     localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
 //   };
 
-//   // ✅ FIXED: Logout par profile data preserve karo
+//   // ✅ FIXED: Logout par COMPLETELY clear karo
 //   const clearProfile = () => {
-//     console.log("🚪 Clearing authentication tokens only");
-//     // ❌ setProfile(null) MAT KARO - yeh line COMMENT karo ya remove karo
+//     console.log("🚪 Clearing ALL user data");
+//     setProfile(null);
 //     localStorage.removeItem("accessToken");
 //     localStorage.removeItem("refreshToken");
-//     // ✅ userProfile ko preserve rahega - image bhi save rahegi
+//     localStorage.removeItem("userProfile");
+//     localStorage.removeItem("user");
 //   };
 
 //   const refreshProfile = () => {
@@ -329,7 +430,7 @@ export const UserProfileProvider = ({ children }) => {
 //   };
 
 //   const hasCompleteProfile = () => {
-//     return profile && profile.is_submitted && profile.full_name && profile.email;
+//     return profile && profile.is_submitted && (profile.first_name || profile.full_name) && profile.email;
 //   };
 
 //   const value = {
@@ -347,8 +448,6 @@ export const UserProfileProvider = ({ children }) => {
 //     </UserProfileContext.Provider>
 //   );
 // };
-
-
 
 
 
