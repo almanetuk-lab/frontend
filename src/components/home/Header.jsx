@@ -74,14 +74,14 @@ function Header() {
                   Home
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   to="/"
                   className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
                 >
                   About
                 </Link>
-              </li>
+              </li> */}
               
               {isLoggedIn && (
                 <>
@@ -138,7 +138,7 @@ function Header() {
               <>
                 {localStorage.getItem("accessToken") && <NotificationBell />}
                 
-                <div className="flex items-center gap-2 text-gray-700">
+                {/* <div className="flex items-center gap-2 text-gray-700">
                   <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
                     <span className="text-amber-600 font-semibold text-sm">
                       {profile?.name?.charAt(0) || 'U'}
@@ -147,7 +147,7 @@ function Header() {
                   <span className="text-sm">
                     {localStorage.getItem("adminToken") ? "Welcome, Admin" : `Welcome, ${profile?.name?.split(' ')[0] || 'User'}`}
                   </span>
-                </div>
+                </div> */}
                 
                 <button
                   onClick={handleLogout}
@@ -189,11 +189,11 @@ function Header() {
             {/* User Avatar for mobile */}
             {isLoggedIn && (
               <div className="flex items-center gap-2 text-gray-700">
-                <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
+                 <div className="w-0 h-1 bg-white rounded-full flex items-center justify-center">
                   <span className="text-amber-600 font-semibold text-sm">
-                    {profile?.name?.charAt(0) || 'U'}
+                    {/* {profile?.name?.charAt(0) || 'Hello'} */}
                   </span>
-                </div>
+                </div> 
               </div>
             )}
 
@@ -311,9 +311,17 @@ function Header() {
               {isLoggedIn ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between px-4 py-2">
+                    {/* <span className="text-sm text-gray-600">
+                      {localStorage.getItem("adminToken") ? "Admin User" : `Hello, ${profile?.name?.split(' ')[0] || ''}`}
+                    </span> */}
                     <span className="text-sm text-gray-600">
-                      {localStorage.getItem("adminToken") ? "Admin User" : `Hello, ${profile?.name?.split(' ')[0] || 'User'}`}
-                    </span>
+  {localStorage.getItem("adminToken") 
+    ? "Admin User" 
+    : profile?.first_name && profile?.last_name 
+      ? `Hello, ${profile.first_name} ${profile.last_name}`
+      : `Hello, ${profile?.first_name || profile?.name || 'User'}`
+  }
+</span>
                   </div>
                   <button
                     onClick={handleLogout}

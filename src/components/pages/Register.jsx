@@ -66,7 +66,9 @@ export default function Register() {
       }
       
       // Use window.location for complete refresh to clear any cached state
-      window.location.href = "/login";
+      // window.location.href = "/";
+      navigate("/login", { replace: true });
+
       
     } catch (err) {
       console.error("Register error:", err);
