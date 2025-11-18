@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../services/adminApi';
+import AdminPlans from './AdminAllPlan.jsx';
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -9,6 +10,9 @@ const AdminDashboard = () => {
   const [usersData, setUsersData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [userDetailsLoading, setUserDetailsLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [plans, setPlans] = useState([]);
+
 
   const fetchUsers = async () => {
     try {
@@ -215,7 +219,14 @@ const AdminDashboard = () => {
               </div>
 
               {[
-                { label: 'Full Name', value: selectedUser.full_name || 'No Name', className: 'font-medium' },
+                // { label: 'Full Name', value: selectedUser.firsr_name || 'No Name', className: 'font-medium' },
+               { 
+                label: 'Full Name', 
+                value: selectedUser.first_name && selectedUser.last_name 
+             ? `${selectedUser.first_name} ${selectedUser.last_name}`
+              : selectedUser.first_name || selectedUser.last_name || 'No Name', 
+               className: 'font-medium' 
+                },
                 { label: 'Email Address', value: selectedUser.email },
                 { label: 'Phone', value: selectedUser.phone || 'Not provided' },
                 { label: 'Gender', value: selectedUser.gender || 'Not specified' },
@@ -477,7 +488,12 @@ const AdminDashboard = () => {
                     {filteredUsers.map((user) => (
                       <tr key={user.user_id || user.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{user.full_name || 'No Name'}</div>
+                          <div className="text-sm font-medium text-gray-900"> {                      user.first_name && user.last_name 
+                         ? `${user.first_name} ${user.last_name}`
+                         : user.first_name || user.last_name || user.full_name || 'No Name'
+                            }
+</div>
+                          {/* <div className="text-sm font-medium text-gray-900">{user.full_name || 'No Name'}</div> */}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-500">{user.email}</div>
@@ -543,6 +559,12 @@ const AdminDashboard = () => {
           </div>
         );
 
+          case 'plans':
+        return (
+          <AdminPlans editingId={editingId} setEditingId={setEditingId} plans={plans} setPlans={setPlans}/>
+        );
+      
+          
       default:
         return (
           <div className="p-6">
@@ -566,7 +588,7 @@ const AdminDashboard = () => {
         </div>
         
         <nav className="mt-6">
-          {['dashboard', 'users', 'settings', 'logs'].map((section) => (
+          {['dashboard', 'users', 'settings', 'logs', 'plans'].map((section) => (
             <div key={section} className="px-6 py-3">
               <button
                 onClick={() => setActiveSection(section)}

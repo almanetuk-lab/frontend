@@ -41,6 +41,17 @@ const handleLogin = async (e) => {
     setLoading(false);
   }
 };
+const handleLogout = () => {
+  // Clear admin data
+  localStorage.removeItem('adminToken');
+  localStorage.removeItem('adminData');
+  
+  //  FIXED: Redirect to home page
+  window.location.href = '/#/'; // Ya phir '/#/' agar HashRouter use kar rahe ho
+  
+  // Ya phir React Router use karo
+  // navigate('/');
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white/45 to-white/100 px-4 py-8">

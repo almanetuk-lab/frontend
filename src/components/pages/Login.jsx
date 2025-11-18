@@ -160,7 +160,7 @@ export default function Login() {
               loading ? "bg-amber-700 cursor-not-allowed" : "bg-amber-600 hover:bg-amber-700"
             }`}
           >
-            {loading ? "Logging in..." : "Login with Email"}
+            {loading ? "Logging in..." : "Login Your Account"}
           </button>
 
             {/* LinkedIn Login Button */}
