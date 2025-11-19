@@ -12,7 +12,7 @@ const AdminLogin = () => {
   const [error, setError] = useState(''); // ✅ Ye line important hai - component level pe define karo
 
    const navigate = useNavigate();
-   
+
 const handleLogin = async (e) => {
   e.preventDefault();
   setLoading(true);
@@ -49,14 +49,14 @@ const handleLogout = () => {
   localStorage.removeItem('adminData');
   
   //  FIXED: Redirect to home page
-  // window.location.href = '/'; // Ya phir '/#/' agar HashRouter use kar rahe ho
+  window.location.href = '/#/'; // Ya phir '/#/' agar HashRouter use kar rahe ho
   
   setTimeout(() => {
     window.location.reload();
   }, 100);
 
   // Ya phir React Router use karo
-  navigate('/');
+  // navigate('/');
 };
 
   return (
