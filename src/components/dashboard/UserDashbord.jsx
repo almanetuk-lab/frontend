@@ -108,7 +108,7 @@ export default function UserDashboard() {
             <Route path="search" element={<AdvancedSearch />} />
             <Route path="matches" element={<MatchesPage />} />
             <Route path="members" element={<MemberPage />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
       </div>
