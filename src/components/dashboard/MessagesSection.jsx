@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { chatApi } from '../services/chatApi';
 import io from 'socket.io-client';
@@ -16,7 +15,7 @@ export default function MessagesSection() {
   const [fileUploading, setFileUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(null);
-  const [showSidebar, setShowSidebar] = useState(true); // ✅ Mobile sidebar toggle
+  const [showSidebar, setShowSidebar] = useState(true); //  Mobile sidebar toggle
 
   const [currentUserId, setCurrentUserId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
@@ -26,7 +25,7 @@ export default function MessagesSection() {
   const messagesEndRef = useRef();
   const [socketConnected, setSocketConnected] = useState(false);
 
-  // ✅ Click outside to close reaction picker
+  //  Click outside to close reaction picker
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showReactionPicker && !event.target.closest('.reaction-picker') && !event.target.closest('.message-bubble')) {
@@ -38,7 +37,7 @@ export default function MessagesSection() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showReactionPicker]);
 
-  // ✅ Get current user once
+  //  Get current user once
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem('currentUser');
@@ -56,7 +55,7 @@ export default function MessagesSection() {
     }
   }, []);
 
-  // ✅ FIXED: SOCKET WITH REACTION HANDLING
+  //  FIXED: SOCKET WITH REACTION HANDLING
   useEffect(() => {
     if (!currentUserId) return;
 
@@ -85,7 +84,7 @@ export default function MessagesSection() {
       setSocketConnected(false);
     });
 
-    // ✅ FIXED: HANDLE NEW REACTIONS VIA SOCKET
+    //  FIXED: HANDLE NEW REACTIONS VIA SOCKET
     socket.on('new_reaction', (reactionData) => {
       console.log('🎭 New reaction received via socket:', reactionData);
       if (reactionData && selectedUser) {
