@@ -162,7 +162,7 @@ select {
     color: white;
     position: relative;
     left: 29rem;
-    top: 1rem;
+    top: -1rem;
     border-radius: 16px;
     padding: 5px 14px;
 }
