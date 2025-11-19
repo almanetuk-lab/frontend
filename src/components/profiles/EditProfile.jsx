@@ -452,7 +452,7 @@ useEffect(() => {
       
       // Navigate after short delay
       setTimeout(() => {
-        navigate("/profile");
+        navigate("/dashboard");
       }, 1000);
       
     } catch (error) {
@@ -483,10 +483,10 @@ useEffect(() => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-800">Edit Profile</h1>
           <button
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/dashboard/profile")}
             className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
           >
-            Cancel
+            Cancel  
           </button>
         </div>
 
@@ -826,13 +826,13 @@ useEffect(() => {
 
           {/* Submit Buttons */}
           <div className="flex justify-center gap-4 pt-6 border-t">
-            <button type="button" onClick={() => navigate("/profile")} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
+            <button type="button" onClick={() => navigate("/dashboard")} className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
               Cancel
             </button>
             <button type="submit" disabled={loading || imageLoading} className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50">
               {loading ? "Saving..." : "Save Changes"}
             </button>
-          </div>
+          </div> 
         </form>
       </div>
     </div>
