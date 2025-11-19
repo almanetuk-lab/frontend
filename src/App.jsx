@@ -1,5 +1,8 @@
 import React from "react";
-import { Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
+// import { Routes, Route, Navigate, BrowserRouter, useNavigate } from "react-router-dom";
+
+import { HashRouter, Routes, Route, Navigate,useNavigate } from "react-router-dom";
+import { useState} from "react";
 import { UserProfileProvider } from "./components/context/UseProfileContext";
 import Header from "./components/home/Header";
 import Footer from "./components/home/Footer";
@@ -18,7 +21,7 @@ import UserCreateForm from "./components/profiles/CreateProfile";
 import EditProfile from "./components/profiles/EditProfile";
 
 // Admin Setup
-import ProtectedRoute from './components/admin/ProtectedRoute';
+import ProtectedRoute from "./components/admin/ProtectedRoute";
 import AdminPage from "./components/admin/AdminPage";
 import AdminLogin from "./components/admin/AdminLogin";
 
@@ -27,11 +30,16 @@ import ChatModule from "./components/chatsystem/ChatModule";
 import AdvancedSearch from "./components/chatsystem/AdvancedSearch";
 
 // Match System
-import MatchesPage from './components/MatchSystem/MatchesPage';
+import MatchesPage from "./components/MatchSystem/MatchesPage";
 import MembersPage from "./components/pages/MemberPage";
 import Contact from "./components/pages/Contact";
-// Linkde login button 
-import LinkedInCallback from './components/social/LinkedInCallback';
+// Linkde login button
+import LinkedInCallback from "./components/social/LinkedInCallback";
+
+import axios from "axios";
+import AddNewPlan from "./components/admin/AddPlanForm";
+
+const BASE_URL = "http://localhost:3435/api/admin/plans";
 
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
@@ -55,21 +63,74 @@ const MainLayout = ({ children }) => (
 );
 
 export default function App() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    name: "",
+    price: 0,
+    duration: 0,
+    video_call_limit: 0,
+    people_search_limit: 0,
+    people_message_limit: 0,
+    audio_call_limit: 0,
+    people_details_visibility: false,
+    type: "",
+  });
+
+  const [editingId, setEditingId] = useState(null);
+
+  const fetchPlans = async () => {
+    const res = await axios.get(BASE_URL);
+    setPlans(res.data);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!editingId) {
+      await axios.post(BASE_URL, formData);
+    } else {
+      setIsOpen(true);
+    }
+
+    setFormData({
+      name: "",
+      price: "",
+      duration: "",
+      video_call_limit: "",
+      people_search_limit: "",
+      people_message_limit: "",
+      audio_call_limit: "",
+      people_details_visibility: "",
+      type: "",
+    });
+
+    navigate("/admin-dashboard");
+
+    fetchPlans();
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
-    <BrowserRouter>
-      <UserProfileProvider>
+    // <BrowserRouter>
+    <HashRouter>    
+    <UserProfileProvider>
         <Routes>
+          <Route path='/admin-plans-new' element={<AddNewPlan handleChange={handleChange} handleSubmit={handleSubmit} editingId={editingId} setEditingId={setEditingId} formData={formData} />} />
           {/* Admin Routes - SEPARATE (No Header/Footer) */}
           <Route path="/admin-login" element={<AdminLogin />} />
-          <Route 
-            path="/admin-dashboard" 
+          <Route
+            path="/admin-dashboard"
             element={
               <ProtectedRoute>
                 <AdminPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+        
           <Route path="/linkedin-callback" element={<LinkedInCallback />} />
 
           {/* Public Routes WITH Header & Footer */}
@@ -176,7 +237,8 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </UserProfileProvider>
-    </BrowserRouter>
+      </HashRouter>
+
   );
 }
 
