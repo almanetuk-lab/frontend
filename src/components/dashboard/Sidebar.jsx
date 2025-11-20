@@ -146,6 +146,16 @@ export default function Sidebar({ profile, activeSection, sidebarOpen, setSideba
                 setSidebarOpen(false);
               }}
             />
+
+             <SidebarItem icon="💳"
+            label="Plan"
+            active={activeSection === "plans"}
+            onClick={() => {
+              navigate("/dashboard/plans");
+              setSidebarOpen(false);
+            }}
+            />
+
           </nav>
         </div>
 
