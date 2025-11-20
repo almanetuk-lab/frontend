@@ -33,6 +33,8 @@ import Contact from "./components/pages/Contact";
 // Linkde login button
 import LinkedInCallback from "./components/social/LinkedInCallback";
 import AddNewPlan from "./components/admin/AddPlanForm";
+import UserPlans from "./components/pages/UserPlans";
+import Cart from "./components/pages/cart";
 
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
@@ -63,9 +65,55 @@ const PlanFormWrapper = () => {
 };
 
 export default function App() {
-  // ❌ useNavigate, useState etc. YAHAN MAT USE KAREIN
-  // Kyunki App component HashRouter ke BAHAR hai
+  const navigate = useNavigate();
 
+  const [formData, setFormData] = useState({
+    name: "",
+    price: 0,
+    duration: 0,
+    video_call_limit: 0,
+    people_search_limit: 0,
+    people_message_limit: 0,
+    audio_call_limit: 0,
+    type: "",
+  });
+
+  const [editingId, setEditingId] = useState(null);
+
+  const fetchPlans = async () => {
+    const res = await axios.get(BASE_URL);
+    setPlans(res.data);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!editingId) {
+      await axios.post(BASE_URL, formData);
+    } else {
+      setIsOpen(true);
+    }
+
+    setFormData({
+      name: "",
+      price: "",
+      duration: "",
+      video_call_limit: "",
+      people_search_limit: "",
+      people_message_limit: "",
+      audio_call_limit: "",
+      type: "",
+    });
+
+    navigate("/admin-dashboard");
+
+    fetchPlans();
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+ 
   return (
 
     // <HashRouter>
@@ -117,6 +165,52 @@ export default function App() {
             </MainLayout>
           } />
 
+
+                  {/* Chat Routes */}
+                  <Route
+                    path="/chat"
+                    element={
+                      <UserProtectedRoute>
+                        <ChatModule />
+                      </UserProtectedRoute>
+                    }
+                  />
+                     
+                  <Route
+                    path="/search"
+                    element={
+                      <UserProtectedRoute>
+                        <AdvancedSearch />
+                      </UserProtectedRoute>
+                    }
+                  />
+                     {/* plan Routes */}
+                  <Route
+                    path="/plans"
+                    element={
+                      <UserProtectedRoute>
+                        <UserPlans />
+                      </UserProtectedRoute>
+                    }
+                  />
+                  {/* Cart Routes */}
+                  <Route
+                    path="/cart"
+                    element={
+                      <UserProtectedRoute>
+                        <Cart />
+                      </UserProtectedRoute>
+                    }
+                  />
+                  {/* Matches Routes */}
+                  <Route
+                    path="/matches"
+                    element={
+                      <UserProtectedRoute>
+                        <MatchesPage />
+                      </UserProtectedRoute>
+                    }
+                  />
           {/* Protected User Routes WITH Header & Footer */}
           <Route path="/dashboard/*" element={
             <MainLayout>
@@ -166,6 +260,7 @@ export default function App() {
               </UserProtectedRoute>
             </MainLayout>
           } />
+
 
           {/* Matches Routes WITH Header & Footer */}
           <Route path="/matches" element={
