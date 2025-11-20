@@ -36,6 +36,8 @@ import LinkedInCallback from "./components/social/LinkedInCallback";
 
 import axios from "axios";
 import AddNewPlan from "./components/admin/AddPlanForm";
+import UserPlans from "./components/pages/UserPlans";
+import Cart from "./components/pages/cart";
 
 const BASE_URL = "http://localhost:3435/api/admin/plans";
 
@@ -71,7 +73,6 @@ export default function App() {
     people_search_limit: 0,
     people_message_limit: 0,
     audio_call_limit: 0,
-    people_details_visibility: false,
     type: "",
   });
 
@@ -99,7 +100,6 @@ export default function App() {
       people_search_limit: "",
       people_message_limit: "",
       audio_call_limit: "",
-      people_details_visibility: "",
       type: "",
     });
 
@@ -213,6 +213,7 @@ export default function App() {
                       </UserProtectedRoute>
                     }
                   />
+                     
                   <Route
                     path="/search"
                     element={
@@ -221,7 +222,24 @@ export default function App() {
                       </UserProtectedRoute>
                     }
                   />
-
+                     {/* plan Routes */}
+                  <Route
+                    path="/plans"
+                    element={
+                      <UserProtectedRoute>
+                        <UserPlans />
+                      </UserProtectedRoute>
+                    }
+                  />
+                  {/* Cart Routes */}
+                  <Route
+                    path="/cart"
+                    element={
+                      <UserProtectedRoute>
+                        <Cart />
+                      </UserProtectedRoute>
+                    }
+                  />
                   {/* Matches Routes */}
                   <Route
                     path="/matches"

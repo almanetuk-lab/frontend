@@ -10,6 +10,7 @@ import EditProfilePage from "../profiles/EditProfile";
 import MatchesPage from "../MatchSystem/MatchesPage";
 import MemberPage from "../pages/MemberPage";
 import AdvancedSearch from "./SearchSection";
+import UserPlans from "../pages/UserPlans";
 
 export default function UserDashboard() {
   const { profile, loading } = useUserProfile();
@@ -26,6 +27,7 @@ export default function UserDashboard() {
     if (path.includes('search')) return 'search';
     if (path.includes('matches')) return 'matches';
     if (path.includes('members')) return 'members';
+    if (path.includes('plans')) return 'plans';
     return 'dashboard';
   }, [location.pathname]);
 
@@ -108,7 +110,9 @@ export default function UserDashboard() {
             <Route path="search" element={<AdvancedSearch />} />
             <Route path="matches" element={<MatchesPage />} />
             <Route path="members" element={<MemberPage />} />
+            <Route path="plans" element={<UserPlans />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
           </Routes>
         </main>
       </div>

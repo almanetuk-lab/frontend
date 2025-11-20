@@ -136,6 +136,13 @@ function Header() {
           <div className="hidden lg:flex items-center gap-4">
             {isLoggedIn ? (
               <>
+                   <Link
+                  to="/cart"
+                  className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+                >
+                  Cart
+                </Link>
+
                 {localStorage.getItem("accessToken") && <NotificationBell />}
                 
                 {/* <div className="flex items-center gap-2 text-gray-700">
