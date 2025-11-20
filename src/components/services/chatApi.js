@@ -52,15 +52,6 @@ getRecentChats: (myUserId) => {
     return api.get(`/api/reactions?userA=${userA}&userB=${userB}`);
   },
 
-  // CHAT NOTIFICATION APIS
-// getUnreadChats: (userId) => {
-//   return api.get(`/api/notifications/unread/${userId}`);
-// },
-
-// getUnreadChatCount: (userId) => {
-//   return api.get(`/api/notifications/count/${userId}`);
-// },
-
 markChatAsRead: (notificationId) => {
   return api.put(`/api/notifications/read/${notificationId}`);
 },
@@ -77,5 +68,4 @@ getUserNotifications: (userId) => {
 
 };
 
-  
 export default api;

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
@@ -19,14 +20,18 @@ export default function EditProfilePage() {
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
 
+
   const openCamera = () => {
     console.log("Opening camera...");
     setShowCamera(true);
+    setCapturedImage(null);
   };
 
   const closeCamera = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+      });
       streamRef.current = null;
     }
     setIsCameraActive(false);
@@ -37,7 +42,8 @@ export default function EditProfilePage() {
   const startCamera = async () => {
     try {
       setCameraError('');
-      
+      setIsCameraActive(false);
+
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Camera not supported in this browser');
       }
@@ -55,34 +61,60 @@ export default function EditProfilePage() {
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        setIsCameraActive(true);
+        
+        // Wait for video to load metadata
+        videoRef.current.onloadedmetadata = () => {
+          console.log("Video metadata loaded");
+          videoRef.current.play()
+            .then(() => {
+              console.log("Camera started successfully");
+              setIsCameraActive(true);
+            })
+            .catch(error => {
+              console.error("Video play error:", error);
+              setCameraError('Failed to start video playback');
+            });
+        };
       }
     } catch (error) {
       console.error('Camera error:', error);
-      setCameraError(
-        error.name === 'NotAllowedError' 
-          ? 'Camera permission denied. Please allow camera access.'
-          : error.name === 'NotFoundError'
-          ? 'No camera found on this device.'
-          : 'Failed to access camera. Please try again.'
-      );
+      let errorMessage = 'Failed to access camera. Please try again.';
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = 'Camera permission denied. Please allow camera access in your browser settings.';
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = 'No camera found on this device.';
+      } else if (error.name === 'NotSupportedError') {
+        errorMessage = 'Camera not supported in this browser.';
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = 'Camera is already in use by another application.';
+      }
+      
+      setCameraError(errorMessage);
       setIsCameraActive(false);
     }
   };
 
   const capturePhoto = () => {
-    if (!videoRef.current || !canvasRef.current || !isCameraActive) return;
+    if (!videoRef.current || !canvasRef.current || !isCameraActive) {
+      console.log("Cannot capture: Camera not ready");
+      return;
+    }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
+    // Set canvas dimensions to match video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+
+    // Draw current video frame to canvas
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+    // Convert canvas to image data URL
     const imageDataUrl = canvas.toDataURL('image/png');
+    console.log("Photo captured successfully");
     setCapturedImage(imageDataUrl);
     closeCamera();
   };
@@ -92,16 +124,35 @@ export default function EditProfilePage() {
     startCamera();
   };
 
-  // ✅ Phir useEffect
+  const useCapturedImage = () => {
+    console.log("Using captured image:", capturedImage);
+    // Here you can use the capturedImage for your purpose
+    // For example: upload to server, set as profile picture, etc.
+    alert('Photo captured successfully! You can now use it.');
+  };
+
+  // Effect to handle camera start/stop
   useEffect(() => {
     if (showCamera) {
-      startCamera();
+      // Small delay to ensure DOM is updated
+      const timer = setTimeout(() => {
+        startCamera();
+      }, 100);
+      
+      return () => clearTimeout(timer);
     } else {
       closeCamera();
     }
+    
+    return () => {
+      // Cleanup on unmount
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
   }, [showCamera]);
 
-
+ 
   
   const [formData, setFormData] = useState({
     first_name: "",
@@ -530,8 +581,11 @@ useEffect(() => {
                     disabled={imageLoading}
                   />
                 </label>
-                
-                {/* ✅ Take Photo Button Added */}
+
+
+             
+                 
+                 {/* ✅ Take Photo Button Added  */}
                 <button
                   type="button"
                   onClick={openCamera}
@@ -627,8 +681,8 @@ useEffect(() => {
       )}
     </div>
   </div>
-)}
-            
+)} 
+
  
               {/* Help Text */}
               <p className="text-sm text-gray-500 text-center">

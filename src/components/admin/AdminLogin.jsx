@@ -9,8 +9,7 @@ const AdminLogin = () => {
     password: ''
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(''); // ✅ Ye line important hai - component level pe define karo
-
+  const [error, setError] = useState('');
    const navigate = useNavigate();
 
 const handleLogin = async (e) => {
@@ -19,7 +18,7 @@ const handleLogin = async (e) => {
   setError('');
 
   try {
-    // ✅ Environment variable se
+    //  Environment variable se
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://backend-q0wc.onrender.com';
     const response = await axios.post(
       `${API_BASE_URL}/api/admin/login`, 
@@ -49,7 +48,7 @@ const handleLogout = () => {
   localStorage.removeItem('adminData');
   
   //  FIXED: Redirect to home page
-  window.location.href = '/#/'; // Ya phir '/#/' agar HashRouter use kar rahe ho
+  window.location.href = '/#/'; 
   
   setTimeout(() => {
     window.location.reload();
@@ -74,7 +73,7 @@ const handleLogout = () => {
           <p className="text-gray-600 text-sm">Sign in to your administrator account</p>
         </div>
 
-        {/* ✅ Error Message - Ab error variable accessible hai */}
+        {/*  Error Message - Ab error variable accessible hai */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
             <span className="text-red-500 text-lg">⚠️</span>
