@@ -26,7 +26,10 @@ export const chatApi = {
   sendMessage: (messageData) => {
     return api.post('/api/messages', messageData);
   },
-
+// for resent meaasge
+getRecentChats: (myUserId) => {
+  return api.get(`/api/chats/recent/${myUserId}`);
+},
 
   //  Upload file
   uploadFile: (file) => {

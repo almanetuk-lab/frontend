@@ -29,8 +29,14 @@ function Header() {
     localStorage.removeItem("user");
     clearProfile();
     setIsMobileMenuOpen(false);
-    window.location.href = '/#/';
-  };
+    // window.location.href = '/#/';
+      navigate('/');
+
+        setTimeout(() => {
+    window.location.reload();
+  }, 100);
+};
+  
 
   // Close mobile menu when clicking outside
   useEffect(() => {

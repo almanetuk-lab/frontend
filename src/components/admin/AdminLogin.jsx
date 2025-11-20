@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 const AdminLogin = () => {
@@ -10,6 +10,8 @@ const AdminLogin = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(''); // ✅ Ye line important hai - component level pe define karo
+
+   const navigate = useNavigate();
 
 const handleLogin = async (e) => {
   e.preventDefault();
@@ -27,9 +29,9 @@ const handleLogin = async (e) => {
     if (response.data.status === "success") {
       localStorage.setItem('adminToken', response.data.token);
       localStorage.setItem('adminData', JSON.stringify(response.data.admin));
-      // navigate('/admin-dashboard');
+      navigate('/admin-dashboard');
       // window.location.href = '/admin-dashboard';
-       window.location.href = '/#/admin-dashboard';
+      //  window.location.href = '/admin-dashboard';
     } else {
       setError(response.data.message || 'Login failed!');
     }
@@ -49,6 +51,10 @@ const handleLogout = () => {
   //  FIXED: Redirect to home page
   window.location.href = '/#/'; // Ya phir '/#/' agar HashRouter use kar rahe ho
   
+  setTimeout(() => {
+    window.location.reload();
+  }, 100);
+
   // Ya phir React Router use karo
   // navigate('/');
 };

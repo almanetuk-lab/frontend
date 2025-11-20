@@ -113,6 +113,7 @@ export default function UserDashboard() {
             <Route path="plans" element={<UserPlans />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
 
+            {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
           </Routes>
         </main>
       </div>
