@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { UserProfileProvider } from "./components/context/UseProfileContext";
 import Header from "./components/home/Header";
 import Footer from "./components/home/Footer";
@@ -35,6 +35,7 @@ import LinkedInCallback from "./components/social/LinkedInCallback";
 import AddNewPlan from "./components/admin/AddPlanForm";
 import UserPlans from "./components/pages/UserPlans";
 import Cart from "./components/pages/cart";
+import { useState } from "react";
 
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {

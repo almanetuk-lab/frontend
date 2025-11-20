@@ -173,9 +173,9 @@ export default function Sidebar({ profile, activeSection, sidebarOpen, setSideba
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-800 truncate">
+              {/* <p className="text-sm font-medium text-gray-800 truncate">
                 {profile?.full_name?.split(' ')[0] || 'User'}
-              </p>
+              </p> */}
               <p className="text-xs text-gray-500">Free Member</p>
             </div>
           </div>
