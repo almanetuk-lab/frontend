@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { chatApi } from '../services/chatApi';
 import io from 'socket.io-client';
@@ -16,11 +15,15 @@ export default function MessagesSection() {
   const [loading, setLoading] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(null);
   const [showSidebar, setShowSidebar] = useState(true);
-
   const [currentUserId, setCurrentUserId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [recentChats, setRecentChats] = useState([]);
   const [recentChatsLoading, setRecentChatsLoading] = useState(true);
+  const [showDeleteOption, setShowDeleteOption] = useState(null);
+  const [deletingMessageId, setDeletingMessageId] = useState(null);
+  // for open img 
+const [selectedImage, setSelectedImage] = useState(null);
+const [showImageModal, setShowImageModal] = useState(false);
 
   const socketRef = useRef(null);
   const fileInputRef = useRef();
@@ -51,24 +54,27 @@ export default function MessagesSection() {
     setShowSidebar(false);
   };
 
-  // ✅ RECENT CHATS USE EFFECT - YAHAN ADD KARNA HAI
+  // ✅ RECENT CHATS USE EFFECT
   useEffect(() => {
     if (currentUserId) {
       fetchRecentChats();
     }
   }, [currentUserId]);
 
-  // ✅ Click outside to close reaction picker
+  // ✅ Click outside to close reaction picker and delete option
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showReactionPicker && !event.target.closest('.reaction-picker') && !event.target.closest('.message-bubble')) {
         setShowReactionPicker(null);
       }
+      if (showDeleteOption && !event.target.closest('.delete-option') && !event.target.closest('.message-bubble')) {
+        setShowDeleteOption(null);
+      }
     };
 
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [showReactionPicker]);
+  }, [showReactionPicker, showDeleteOption]);
 
   // ✅ Get current user once
   useEffect(() => {
@@ -88,7 +94,29 @@ export default function MessagesSection() {
     }
   }, []);
 
-  // ✅ FIXED: SOCKET WITH REACTION HANDLING
+  // ✅ Image Modal Effects
+useEffect(() => {
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      setShowImageModal(false);
+    }
+  };
+
+  if (showImageModal) {
+    document.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = 'unset';
+  }
+
+  return () => {
+    document.removeEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'unset';
+  };
+}, [showImageModal]);
+
+
+  // ✅ SOCKET WITH REACTION HANDLING
   useEffect(() => {
     if (!currentUserId) return;
 
@@ -117,7 +145,7 @@ export default function MessagesSection() {
       setSocketConnected(false);
     });
 
-    // ✅ FIXED: HANDLE NEW REACTIONS VIA SOCKET
+    // ✅ HANDLE NEW REACTIONS VIA SOCKET
     socket.on('new_reaction', (reactionData) => {
       console.log('🎭 New reaction received via socket:', reactionData);
       if (reactionData && selectedUser) {
@@ -141,7 +169,7 @@ export default function MessagesSection() {
     // ✅ Handle incoming messages
     const handleIncomingMessage = (message) => {
       console.log('📩 Socket message received:', message);
-       fetchRecentChats();
+      fetchRecentChats();
       
       if (!selectedUser) return;
 
@@ -238,7 +266,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ FIXED: LOAD REACTIONS PROPERLY
+  // ✅ LOAD REACTIONS PROPERLY
   const loadReactions = async (userId) => {
     if (!currentUserId || !userId) return;
     try {
@@ -284,6 +312,55 @@ export default function MessagesSection() {
     await loadReactions(user.id);
   };
 
+  // ✅ DELETE MESSAGE FUNCTION
+  const handleDeleteMessage = async (messageId) => {
+    if (!messageId || !currentUserId) {
+      console.error('❌ Cannot delete: missing message ID or user ID');
+      return;
+    }
+
+    const confirmDelete = window.confirm('Ky aap msg dlt karna chahte hai?');
+    if (!confirmDelete) {
+      setShowDeleteOption(null);
+      return;
+    }
+
+    console.log(`🗑️ Deleting message: ${messageId}`);
+    setDeletingMessageId(messageId);
+
+    try {
+      const response = await chatApi.deleteMessage(messageId);
+      console.log('✅ Message deleted successfully:', response);
+
+      // Remove message from state
+      setMessages(prev => prev.filter(msg => msg.id !== messageId));
+      
+      // Update recent chats
+      if (selectedUser) {
+        fetchRecentChats();
+      }
+
+      // Show success message
+      alert('Message successfully deleted!');
+
+    } catch (error) {
+      console.error('❌ Delete failed:', error);
+      alert(' meaasage is not dlt for some erros!');
+    } finally {
+      setDeletingMessageId(null);
+      setShowDeleteOption(null);
+    }
+  };
+
+  // ✅ MESSAGE BUBBLE CLICK HANDLER (Delete option show karega)
+  const handleMessageClick = (messageId, e) => {
+    // Only show delete option for user's own messages
+    const message = messages.find(msg => msg.id === messageId);
+    if (message && message.sender_id === currentUserId) {
+      setShowDeleteOption(showDeleteOption === messageId ? null : messageId);
+    }
+  };
+
   // ✅ SEND MESSAGE
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedUser || !currentUserId) return;
@@ -313,7 +390,7 @@ export default function MessagesSection() {
       });
 
       console.log('✅ Message sent successfully');
-         fetchRecentChats();
+      fetchRecentChats();
 
       setTimeout(() => {
         setMessages(prev => {
@@ -340,7 +417,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ FIXED: ADD REACTION - PROPER REAL-TIME HANDLING
+  // ✅ ADD REACTION - PROPER REAL-TIME HANDLING
   const addReaction = async (messageId, emoji) => {
     if (!currentUserId || !messageId) {
       console.error('❌ Cannot add reaction: missing user ID or message ID');
@@ -376,7 +453,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ FIXED: GET REACTIONS FOR MESSAGE - SIMPLE AND WORKING
+  // ✅ GET REACTIONS FOR MESSAGE - SIMPLE AND WORKING
   const getMessageReactions = (messageId) => {
     if (!messageId) return [];
     
@@ -473,36 +550,74 @@ export default function MessagesSection() {
       hour12: true 
     });
   };
+  // -----------------------------------------------------------------
+  
 
-  // ✅ RENDER ATTACHMENT
-  const renderAttachment = (message) => {
-    if (!message.attachment_url) return null;
-    
-    const isImage = message.attachment_url.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-    const fileName = message.attachment_url.split('/').pop();
-
-    if (isImage) {
-      return (
-        <img 
-          src={message.attachment_url} 
-          alt="Attachment" 
-          className="max-w-full rounded-lg max-h-48 object-cover border border-gray-200 mt-2"
-        />
-      );
-    } else {
-      return (
-        <a 
-          href={message.attachment_url} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-3 py-2 bg-white bg-opacity-20 rounded-lg border border-white border-opacity-30 hover:bg-opacity-30 transition mt-2"
-        >
-          <span>📎</span>
-          <span className="text-sm truncate max-w-xs">{fileName}</span>
-        </a>
-      );
+  // ✅ Image Modal Effects
+useEffect(() => {
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      setShowImageModal(false);
     }
   };
+
+  if (showImageModal) {
+    document.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = 'unset';
+  }
+
+  return () => {
+    document.removeEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'unset';
+  };
+}, [showImageModal]);
+
+  // ✅ RENDER ATTACHMENT new imran
+  const renderAttachment = (message) => {
+  if (!message.attachment_url) return null;
+
+  const isImage = message.attachment_url.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg|webp)$/i);
+
+  if (isImage) {
+    return (
+      <div className="mt-2">
+        <img 
+          src={message.attachment_url}
+          onClick={() => {
+            setSelectedImage({
+              url: message.attachment_url,
+              sender: message.sender_id === currentUserId ? 'You' : selectedUser?.name,
+              timestamp: message.created_at
+            });
+            setShowImageModal(true);
+
+          }}
+          alt="Attachment"
+          className="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition-opacity border border-gray-200 max-h-64 object-cover"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Click to view image
+        </p>
+      </div>
+
+      // yha per add karna h ab 
+    );
+  }
+
+  return (
+    <a 
+      href={message.attachment_url} 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg border border-gray-300 hover:bg-gray-200 transition mt-2"
+    >
+      <span>📎</span>
+      <span className="text-sm">Download File</span>
+    </a>
+  );
+};
 
   // Show login message if no user
   if (!currentUserId) {
@@ -514,6 +629,7 @@ export default function MessagesSection() {
           <h3 className="text-xl font-semibold text-gray-700 mb-2">Please Login First</h3>
           <p className="text-gray-500">You need to login to access messages</p>
         </div>
+        
       </div>
     );
   }
@@ -723,9 +839,34 @@ export default function MessagesSection() {
                               : 'bg-white text-gray-800 shadow-sm border border-gray-200'
                           } rounded-2xl p-3 sm:p-4 ${
                             message.isTemporary ? 'opacity-70 border-2 border-dashed border-yellow-400' : ''
-                          }`}
-                          onClick={() => setShowReactionPicker(showReactionPicker === message.id ? null : message.id)}
+                          } ${deletingMessageId === message.id ? 'opacity-50' : ''}`}
+                          onClick={(e) => handleMessageClick(message.id, e)}
                         >
+                          {/* DELETE OPTION - Only show for user's own messages */}
+                          {showDeleteOption === message.id && message.sender_id === currentUserId && (
+                            <div className="absolute -top-8 right-0 bg-white border border-gray-200 rounded-lg shadow-lg p-1 delete-option z-20">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteMessage(message.id);
+                                }}
+                                disabled={deletingMessageId === message.id}
+                                className="flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 rounded-md text-sm font-medium w-full disabled:opacity-50"
+                              >
+                                {deletingMessageId === message.id ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600"></div>
+                                    Deleting...
+                                  </>
+                                ) : (
+                                  <>
+                                    🗑️ Delete
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          )}
+
                           {/* Sender name for received messages */}
                           {message.sender_id !== currentUserId && (
                             <p className="text-xs font-medium text-gray-500 mb-1">
@@ -747,9 +888,10 @@ export default function MessagesSection() {
                           }`}>
                             {formatTime(message.created_at)}
                             {message.isTemporary && ' • Sending...'}
+                            {deletingMessageId === message.id && ' • Deleting...'}
                           </p>
 
-                          {/* ✅ FIXED: SIMPLE REACTIONS DISPLAY */}
+                          {/* ✅ REACTIONS DISPLAY */}
                           <div className="flex flex-wrap gap-1 mt-2">
                             {getMessageReactions(message.id).map((reaction, index) => (
                               <span 
@@ -875,21 +1017,50 @@ export default function MessagesSection() {
 //   const [fileUploading, setFileUploading] = useState(false);
 //   const [loading, setLoading] = useState(false);
 //   const [showReactionPicker, setShowReactionPicker] = useState(null);
-//   const [showSidebar, setShowSidebar] = useState(true); //  Mobile sidebar toggle
+//   const [showSidebar, setShowSidebar] = useState(true);
 
 //   const [currentUserId, setCurrentUserId] = useState(null);
 //   const [currentUser, setCurrentUser] = useState(null);
+//   const [recentChats, setRecentChats] = useState([]);
+//   const [recentChatsLoading, setRecentChatsLoading] = useState(true);
 
 //   const socketRef = useRef(null);
 //   const fileInputRef = useRef();
 //   const messagesEndRef = useRef();
 //   const [socketConnected, setSocketConnected] = useState(false);
 
-//   // Existing states ke saath yeh add karein
-// const [recentChats, setRecentChats] = useState([]);
-// const [recentChatsLoading, setRecentChatsLoading] = useState(true);
+//   // ✅ Fetch recent chats
+//   const fetchRecentChats = async () => {
+//     try {
+//       setRecentChatsLoading(true);
+//       const response = await chatApi.getRecentChats(currentUserId);
+//       setRecentChats(response.data);
+//     } catch (error) {
+//       console.error('Error fetching recent chats:', error);
+//     } finally {
+//       setRecentChatsLoading(false);
+//     }
+//   };
 
-//   //  Click outside to close reaction picker
+//   // ✅ Handle recent chat selection
+//   const handleRecentChatSelect = (chat) => {
+//     const user = {
+//       id: chat.user_id,
+//       name: chat.name,
+//       email: chat.email
+//     };
+//     handleUserSelect(user);
+//     setShowSidebar(false);
+//   };
+
+//   // ✅ RECENT CHATS USE EFFECT - YAHAN ADD KARNA HAI
+//   useEffect(() => {
+//     if (currentUserId) {
+//       fetchRecentChats();
+//     }
+//   }, [currentUserId]);
+
+//   // ✅ Click outside to close reaction picker
 //   useEffect(() => {
 //     const handleClickOutside = (event) => {
 //       if (showReactionPicker && !event.target.closest('.reaction-picker') && !event.target.closest('.message-bubble')) {
@@ -901,7 +1072,7 @@ export default function MessagesSection() {
 //     return () => document.removeEventListener('click', handleClickOutside);
 //   }, [showReactionPicker]);
 
-//   //  Get current user once
+//   // ✅ Get current user once
 //   useEffect(() => {
 //     try {
 //       const storedUser = localStorage.getItem('currentUser');
@@ -919,7 +1090,7 @@ export default function MessagesSection() {
 //     }
 //   }, []);
 
-//   //  FIXED: SOCKET WITH REACTION HANDLING
+//   // ✅ FIXED: SOCKET WITH REACTION HANDLING
 //   useEffect(() => {
 //     if (!currentUserId) return;
 
@@ -948,7 +1119,7 @@ export default function MessagesSection() {
 //       setSocketConnected(false);
 //     });
 
-//     //  FIXED: HANDLE NEW REACTIONS VIA SOCKET
+//     // ✅ FIXED: HANDLE NEW REACTIONS VIA SOCKET
 //     socket.on('new_reaction', (reactionData) => {
 //       console.log('🎭 New reaction received via socket:', reactionData);
 //       if (reactionData && selectedUser) {
@@ -968,40 +1139,11 @@ export default function MessagesSection() {
 //         });
 //       }
 //     });
-// // ✅ Fetch recent chats
-// const fetchRecentChats = async () => {
-//   try {
-//     setRecentChatsLoading(true);
-//     const response = await chatApi.getRecentChats(currentUserId);
-//     setRecentChats(response.data);
-//   } catch (error) {
-//     console.error('Error fetching recent chats:', error);
-//   } finally {
-//     setRecentChatsLoading(false);
-//   }
-// };
-
-// // Handle recent chat selection
-// const handleRecentChatSelect = (chat) => {
-//   const user = {
-//     id: chat.user_id,
-//     name: chat.name,
-//     email: chat.email
-//   };
-//   handleUserSelect(user);
-//   setShowSidebar(false);
-// };
-
-// // ✅ YAHAN PAR ADD KARNA HAI - Functions ke baad
-// useEffect(() => {
-//   if (currentUserId) {
-//     fetchRecentChats();
-//   }
-// }, [currentUserId]);
 
 //     // ✅ Handle incoming messages
 //     const handleIncomingMessage = (message) => {
 //       console.log('📩 Socket message received:', message);
+//        fetchRecentChats();
       
 //       if (!selectedUser) return;
 
@@ -1106,7 +1248,6 @@ export default function MessagesSection() {
 //       const res = await chatApi.getReactions(currentUserId, userId);
 //       console.log('🎭 Reactions loaded from API:', res.data);
       
-//       // ✅ FIXED: Handle different response formats
 //       let reactionsData = [];
 //       if (Array.isArray(res.data)) {
 //         reactionsData = res.data;
@@ -1137,7 +1278,6 @@ export default function MessagesSection() {
     
 //     setSelectedUser(selectedUserData);
     
-//     // ✅ Mobile: Hide sidebar when user selected
 //     if (window.innerWidth < 768) {
 //       setShowSidebar(false);
 //     }
@@ -1175,6 +1315,7 @@ export default function MessagesSection() {
 //       });
 
 //       console.log('✅ Message sent successfully');
+//          fetchRecentChats();
 
 //       setTimeout(() => {
 //         setMessages(prev => {
@@ -1219,7 +1360,6 @@ export default function MessagesSection() {
 
 //       console.log('✅ Reaction sent successfully:', response.data);
 
-//       // ✅ FIXED: Force reactions reload after adding
 //       if (selectedUser) {
 //         setTimeout(() => {
 //           loadReactions(selectedUser.id);
@@ -1242,14 +1382,12 @@ export default function MessagesSection() {
 //   const getMessageReactions = (messageId) => {
 //     if (!messageId) return [];
     
-//     // ✅ SIMPLE FIX: Direct filter without complex logic
 //     const messageReactions = reactions.filter(r => {
-//       return r.message_id == messageId; // Use == for loose comparison
+//       return r.message_id == messageId;
 //     });
     
 //     console.log(`🎭 Reactions for message ${messageId}:`, messageReactions);
     
-//     // ✅ SIMPLE FIX: Return reactions as is without grouping
 //     return messageReactions;
 //   };
 
@@ -1460,60 +1598,56 @@ export default function MessagesSection() {
 //                 className="flex-1 px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm" 
 //               />
 //             </div>
+//           </div>
+
+//           {/* ✅ RECENT CHATS SECTION - RESPONSIVE */}
+//           <div className="border-b border-gray-200">
+//             <div className="px-4 py-3 bg-gray-50">
+//               <h3 className="text-sm font-medium text-gray-700">Recent Chats</h3>
+//             </div>
             
-//           </div>
-
-// {/* ✅ RECENT CHATS SECTION */}
-// <div className="border-b border-gray-200">
-//   <div className="px-4 py-3 bg-gray-50">
-//     <h3 className="text-sm font-medium text-gray-700">Recent Chats</h3>
-//   </div>
-  
-//   <div className="max-h-48 overflow-y-auto">
-//     {recentChatsLoading ? (
-//       <div className="p-3 text-center text-gray-500 text-sm">Loading recent chats...</div>
-//     ) : recentChats.length === 0 ? (
-//       <div className="p-3 text-center text-gray-500 text-sm">No recent conversations</div>
-//     ) : (
-//       recentChats.map(chat => (
-//         <div
-//           key={chat.user_id}
-//           onClick={() => handleRecentChatSelect(chat)}
-//           className={`p-3 cursor-pointer transition border-b border-gray-100 ${
-//             selectedUser?.id === chat.user_id ? 'bg-indigo-50 border-indigo-200' : 'hover:bg-gray-50'
-//           }`}
-//         >
-//           <div className="flex items-center gap-3">
-//             <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">
-//               {chat.name?.charAt(0)?.toUpperCase() || 'U'}
-//             </div>
-//             <div className="flex-1 min-w-0">
-//               <div className="flex justify-between items-center">
-//                 <p className="font-medium text-gray-800 truncate text-sm">{chat.name}</p>
-//                 <span className="text-xs text-gray-500">
-//                   {new Date(chat.last_message_time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
-//                 </span>
-//               </div>
-//               <div className="flex justify-between items-center mt-1">
-//                 <p className="text-xs text-gray-600 truncate">
-//                   {chat.last_message || 'No messages yet'}
-//                 </p>
-//                 {chat.unread_count > 0 && (
-//                   <span className="bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-//                     {chat.unread_count}
-//                   </span>
-//                 )}
-//               </div>
+//             <div className="max-h-48 overflow-y-auto">
+//               {recentChatsLoading ? (
+//                 <div className="p-3 text-center text-gray-500 text-sm">Loading recent chats...</div>
+//               ) : recentChats.length === 0 ? (
+//                 <div className="p-3 text-center text-gray-500 text-sm">No recent conversations</div>
+//               ) : (
+//                 recentChats.map(chat => (
+//                   <div
+//                     key={chat.user_id}
+//                     onClick={() => handleRecentChatSelect(chat)}
+//                     className={`p-3 cursor-pointer transition border-b border-gray-100 ${
+//                       selectedUser?.id === chat.user_id ? 'bg-indigo-50 border-indigo-200' : 'hover:bg-gray-50'
+//                     }`}
+//                   >
+//                     <div className="flex items-center gap-3">
+//                       <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+//                         {chat.name?.charAt(0)?.toUpperCase() || 'U'}
+//                       </div>
+//                       <div className="flex-1 min-w-0">
+//                         <div className="flex justify-between items-center">
+//                           <p className="font-medium text-gray-800 truncate text-sm">{chat.name}</p>
+//                           <span className="text-xs text-gray-500">
+//                             {new Date(chat.last_message_time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+//                           </span>
+//                         </div>
+//                         <div className="flex justify-between items-center mt-1">
+//                           <p className="text-xs text-gray-600 truncate">
+//                             {chat.last_message || 'No messages yet'}
+//                           </p>
+//                           {chat.unread_count > 0 && (
+//                             <span className="bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+//                               {chat.unread_count}
+//                             </span>
+//                           )}
+//                         </div>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 ))
+//               )}
 //             </div>
 //           </div>
-//         </div>
-//       ))
-//     )}
-//   </div>
-// </div>
-
-
-         
 
 //           {/* Users List */}
 //           <div className="flex-1 overflow-y-auto">
@@ -1713,6 +1847,7 @@ export default function MessagesSection() {
 //     </div>
 //   );
 // }
+
 
 
 
