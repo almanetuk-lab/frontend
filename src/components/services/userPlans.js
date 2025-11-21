@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3435/api";
+const BASE_URL = "https://backend-q0wc.onrender.com/api";
 let user_id = 1; //Comes from user table.
 
 export const fetchPlans = async () => {
