@@ -61,10 +61,36 @@ getUserNotifications: (userId) => {
   return api.get(`/api/notifications/${userId}`);
 },
 
- //  YEH NAYI API ADD KARDI
+ //  YEH NAYI API ADD KARDI hai mane
   markAllNotificationsAsRead: (userId) => {
     return api.put(`/api/notifications/read/messages/${userId}`);
+  },
+
+//   //  DELETE MESSAGE API
+// deleteMessage: async (messageId) => {
+//   // Server automatically current user detect karega token se hoga
+//   const response = await api.delete(`/api/message/${messageId}`);
+//   return response;
+// },
+
+//  DELETE MESSAGE API hai yeh 
+deleteMessage: async (messageId) => {
+  // Get current user ID from localStorage
+  const currentUser = localStorage.getItem('currentUser');
+  let userId = '';
+  
+  if (currentUser) {
+    try {
+      const userData = JSON.parse(currentUser);
+      userId = userData.user_id || userData.id;
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+    }
   }
+  
+  const response = await api.delete(`/api/messages/${messageId}?userId=${userId}`);
+  return response;
+},
 
 };
 
