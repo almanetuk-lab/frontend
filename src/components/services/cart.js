@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3435/api/cart";
+const BASE_URL = "https://backend-q0wc.onrender.com/api/cart";
 
 // ✅ Get all cart items by user_id
 export const fetchCartItems = async (userId) => {

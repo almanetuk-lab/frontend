@@ -39,10 +39,10 @@ api.interceptors.response.use(
 
 // Admin APIs
 export const adminAPI = {
-  // Login (already working)
+  // Login 
   // login: (credentials) => api.post('/api/admin/login', credentials),
 
-  // Get All Users (jab ban jayegi)
+  // Get All Users 
   getUsers: () => api.get('/api/admin/users'),
 
     // Get User Details by ID -
@@ -72,7 +72,7 @@ export const adminAPI = {
       // SEARCH PROFILES - Add this line only
   searchProfiles: (searchParams) => api.get('/search', { params: searchParams }),
 
-   // ✅ NOTIFICATION APIS ADDED
+   // NOTIFICATION APIS ADDED
   getUserNotifications: (userId) => 
     api.get(`/api/notifications/${userId}`),
   

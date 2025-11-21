@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:3435/api/admin/plans";
+const API = "https://backend-q0wc.onrender.com/api/admin/plans";
 
 export const getPlans = () => axios.get(API);
 
