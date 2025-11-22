@@ -388,7 +388,7 @@ const AdminDashboard = () => {
                 onClick={() => handleOnHold(selectedUser.user_id || selectedUser.id)}
                 className="px-4 sm:px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium text-sm sm:text-base flex-1 sm:flex-none order-2 sm:order-1"
               >
-                Put On Hold
+               On Hold
               </button>
               <button
                 onClick={() => handleDeactivate(selectedUser.user_id || selectedUser.id)}

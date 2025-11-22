@@ -38,6 +38,7 @@ import Cart from "./components/pages/cart";
 import { useState } from "react";
 // Admin plan 
 import AdminAddNewPlan from "./components/pages/AdminAddNewPlan";
+import BlogPage from "./components/pages/BlogPage";
 
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
@@ -198,6 +199,12 @@ export default function App() {
                 <Contact />
               </UserProtectedRoute>
             </MainLayout>
+          } />
+
+          <Route path="/blog" element={
+               <MainLayout>
+               <BlogPage />
+             </MainLayout> 
           } />
 
           {/* Chat Routes WITH Header & Footer */}
