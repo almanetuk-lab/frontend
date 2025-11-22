@@ -82,7 +82,7 @@ function Header() {
               </li>
               {/* <li>
                 <Link
-                  to="/"
+                  to="/contact"
                   className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
                 >
                   About
@@ -129,7 +129,7 @@ function Header() {
                   
               <li>
                 <Link
-                  to="/"
+                  to="/blog"
                   className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
                 >
                   Blogs
@@ -172,17 +172,17 @@ function Header() {
             ) : (
               <div className="flex items-center gap-3">
                 <Link
-                  to="/admin-login"
-                  className="text-gray-700 hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
-                >
-                 Admin Login
-                </Link>
-
-                <Link
                   to="/login"
                   className="text-gray-700 hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
                 >
-                  Login
+                Login
+                </Link>
+
+                <Link
+                  to="/admin-login"
+                  className="text-gray-700 hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
+                >
+                   Admin Login
                 </Link>
                 <Link
                   to="/register"
@@ -307,15 +307,15 @@ function Header() {
                   </Link>
                 </li>
                     
-                <li>
+                {/* <li>
                   <Link
-                    to="/"
+                    to="/blog"
                     className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Blogs
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </nav>
 
