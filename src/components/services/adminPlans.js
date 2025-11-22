@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API = "https://backend-q0wc.onrender.com/api/admin/plans";
+// const API = "https://backend-q0wc.onrender.com/api/admin/plans";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://backend-q0wc.onrender.com";
+
 
 export const getPlans = () => axios.get(API);
 

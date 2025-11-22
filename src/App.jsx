@@ -36,6 +36,8 @@ import AddNewPlan from "./components/admin/AddPlanForm";
 import UserPlans from "./components/pages/UserPlans";
 import Cart from "./components/pages/cart";
 import { useState } from "react";
+// Admin plan 
+import AdminAddNewPlan from "./components/pages/AdminAddNewPlan";
 
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
@@ -62,59 +64,12 @@ const MainLayout = ({ children }) => (
 const PlanFormWrapper = () => {
   // Yahan aap useState aur useNavigate use kar sakte hain
   // Kyunki yeh component HashRouter ke ANDAR hai
-  return <AddNewPlan />;
+  return <AdminAddNewPlan />;
 };
-
+  
 export default function App() {
-  const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    price: 0,
-    duration: 0,
-    video_call_limit: 0,
-    people_search_limit: 0,
-    people_message_limit: 0,
-    audio_call_limit: 0,
-    type: "",
-  });
-
-  const [editingId, setEditingId] = useState(null);
-
-  const fetchPlans = async () => {
-    const res = await axios.get(BASE_URL);
-    setPlans(res.data);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!editingId) {
-      await axios.post(BASE_URL, formData);
-    } else {
-      setIsOpen(true);
-    }
-
-    setFormData({
-      name: "",
-      price: "",
-      duration: "",
-      video_call_limit: "",
-      people_search_limit: "",
-      people_message_limit: "",
-      audio_call_limit: "",
-      type: "",
-    });
-
-    navigate("/admin-dashboard");
-
-    fetchPlans();
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
- 
+  
   return (
 
     // <HashRouter>

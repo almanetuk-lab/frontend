@@ -42,21 +42,46 @@ const handleLogin = async (e) => {
     setLoading(false);
   }
 };
+
 const handleLogout = () => {
-  // Clear admin data
-  localStorage.removeItem('adminToken');
-  localStorage.removeItem('adminData');
+  try {
+    // Clear all admin related data
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminData');
+    sessionStorage.removeItem('adminSession');
+    
+    // Clear any other related storage
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith('admin')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Force redirect to home page
+    window.location.href = '/';
+    
+  } catch (error) {
+    console.error('Logout error:', error);
+    window.location.href = '/';
+  }
+};
+
+// const handleLogout = () => {
+//   // Clear admin data
+//   localStorage.removeItem('adminToken');
+//   localStorage.removeItem('adminData');
   
-  //  FIXED: Redirect to home page
-  window.location.href = '/#/'; 
+//   //  FIXED: Redirect to home page
+//   window.location.href = '/'; 
   
-  setTimeout(() => {
-    window.location.reload();
-  }, 100);
+//   setTimeout(() => {
+//     window.location.reload();
+//   }, 100);
 
   // Ya phir React Router use karo
   // navigate('/');
-};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white/45 to-white/100 px-4 py-8">

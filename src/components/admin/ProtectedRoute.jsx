@@ -11,5 +11,4 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// ✅ Ye line important hai - default export karo
 export default ProtectedRoute;
