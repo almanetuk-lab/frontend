@@ -4,7 +4,11 @@ import EditPlanModal from "./EditPlansModal";
 import DeleteConfirmModal from './DeleteConfirmModal.jsx';
 import { useNavigate } from "react-router-dom";
 
-const BASE_URL = "http://localhost:3435/api/admin/plans";
+const BASE_URL = "https://backend-q0wc.onrender.com/api/admin/plans";
+
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://backend-q0wc.onrender.com";
+
+
 
 export default function AdminPlans({ editingId, setEditingId, plans, setPlans }) {
     const navigate = useNavigate();
