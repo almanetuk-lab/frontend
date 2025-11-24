@@ -15,32 +15,35 @@ export default function DashboardHome({ profile }) {
   const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Memoized matches data
-  const randomMatches = useMemo(() => [
-    { 
-      id: 1, 
-      name: "Priya Sharma", 
-      profession: "Software Engineer", 
-      city: "Mumbai",
-      age: 28,
-      online: true
-    },
-    { 
-      id: 2, 
-      name: "Rahul Kumar", 
-      profession: "UI/UX Designer", 
-      city: "Delhi",
-      age: 26,
-      online: false
-    },
-    { 
-      id: 3, 
-      name: "Anjali Singh", 
-      profession: "Marketing Manager", 
-      city: "Bangalore",
-      age: 30,
-      online: true
-    }
-  ], []);
+  const randomMatches = useMemo(
+    () => [
+      {
+        id: 1,
+        name: "Priya Sharma",
+        profession: "Software Engineer",
+        city: "Mumbai",
+        age: 28,
+        online: true,
+      },
+      {
+        id: 2,
+        name: "Rahul Kumar",
+        profession: "UI/UX Designer",
+        city: "Delhi",
+        age: 26,
+        online: false,
+      },
+      {
+        id: 3,
+        name: "Anjali Singh",
+        profession: "Marketing Manager",
+        city: "Bangalore",
+        age: 30,
+        online: true,
+      },
+    ],
+    []
+  );
 
   // ✅ Search users function
   const handleSearch = async (query) => {
@@ -54,15 +57,15 @@ export default function DashboardHome({ profile }) {
     try {
       const response = await chatApi.searchUsers(query);
       console.log("Search results:", response.data);
-      
+
       // Get current user ID from profile or localStorage
       const currentUserId = profile?.id || profile?.user_id;
-      
+
       // Filter out current user from results
-      const filteredResults = (response.data || []).filter(user => 
-        user.id !== currentUserId
+      const filteredResults = (response.data || []).filter(
+        (user) => user.id !== currentUserId
       );
-      
+
       setSearchResults(filteredResults);
       setShowSearchResults(true);
     } catch (error) {
@@ -99,33 +102,38 @@ export default function DashboardHome({ profile }) {
   // ✅ Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest('.search-container')) {
+      if (!event.target.closest(".search-container")) {
         setShowSearchResults(false);
       }
     };
 
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   return (
-
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-    
       <div className="max-w-7xl mx-auto">
         {/* Desktop Header */}
         <header className="hidden lg:block bg-white shadow-sm p-6 border-b border-gray-200 mb-6 rounded-2xl">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-2 truncate">
-                Welcome back, <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Welcome back,{" "}
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                   {/* {profile?.full_name?.split(' ')[0] || profile?.name?.split(' ')[0] || 'User'}! */}
-                  {profile?.first_name || profile?.last_name?.split(' ')[0] || profile?.name?.split(' ')[0] || 'User'}!
+                  {profile?.first_name ||
+                    profile?.last_name?.split(" ")[0] ||
+                    profile?.name?.split(" ")[0] ||
+                    "User"}
+                  !
                 </span>
               </h1>
-              <p className="text-gray-600 text-sm lg:text-base">Ready to find your perfect match?</p>
+              <p className="text-gray-600 text-sm lg:text-base">
+                Ready to find your perfect match?
+              </p>
             </div>
-            
+
             {/* Search Bar */}
             <div className="w-full lg:w-96 flex-shrink-0 search-container">
               <div className="relative">
@@ -144,16 +152,18 @@ export default function DashboardHome({ profile }) {
                   }}
                   className="w-full px-4 lg:px-5 py-3 lg:py-4 pl-10 lg:pl-12 pr-10 border border-gray-300 rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm transition text-sm lg:text-base"
                 />
-                <span className="absolute left-3 lg:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-base">🔍</span>
-                
+                <span className="absolute left-3 lg:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-base">
+                  🔍
+                </span>
+
                 {searchLoading && (
                   <div className="absolute right-10 top-1/2 transform -translate-y-1/2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
                   </div>
                 )}
-                
+
                 {searchQuery && !searchLoading && (
-                  <button 
+                  <button
                     onClick={() => {
                       setSearchQuery("");
                       setSearchResults([]);
@@ -164,7 +174,7 @@ export default function DashboardHome({ profile }) {
                     ✕
                   </button>
                 )}
-                
+
                 {/* ✅ Search Results Dropdown */}
                 {showSearchResults && searchQuery.trim() && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50">
@@ -182,17 +192,25 @@ export default function DashboardHome({ profile }) {
                             className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-b border-gray-100 last:border-b-0"
                           >
                             <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">
-                              {user.name?.charAt(0)?.toUpperCase() || user.first_name?.charAt(0)?.toUpperCase() || 'U'}
+                              {user.name?.charAt(0)?.toUpperCase() ||
+                                user.first_name?.charAt(0)?.toUpperCase() ||
+                                "U"}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-gray-800 truncate text-sm">
-                                {user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'User'}
+                                {user.name ||
+                                  `${user.first_name || ""} ${
+                                    user.last_name || ""
+                                  }`.trim() ||
+                                  "User"}
                               </p>
                               <p className="text-xs text-gray-600 truncate">
-                                {user.profession || user.email || 'No info'}
+                                {user.profession || user.email || "No info"}
                               </p>
                               {user.city && (
-                                <p className="text-xs text-gray-500 truncate">📍 {user.city}</p>
+                                <p className="text-xs text-gray-500 truncate">
+                                  📍 {user.city}
+                                </p>
                               )}
                             </div>
                           </div>
@@ -201,7 +219,9 @@ export default function DashboardHome({ profile }) {
                     ) : (
                       <div className="p-4 text-center text-gray-500">
                         <p className="text-sm">No users found</p>
-                        <p className="text-xs mt-1">Try different search terms</p>
+                        <p className="text-xs mt-1">
+                          Try different search terms
+                        </p>
                       </div>
                     )}
                   </div>
@@ -216,14 +236,18 @@ export default function DashboardHome({ profile }) {
           <div className="flex items-center justify-between mb-4">
             <div className="flex-1 min-w-0">
               <h1 className="text-xl font-bold text-gray-800 mb-1 truncate">
-                Welcome, <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  {profile?.full_name?.split(' ')[0] || profile?.name?.split(' ')[0] || 'User'}!
+                Welcome,{" "}
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  {profile?.full_name?.split(" ")[0] ||
+                    profile?.name?.split(" ")[0] ||
+                    "User"}
+                  !
                 </span>
               </h1>
               <p className="text-gray-600 text-sm">Find your perfect match</p>
             </div>
           </div>
-          
+
           {/* Mobile Search Bar */}
           <div className="relative search-container">
             <input
@@ -241,16 +265,18 @@ export default function DashboardHome({ profile }) {
               }}
               className="w-full px-4 py-3 pl-10 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm transition text-sm"
             />
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
-            
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              🔍
+            </span>
+
             {searchLoading && (
               <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
               </div>
             )}
-            
+
             {searchQuery && !searchLoading && (
-              <button 
+              <button
                 onClick={() => {
                   setSearchQuery("");
                   setSearchResults([]);
@@ -261,7 +287,7 @@ export default function DashboardHome({ profile }) {
                 ✕
               </button>
             )}
-            
+
             {/* ✅ Mobile Search Results Dropdown */}
             {showSearchResults && searchQuery.trim() && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50">
@@ -279,14 +305,20 @@ export default function DashboardHome({ profile }) {
                         className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-b border-gray-100 last:border-b-0"
                       >
                         <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">
-                          {user.name?.charAt(0)?.toUpperCase() || user.first_name?.charAt(0)?.toUpperCase() || 'U'}
+                          {user.name?.charAt(0)?.toUpperCase() ||
+                            user.first_name?.charAt(0)?.toUpperCase() ||
+                            "U"}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-800 truncate text-sm">
-                            {user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'User'}
+                            {user.name ||
+                              `${user.first_name || ""} ${
+                                user.last_name || ""
+                              }`.trim() ||
+                              "User"}
                           </p>
                           <p className="text-xs text-gray-600 truncate">
-                            {user.profession || user.email || 'No info'}
+                            {user.profession || user.email || "No info"}
                           </p>
                         </div>
                       </div>
@@ -310,57 +342,64 @@ export default function DashboardHome({ profile }) {
             {/* Profile Card */}
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Your Profile</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                  Your Profile
+                </h2>
                 <div className="flex gap-2">
-                  <span className="px-2 sm:px-3 py-1 bg-green-100 text-green-600 text-xs sm:text-sm rounded-full font-medium">Active</span>
-                  <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-600 text-xs sm:text-sm rounded-full font-medium">Verified</span>
+                  <span className="px-2 sm:px-3 py-1 bg-green-100 text-green-600 text-xs sm:text-sm rounded-full font-medium">
+                    Active
+                  </span>
+                  <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-600 text-xs sm:text-sm rounded-full font-medium">
+                    Verified
+                  </span>
                 </div>
               </div>
-              
+
               {/* Profile Header */}
               <div className="flex flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6 sm:mb-8">
-             
                 {/* Profile Picture */}
                 <div className="flex-shrink-0">
-  {profile?.image_url ? (
-    <img
-      src={profile.image_url}
-      alt="Profile"
-      className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl object-cover border-4 border-white shadow-lg"
-      loading="lazy"
-    />
-  ) : (
-    <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg flex-col">
-      {profile?.first_name?.charAt(0)}
-      {profile?.last_name?.charAt(0)}
-      <span className="text-xs mt-1 text-white/80">Profile Pic</span>
-    </div>
-  )}
-</div>
-
+                  {profile?.image_url ? (
+                    <img
+                      src={profile.image_url}
+                      alt="Profile"
+                      className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl object-cover border-4 border-white shadow-lg"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg flex-col">
+                      {profile?.first_name?.charAt(0)}
+                      {profile?.last_name?.charAt(0)}
+                      <span className="text-xs mt-1 text-white/80">
+                        Profile Pic
+                      </span>
+                    </div>
+                  )}
+                </div>
 
                 {/* Profile Info */}
-                
-                 <div className="flex-1 w-full min-w-0">           
+
+                <div className="flex-1 w-full min-w-0">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 mb-4">
                     <div className="flex-1 min-w-0">
                       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2 truncate">
                         {/* {profile?.first_name || profile?.name || ""} */}
-                          {profile?.first_name && profile?.last_name
-                        ? `${profile.first_name} ${profile.last_name}`
-                        : profile?.name || 'User'
-                        }
-
+                        {profile?.first_name && profile?.last_name
+                          ? `${profile.first_name} ${profile.last_name}`
+                          : profile?.name || "User"}
                       </h1>
                       <p className="text-gray-600 text-base sm:text-lg mb-1 truncate">
-                        {profile?.profession || profile?.occupation || profile?.headline || "Software Engineer"}
+                        {profile?.profession ||
+                          profile?.occupation ||
+                          profile?.headline ||
+                          "Software Engineer"}
                       </p>
                       <p className="text-gray-500 text-sm sm:text-base flex items-center gap-1 truncate">
-                        📍 {profile?.city || profile?.location || "INDORE"} • 
+                        📍 {profile?.city || profile?.location || "INDORE"} •
                         {profile?.age ? ` ${profile.age} years` : " 24 years"}
                       </p>
                     </div>
-                    
+
                     <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => navigate("/dashboard/profile")}
@@ -379,7 +418,7 @@ export default function DashboardHome({ profile }) {
                         <span className="sm:hidden">Edit</span>
                       </button>
                     </div>
-                  </div> 
+                  </div>
                 </div>
               </div>
 
@@ -394,19 +433,21 @@ export default function DashboardHome({ profile }) {
 
             {/* Recent Activity */}
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Recent Activity</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">
+                Recent Activity
+              </h3>
               <div className="space-y-2 sm:space-y-3">
-                <ActivityItem 
+                <ActivityItem
                   icon="👀"
                   text="Your profile was viewed by 5 new people"
                   time="2 hours ago"
                 />
-                <ActivityItem 
+                <ActivityItem
                   icon="💖"
                   text="You have 3 new matches waiting"
                   time="5 hours ago"
                 />
-                <ActivityItem 
+                <ActivityItem
                   icon="💬"
                   text="You received 2 new messages"
                   time="1 day ago"
@@ -420,15 +461,19 @@ export default function DashboardHome({ profile }) {
             {/* Suggested Matches */}
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-800">Suggested Matches</h3>
-                <span className="text-xs sm:text-sm text-indigo-600 font-medium">3+</span>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+                  Suggested Matches
+                </h3>
+                <span className="text-xs sm:text-sm text-indigo-600 font-medium">
+                  3+
+                </span>
               </div>
               <div className="space-y-3 sm:space-y-4">
                 {randomMatches.map((user) => (
                   <MatchCard key={user.id} user={user} />
                 ))}
               </div>
-              <button 
+              <button
                 onClick={() => navigate("/dashboard/matches")}
                 className="w-full mt-3 sm:mt-4 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-100 transition font-medium text-sm sm:text-base"
               >
@@ -438,7 +483,9 @@ export default function DashboardHome({ profile }) {
 
             {/* Quick Actions */}
             <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
-              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                Quick Actions
+              </h3>
               <div className="space-y-2 sm:space-y-3">
                 <QuickAction icon="⚡" label="Boost Profile" />
                 <QuickAction icon="⭐" label="Go Premium" />
@@ -452,29 +499,3 @@ export default function DashboardHome({ profile }) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

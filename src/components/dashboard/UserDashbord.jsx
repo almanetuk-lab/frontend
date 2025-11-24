@@ -1,6 +1,12 @@
 // src/components/dashboard/UserDashboard.jsx
 import React, { useEffect, useState, useCallback } from "react";
-import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
 import Sidebar from "./Sidebar";
 import DashboardHome from "./DashboardContent";
@@ -21,14 +27,14 @@ export default function UserDashboard() {
   // Get active section from URL
   const getActiveSection = useCallback(() => {
     const path = location.pathname;
-    if (path === '/dashboard' || path === '/dashboard/') return 'dashboard';
-    if (path.includes('profile')) return 'profile';
-    if (path.includes('messages')) return 'messages';
-    if (path.includes('search')) return 'search';
-    if (path.includes('matches')) return 'matches';
-    if (path.includes('members')) return 'members';
-    if (path.includes('plans')) return 'plans';
-    return 'dashboard';
+    if (path === "/dashboard" || path === "/dashboard/") return "dashboard";
+    if (path.includes("profile")) return "profile";
+    if (path.includes("messages")) return "messages";
+    if (path.includes("search")) return "search";
+    if (path.includes("matches")) return "matches";
+    if (path.includes("members")) return "members";
+    if (path.includes("plans")) return "plans";
+    return "dashboard";
   }, [location.pathname]);
 
   const activeSection = getActiveSection();
@@ -60,8 +66,10 @@ export default function UserDashboard() {
         <div className="bg-white p-6 rounded-xl shadow-lg text-center max-w-md">
           <div className="text-gray-400 text-3xl mb-3">👤</div>
           <h3 className="text-gray-800 text-lg mb-2">Create Your Profile</h3>
-          <p className="text-gray-600 text-sm mb-4">Let's set up your profile to get started</p>
-          <button 
+          <p className="text-gray-600 text-sm mb-4">
+            Let's set up your profile to get started
+          </p>
+          <button
             onClick={() => navigate("/dashboard/edit-profile")}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm"
           >
@@ -75,7 +83,7 @@ export default function UserDashboard() {
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Sidebar */}
-      <Sidebar 
+      <Sidebar
         profile={profile}
         activeSection={activeSection}
         sidebarOpen={sidebarOpen}
@@ -94,7 +102,7 @@ export default function UserDashboard() {
               <span className="text-xl">☰</span>
             </button>
             <h1 className="text-lg font-semibold text-gray-800 capitalize">
-              {activeSection.replace('-', ' ')}
+              {activeSection.replace("-", " ")}
             </h1>
             <div className="w-8"></div>
           </div>
@@ -120,7 +128,7 @@ export default function UserDashboard() {
 
       {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -128,46 +136,3 @@ export default function UserDashboard() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,3 @@
-
 // src/components/chatsystem/AdvancedSearch.jsx
 import React, { useEffect, useState } from "react";
 import { adminAPI } from "../services/adminApi";
@@ -9,22 +8,21 @@ export default function AdvancedSearch() {
   const [searchResults, setSearchResults] = useState([]);
   const [filters, setFilters] = useState({
     basicSearch: "",
-    first_name: '',
-    last_name: '',
-    gender: '',
-    marital_status: '',
-    profession: '',
-    skills: '',
-    interests: '',
-    city: '',
-    state: '',
-    min_age: '',
-    max_age: '',
-    radius: '',
-    distance: '10',
-    lat: '',
-    lon: ''
-    
+    first_name: "",
+    last_name: "",
+    gender: "",
+    marital_status: "",
+    profession: "",
+    skills: "",
+    interests: "",
+    city: "",
+    state: "",
+    min_age: "",
+    max_age: "",
+    radius: "",
+    distance: "10",
+    lat: "",
+    lon: "",
   });
 
   const getLiveLocation = () => {
@@ -59,189 +57,189 @@ export default function AdvancedSearch() {
   }, [activeTab]);
 
   const handleInputChange = (field, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
-const performSearch = async () => {
-  setLoading(true);
-  setSearchResults([]);
+  const performSearch = async () => {
+    setLoading(true);
+    setSearchResults([]);
 
-  try {
-    let searchParams = {};
+    try {
+      let searchParams = {};
 
-    // ---------------- BASIC SEARCH FIXED ----------------
-    if (activeTab === "basic") {
-      searchParams = { search_mode: "basic" };
+      // ---------------- BASIC SEARCH FIXED ----------------
+      if (activeTab === "basic") {
+        searchParams = { search_mode: "basic" };
 
-      // ✅ FIX: Backend first_name parameter use karta hai basic search ke liye
-      if (filters.basicSearch) {
-        searchParams.first_name = filters.basicSearch; // search_term nahi, first_name
+        // ✅ FIX: Backend first_name parameter use karta hai basic search ke liye
+        if (filters.basicSearch) {
+          searchParams.first_name = filters.basicSearch; // search_term nahi, first_name
+        }
+
+        // Optional AND filters
+        if (filters.profession) {
+          searchParams.profession = filters.profession;
+        }
+
+        if (filters.city) {
+          searchParams.city = filters.city;
+        }
       }
 
-      // Optional AND filters
-      if (filters.profession) {
-        searchParams.profession = filters.profession;
+      // ---------------- ADVANCED SEARCH FIXED ----------------
+      else if (activeTab === "advanced") {
+        searchParams = {
+          search_mode: "advanced",
+          // ✅ DIRECT parameters bhejo jo backend expect kar raha hai
+          first_name: filters.first_name,
+          last_name: filters.last_name,
+          gender: filters.gender,
+          marital_status: filters.marital_status,
+          profession: filters.profession,
+          skills: filters.skills,
+          interests: filters.interests,
+          city: filters.city,
+          state: filters.state,
+          min_age: filters.min_age,
+          max_age: filters.max_age,
+          radius: filters.radius,
+        };
       }
 
-      if (filters.city) {
-        searchParams.city = filters.city;
+      // ---------------- NEAR ME (already working) ----------------
+      else if (activeTab === "nearme") {
+        searchParams = {
+          search_mode: "nearme",
+          radius: filters.radius || filters.distance,
+          lat: filters.lat,
+          lon: filters.lon,
+          city: filters.city,
+        };
       }
+
+      // Remove empty values
+      const cleanParams = Object.fromEntries(
+        Object.entries(searchParams).filter(
+          ([_, value]) => value !== "" && value !== null && value !== undefined
+        )
+      );
+
+      console.log("Fixed Clean params:", cleanParams);
+
+      const response = await adminAPI.searchProfiles(cleanParams);
+      setSearchResults(response.data || []);
+    } catch (error) {
+      console.error("Search API error:", error);
+      alert("Search failed: " + (error.response?.data?.error || error.message));
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // ---------------- ADVANCED SEARCH FIXED ----------------
-    else if (activeTab === "advanced") {
-      searchParams = {
-        search_mode: "advanced",
-        // ✅ DIRECT parameters bhejo jo backend expect kar raha hai
-        first_name: filters.first_name,
-        last_name: filters.last_name,
-        gender: filters.gender,
-        marital_status: filters.marital_status,
-        profession: filters.profession,
-        skills: filters.skills,
-        interests: filters.interests,
-        city: filters.city,
-        state: filters.state,
-        min_age: filters.min_age,
-        max_age: filters.max_age,
-        radius: filters.radius
-      };
-    }
+  //   const performSearch = async () => {
+  //     setLoading(true);
+  //     setSearchResults([]);
 
-    // ---------------- NEAR ME (already working) ----------------
-    else if (activeTab === "nearme") {
-      searchParams = {
-        search_mode: "nearme",
-        radius: filters.radius || filters.distance,
-        lat: filters.lat,
-        lon: filters.lon,
-        city: filters.city
-      };
-    }
+  //     try {
+  //       let searchParams = {};
 
-    // Remove empty values
-    const cleanParams = Object.fromEntries(
-      Object.entries(searchParams).filter(([_, value]) =>
-        value !== '' && value !== null && value !== undefined
-      )
-    );
+  //       // ---------------- BASIC SEARCH (keyword + optional AND filters) ----------------
+  //       if (activeTab === "basic") {
+  //   searchParams = { search_mode: "basic" };
 
-    console.log("Fixed Clean params:", cleanParams);
+  //   if (filters.basicSearch) {
+  //     searchParams.first_name = filters.basicSearch; // OR search keyword
+  //   }
 
-    const response = await adminAPI.searchProfiles(cleanParams);
-    setSearchResults(response.data || []);
-  } catch (error) {
-    console.error("Search API error:", error);
-    alert("Search failed: " + (error.response?.data?.error || error.message));
-  } finally {
-    setLoading(false);
-  }
-};
+  //   if (filters.profession) {
+  //     searchParams.profession = filters.profession; // AND filter
+  //   }
 
+  //   if (filters.city) {
+  //     searchParams.city = filters.city; // AND filter
+  //   }
+  // }
 
-//   const performSearch = async () => {
-//     setLoading(true);
-//     setSearchResults([]);
+  //       // ---------------- ADVANCED SEARCH (AND semantics) ----------------
+  //       else if (activeTab === "advanced") {
+  //         searchParams = {
+  //           first_name: filters.first_name,
+  //           last_name: filters.last_name,
+  //           gender: filters.gender,
+  //           marital_status: filters.marital_status,
+  //           profession: filters.profession,
+  //           skills: filters.skills,
+  //           interests: filters.interests,
+  //           city: filters.city,
+  //           state: filters.state,
+  //           min_age: filters.min_age,
+  //           max_age: filters.max_age,
+  //           radius: filters.radius
+  //         };
+  //         searchParams.search_mode = "advanced";
+  //       }
 
-//     try {
-//       let searchParams = {};
+  //       // ---------------- NEAR ME (prefer GPS, fallback to city+radius) ----------------
+  //       else if (activeTab === "nearme") {
+  //         // send radius & lat/lon if available
+  //         searchParams = {
+  //           radius: filters.radius || filters.distance,
+  //           lat: filters.lat,
+  //           lon: filters.lon,
+  //           city: filters.city // fallback if user typed city
+  //         };
+  //         searchParams.search_mode = "nearme";
+  //       }
 
-//       // ---------------- BASIC SEARCH (keyword + optional AND filters) ----------------
-//       if (activeTab === "basic") {
-//   searchParams = { search_mode: "basic" };
+  //       // Remove empty/null/undefined values only (keep defaults)
+  //       const cleanParams = Object.fromEntries(
+  //         Object.entries(searchParams).filter(([_, value]) =>
+  //           value !== '' && value !== null && value !== undefined
+  //         )
+  //       );
 
-//   if (filters.basicSearch) {
-//     searchParams.first_name = filters.basicSearch; // OR search keyword
-//   }
+  //       console.log("Clean params:", cleanParams);
 
-//   if (filters.profession) {
-//     searchParams.profession = filters.profession; // AND filter
-//   }
-
-//   if (filters.city) {
-//     searchParams.city = filters.city; // AND filter
-//   }
-// }
-
-
-//       // ---------------- ADVANCED SEARCH (AND semantics) ----------------
-//       else if (activeTab === "advanced") {
-//         searchParams = {
-//           first_name: filters.first_name,
-//           last_name: filters.last_name,
-//           gender: filters.gender,
-//           marital_status: filters.marital_status,
-//           profession: filters.profession,
-//           skills: filters.skills,
-//           interests: filters.interests,
-//           city: filters.city,
-//           state: filters.state,
-//           min_age: filters.min_age,
-//           max_age: filters.max_age,
-//           radius: filters.radius
-//         };
-//         searchParams.search_mode = "advanced";
-//       }
-
-//       // ---------------- NEAR ME (prefer GPS, fallback to city+radius) ----------------
-//       else if (activeTab === "nearme") {
-//         // send radius & lat/lon if available
-//         searchParams = {
-//           radius: filters.radius || filters.distance,
-//           lat: filters.lat,
-//           lon: filters.lon,
-//           city: filters.city // fallback if user typed city
-//         };
-//         searchParams.search_mode = "nearme";
-//       }
-
-//       // Remove empty/null/undefined values only (keep defaults)
-//       const cleanParams = Object.fromEntries(
-//         Object.entries(searchParams).filter(([_, value]) =>
-//           value !== '' && value !== null && value !== undefined
-//         )
-//       );
-
-//       console.log("Clean params:", cleanParams);
-
-//       const response = await adminAPI.searchProfiles(cleanParams);
-//       setSearchResults(response.data || []);
-//     } catch (error) {
-//       console.error("Search API error:", error);
-//       alert("Search failed: " + (error.response?.data?.error || error.message));
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+  //       const response = await adminAPI.searchProfiles(cleanParams);
+  //       setSearchResults(response.data || []);
+  //     } catch (error) {
+  //       console.error("Search API error:", error);
+  //       alert("Search failed: " + (error.response?.data?.error || error.message));
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
   const handleSearch = (e) => {
     if (e) e.preventDefault();
     performSearch();
   };
 
- return (
+  return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Find Your Match</h2>
-          
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Find Your Match
+          </h2>
+
           {/* Tabs Navigation */}
           <div className="flex border-b border-gray-200 mb-6">
             {[
               { id: "basic", label: "🔍 Basic Search" },
               { id: "advanced", label: "⚡ Advanced Search" },
-              { id: "nearme", label: "📍 Near Me" }
-            ].map(tab => (
+              { id: "nearme", label: "📍 Near Me" },
+            ].map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 py-3 px-4 text-center font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
                 {tab.label}
@@ -255,10 +253,14 @@ const performSearch = async () => {
             {activeTab === "basic" && (
               <form onSubmit={handleSearch} className="space-y-6">
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Quick Search</h3>
-                  <p className="text-gray-600">Find matches with simple keywords</p>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Quick Search
+                  </h3>
+                  <p className="text-gray-600">
+                    Find matches with simple keywords
+                  </p>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -268,30 +270,40 @@ const performSearch = async () => {
                       type="text"
                       placeholder="e.g. Doctor, JavaScript, Traveling, Mumbai..."
                       value={filters.basicSearch}
-                      onChange={(e) => handleInputChange('basicSearch', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("basicSearch", e.target.value)
+                      }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Profession</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Profession
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. Developer, Doctor"
                         value={filters.profession}
-                        onChange={(e) => handleInputChange('profession', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("profession", e.target.value)
+                        }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
-                    
+
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        City
+                      </label>
                       <input
                         type="text"
                         placeholder="Enter city"
                         value={filters.city}
-                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("city", e.target.value)
+                        }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -304,64 +316,84 @@ const performSearch = async () => {
             {activeTab === "advanced" && (
               <form onSubmit={handleSearch} className="space-y-6">
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Advanced Search</h3>
-                  <p className="text-gray-600">Filter matches with detailed criteria</p>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Advanced Search
+                  </h3>
+                  <p className="text-gray-600">
+                    Filter matches with detailed criteria
+                  </p>
                 </div>
-                
+
                 {/* Personal Information Section */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-4">Personal Information</h4>
-                  
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                    Personal Information
+                  </h4>
+
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        First Name
+                      </label>
                       <input
                         type="text"
                         placeholder="First name"
                         value={filters.first_name}
-                        onChange={(e) => handleInputChange('first_name', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("first_name", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Last Name
+                      </label>
                       <input
                         type="text"
                         placeholder="Last name"
                         value={filters.last_name}
-                        onChange={(e) => handleInputChange('last_name', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("last_name", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Gender
+                    </label>
                     <div className="flex gap-3">
                       <button
                         type="button"
                         onClick={() =>
-  handleInputChange('gender', filters.gender === 'Male' ? '' : 'Male')
-}
-
+                          handleInputChange(
+                            "gender",
+                            filters.gender === "Male" ? "" : "Male"
+                          )
+                        }
                         className={`px-6 py-2 border rounded-md transition-colors ${
-                          filters.gender === 'Male' 
-                            ? 'bg-blue-500 text-white border-blue-500' 
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                          filters.gender === "Male"
+                            ? "bg-blue-500 text-white border-blue-500"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                         }`}
                       >
                         Male
                       </button>
                       <button
                         type="button"
-                       onClick={() =>
-  handleInputChange('gender', filters.gender === 'Female' ? '' : 'Female')
-}
-
+                        onClick={() =>
+                          handleInputChange(
+                            "gender",
+                            filters.gender === "Female" ? "" : "Female"
+                          )
+                        }
                         className={`px-6 py-2 border rounded-md transition-colors ${
-                          filters.gender === 'Female' 
-                            ? 'bg-blue-500 text-white border-blue-500' 
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                          filters.gender === "Female"
+                            ? "bg-blue-500 text-white border-blue-500"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                         }`}
                       >
                         Female
@@ -370,10 +402,14 @@ const performSearch = async () => {
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Marital Status</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Marital Status
+                    </label>
                     <select
                       value={filters.marital_status}
-                      onChange={(e) => handleInputChange('marital_status', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("marital_status", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="">Any Status</option>
@@ -385,22 +421,30 @@ const performSearch = async () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Min Age</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Min Age
+                      </label>
                       <input
                         type="number"
                         placeholder="18"
                         value={filters.min_age}
-                        onChange={(e) => handleInputChange('min_age', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("min_age", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Max Age</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Max Age
+                      </label>
                       <input
                         type="number"
                         placeholder="60"
                         value={filters.max_age}
-                        onChange={(e) => handleInputChange('max_age', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("max_age", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -409,38 +453,52 @@ const performSearch = async () => {
 
                 {/* Professional Information */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-4">Professional Information</h4>
-                  
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                    Professional Information
+                  </h4>
+
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Profession</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Profession
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. Software Developer"
                         value={filters.profession}
-                        onChange={(e) => handleInputChange('profession', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("profession", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Skills</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Skills
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. JavaScript, React, Node.js"
                         value={filters.skills}
-                        onChange={(e) => handleInputChange('skills', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("skills", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Interests</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Interests
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. Traveling, Music, Sports"
                         value={filters.interests}
-                        onChange={(e) => handleInputChange('interests', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("interests", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -449,27 +507,37 @@ const performSearch = async () => {
 
                 {/* Location Information */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-4">Location</h4>
-                  
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                    Location
+                  </h4>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        City
+                      </label>
                       <input
                         type="text"
                         placeholder="City"
                         value={filters.city}
-                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("city", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        State
+                      </label>
                       <input
                         type="text"
                         placeholder="State"
                         value={filters.state}
-                        onChange={(e) => handleInputChange('state', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("state", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -482,10 +550,14 @@ const performSearch = async () => {
             {activeTab === "nearme" && (
               <form onSubmit={handleSearch} className="space-y-6">
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Find Nearby Matches</h3>
-                  <p className="text-gray-600">Connect with people in your area</p>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Find Nearby Matches
+                  </h3>
+                  <p className="text-gray-600">
+                    Connect with people in your area
+                  </p>
                 </div>
-                
+
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <div className="space-y-6">
                     <div>
@@ -497,7 +569,9 @@ const performSearch = async () => {
                         min="1"
                         max="50"
                         value={filters.distance}
-                        onChange={(e) => handleInputChange('distance', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("distance", e.target.value)
+                        }
                         className="w-full"
                         disabled={!filters.lat || !filters.lon}
                       />
@@ -510,22 +584,30 @@ const performSearch = async () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          City
+                        </label>
                         <input
                           type="text"
                           placeholder="Enter city"
                           value={filters.city}
-                          onChange={(e) => handleInputChange('city', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("city", e.target.value)
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Radius (km)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Radius (km)
+                        </label>
                         <input
                           type="number"
                           placeholder="Search radius"
                           value={filters.radius}
-                          onChange={(e) => handleInputChange('radius', e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("radius", e.target.value)
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
@@ -543,10 +625,18 @@ const performSearch = async () => {
               onClick={handleSearch}
               disabled={loading}
               className={`w-full py-3 bg-blue-600 text-white rounded-lg font-medium text-lg transition-colors ${
-                loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
               }`}
             >
-              {loading ? '🔍 Searching...' : `🔍 Search ${activeTab === "basic" ? "Matches" : activeTab === "advanced" ? "Advanced" : "Nearby"}`}
+              {loading
+                ? "🔍 Searching..."
+                : `🔍 Search ${
+                    activeTab === "basic"
+                      ? "Matches"
+                      : activeTab === "advanced"
+                      ? "Advanced"
+                      : "Nearby"
+                  }`}
             </button>
           </div>
 
@@ -556,17 +646,24 @@ const performSearch = async () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-4">
                 Search Results ({searchResults.length})
               </h3>
-              
+
               <div className="grid gap-4">
                 {searchResults.map((profile) => (
-                  <div key={profile.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                  <div
+                    key={profile.id}
+                    className="bg-white border border-gray-200 rounded-lg p-4"
+                  >
                     <div className="flex items-start justify-between">
                       <div>
                         <h4 className="font-semibold text-gray-800">
                           {profile.first_name} {profile.last_name}
                         </h4>
-                        <p className="text-gray-600 text-sm">{profile.profession} • {profile.city}</p>
-                        <p className="text-gray-500 text-sm mt-1">{profile.about}</p>
+                        <p className="text-gray-600 text-sm">
+                          {profile.profession} • {profile.city}
+                        </p>
+                        <p className="text-gray-500 text-sm mt-1">
+                          {profile.about}
+                        </p>
                       </div>
                       <div className="text-right text-sm text-gray-500">
                         <p>{profile.age} years</p>
@@ -589,8 +686,3 @@ const performSearch = async () => {
     </div>
   );
 }
-
-
-
-
-

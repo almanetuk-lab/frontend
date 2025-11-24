@@ -36,7 +36,7 @@ import AddNewPlan from "./components/admin/AddPlanForm";
 import UserPlans from "./components/pages/UserPlans";
 import Cart from "./components/pages/cart";
 import { useState } from "react";
-// Admin plan 
+// Admin plan
 import AdminAddNewPlan from "./components/pages/AdminAddNewPlan";
 import BlogPage from "./components/pages/BlogPage";
 
@@ -67,190 +67,224 @@ const PlanFormWrapper = () => {
   // Kyunki yeh component HashRouter ke ANDAR hai
   return <AdminAddNewPlan />;
 };
-  
+
 export default function App() {
-
-  
   return (
-
     // <HashRouter>
-      <UserProfileProvider>
-        <Routes>
-          <Route path='/admin-plans-new' element={<PlanFormWrapper />} />
-          
-          {/* Admin Routes - SEPARATE (No Header/Footer) */}
-          <Route path="/admin-login" element={<AdminLogin />} />
-          <Route
-            path="/admin-dashboard"
-            element={
-              <ProtectedRoute>
-                <AdminPage />
-              </ProtectedRoute>
-            }
-          />
-        
-          <Route path="/linkedin-callback" element={<LinkedInCallback />} />
+    <UserProfileProvider>
+      <Routes>
+        <Route path="/admin-plans-new" element={<PlanFormWrapper />} />
 
-          {/* Public Routes WITH Header & Footer */}
-          <Route path="/" element={
+        {/* Admin Routes - SEPARATE (No Header/Footer) */}
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="/linkedin-callback" element={<LinkedInCallback />} />
+
+        {/* Public Routes WITH Header & Footer */}
+        <Route
+          path="/"
+          element={
             <MainLayout>
               <Home />
             </MainLayout>
-          } />
-          
-          <Route path="/login" element={
+          }
+        />
+
+        <Route
+          path="/login"
+          element={
             <MainLayout>
               <PublicRoute>
                 <Login />
               </PublicRoute>
             </MainLayout>
-          } />
-          
-          <Route path="/register" element={
+          }
+        />
+
+        <Route
+          path="/register"
+          element={
             <MainLayout>
               <PublicRoute>
                 <Register />
               </PublicRoute>
             </MainLayout>
-          } />
-          
-          <Route path="/forgot-password" element={
+          }
+        />
+
+        <Route
+          path="/forgot-password"
+          element={
             <MainLayout>
               <PublicRoute>
                 <ForgotPassword />
               </PublicRoute>
             </MainLayout>
-          } />
+          }
+        />
 
+        {/* Chat Routes */}
+        <Route
+          path="/chat"
+          element={
+            <UserProtectedRoute>
+              <ChatModule />
+            </UserProtectedRoute>
+          }
+        />
 
-                  {/* Chat Routes */}
-                  <Route
-                    path="/chat"
-                    element={
-                      <UserProtectedRoute>
-                        <ChatModule />
-                      </UserProtectedRoute>
-                    }
-                  />
-                     
-                  <Route
-                    path="/search"
-                    element={
-                      <UserProtectedRoute>
-                        <AdvancedSearch />
-                      </UserProtectedRoute>
-                    }
-                  />
-                     {/* plan Routes */}
-                  <Route
-                    path="/plans"
-                    element={
-                      <UserProtectedRoute>
-                        <UserPlans />
-                      </UserProtectedRoute>
-                    }
-                  />
-                  {/* Cart Routes */}
-                  <Route
-                    path="/cart"
-                    element={
-                      <UserProtectedRoute>
-                        <Cart />
-                      </UserProtectedRoute>
-                    }
-                  />
-                  {/* Matches Routes */}
-                  <Route
-                    path="/matches"
-                    element={
-                      <UserProtectedRoute>
-                        <MatchesPage />
-                      </UserProtectedRoute>
-                    }
-                  />
-          {/* Protected User Routes WITH Header & Footer */}
-          <Route path="/dashboard/*" element={
+        <Route
+          path="/search"
+          element={
+            <UserProtectedRoute>
+              <AdvancedSearch />
+            </UserProtectedRoute>
+          }
+        />
+        {/* plan Routes */}
+        <Route
+          path="/plans"
+          element={
+            <UserProtectedRoute>
+              <UserPlans />
+            </UserProtectedRoute>
+          }
+        />
+        {/* Cart Routes */}
+        <Route
+          path="/cart"
+          element={
+            <MainLayout>
+              <UserProtectedRoute>
+                <Cart />
+              </UserProtectedRoute>
+            </MainLayout>
+          }
+        />
+        {/* Matches Routes */}
+        <Route
+          path="/matches"
+          element={
+            <UserProtectedRoute>
+              <MatchesPage />
+            </UserProtectedRoute>
+          }
+        />
+        {/* Protected User Routes WITH Header & Footer */}
+        <Route
+          path="/dashboard/*"
+          element={
             <MainLayout>
               <UserProtectedRoute>
                 <UserDashboard />
               </UserProtectedRoute>
             </MainLayout>
-          } />
-          
-          <Route path="/create-profile" element={
+          }
+        />
+
+        <Route
+          path="/create-profile"
+          element={
             <MainLayout>
               <UserProtectedRoute>
                 <UserCreateForm />
               </UserProtectedRoute>
             </MainLayout>
-          } />
-          
-          <Route path="/edit-profile" element={
+          }
+        />
+
+        <Route
+          path="/edit-profile"
+          element={
             <MainLayout>
               <UserProtectedRoute>
                 <EditProfile />
               </UserProtectedRoute>
             </MainLayout>
-          } />
-          
-          <Route path="/contact" element={
+          }
+        />
+
+        <Route
+          path="/contact"
+          element={
             <MainLayout>
               <UserProtectedRoute>
                 <Contact />
               </UserProtectedRoute>
             </MainLayout>
-          } />
+          }
+        />
 
-          <Route path="/blog" element={
-               <MainLayout>
-               <BlogPage />
-             </MainLayout> 
-          } />
+        <Route
+          path="/blog"
+          element={
+            <MainLayout>
+              <BlogPage />
+            </MainLayout>
+          }
+        />
 
-          {/* Chat Routes WITH Header & Footer */}
-          <Route path="/chat" element={
+        {/* Chat Routes WITH Header & Footer */}
+        <Route
+          path="/chat"
+          element={
             <MainLayout>
               <UserProtectedRoute>
                 <ChatModule />
               </UserProtectedRoute>
             </MainLayout>
-          } />
-          
-          <Route path="/search" element={
+          }
+        />
+
+        <Route
+          path="/search"
+          element={
             <MainLayout>
               <UserProtectedRoute>
                 <AdvancedSearch />
               </UserProtectedRoute>
             </MainLayout>
-          } />
+          }
+        />
 
-
-          {/* Matches Routes WITH Header & Footer */}
-          <Route path="/matches" element={
+        {/* Matches Routes WITH Header & Footer */}
+        <Route
+          path="/matches"
+          element={
             <MainLayout>
               <UserProtectedRoute>
                 <MatchesPage />
               </UserProtectedRoute>
             </MainLayout>
-          } />
+          }
+        />
 
-          {/* Member Routes WITH Header & Footer */}
-          <Route path="/members" element={
+        {/* Member Routes WITH Header & Footer */}
+        <Route
+          path="/members"
+          element={
             <MainLayout>
               <UserProtectedRoute>
                 <MembersPage />
               </UserProtectedRoute>
             </MainLayout>
-          } />
+          }
+        />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </UserProfileProvider>
+        {/* Fallback Route */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </UserProfileProvider>
   );
 }
-
-
 
 // import React from "react";
 // // import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
@@ -316,7 +350,6 @@ export default function App() {
 // );
 
 // export default function App() {
-  
 
 //   const [formData, setFormData] = useState({
 //     name: "",
@@ -369,7 +402,7 @@ export default function App() {
 
 //   return (
 //     // <BrowserRouter>
-//     <HashRouter>    
+//     <HashRouter>
 //     <UserProfileProvider>
 //         <Routes>
 //           <Route path='/admin-plans-new' element={<AddNewPlan handleChange={handleChange} handleSubmit={handleSubmit} editingId={editingId} setEditingId={setEditingId} formData={formData} />} />
@@ -383,7 +416,7 @@ export default function App() {
 //               </ProtectedRoute>
 //             }
 //           />
-        
+
 //           <Route path="/linkedin-callback" element={<LinkedInCallback />} />
 
 //           {/* Public Routes WITH Header & Footer */}
@@ -392,7 +425,7 @@ export default function App() {
 //               <Home />
 //             </MainLayout>
 //           } />
-          
+
 //           <Route path="/login" element={
 //             <MainLayout>
 //               <PublicRoute>
@@ -400,7 +433,7 @@ export default function App() {
 //               </PublicRoute>
 //             </MainLayout>
 //           } />
-          
+
 //           <Route path="/register" element={
 //             <MainLayout>
 //               <PublicRoute>
@@ -408,7 +441,7 @@ export default function App() {
 //               </PublicRoute>
 //             </MainLayout>
 //           } />
-          
+
 //           <Route path="/forgot-password" element={
 //             <MainLayout>
 //               <PublicRoute>
@@ -426,7 +459,7 @@ export default function App() {
 //             </MainLayout>
 //           } />
 //           {/* "/dashboard/*" */}
-          
+
 //           <Route path="/create-profile" element={
 //             <MainLayout>
 //               <UserProtectedRoute>
@@ -434,7 +467,7 @@ export default function App() {
 //               </UserProtectedRoute>
 //             </MainLayout>
 //           } />
-          
+
 //           <Route path="/edit-profile" element={
 //             <MainLayout>
 //               <UserProtectedRoute>
@@ -442,7 +475,7 @@ export default function App() {
 //               </UserProtectedRoute>
 //             </MainLayout>
 //           } />
-          
+
 //           <Route path="/contact" element={
 //             <MainLayout>
 //               <UserProtectedRoute>
@@ -459,7 +492,7 @@ export default function App() {
 //               </UserProtectedRoute>
 //             </MainLayout>
 //           } />
-          
+
 //           <Route path="/search" element={
 //             <MainLayout>
 //               <UserProtectedRoute>
@@ -494,13 +527,3 @@ export default function App() {
 
 //   );
 // }
-
-
-
-
-
-
-
-
-
-
