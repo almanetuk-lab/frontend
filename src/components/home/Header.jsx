@@ -52,6 +52,7 @@ function Header() {
     };
   }, []);
 
+
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -80,14 +81,6 @@ function Header() {
                   Home
                 </Link>
               </li>
-              {/* <li>
-                <Link
-                  to="/contact"
-                  className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
-                >
-                  About
-                </Link>
-              </li> */}
               
               {isLoggedIn && (
                 <>
@@ -102,7 +95,7 @@ function Header() {
                   <li>
                     <Link
                       to="/members"
-                      className="text-amber-600 font-medium border-amber-600 transition-colors duration-200"
+                      className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
                     >
                       Members
                     </Link>
@@ -138,6 +131,7 @@ function Header() {
             </ul>
           </nav>
 
+
           {/* Desktop Auth Section - Hidden on mobile */}
           <div className="hidden lg:flex items-center gap-4">
             {isLoggedIn ? (
@@ -151,16 +145,7 @@ function Header() {
 
                 {localStorage.getItem("accessToken") && <NotificationBell />}
                 
-                {/* <div className="flex items-center gap-2 text-gray-700">
-                  <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
-                    <span className="text-amber-600 font-semibold text-sm">
-                      {profile?.name?.charAt(0) || 'U'}
-                    </span>
-                  </div>
-                  <span className="text-sm">
-                    {localStorage.getItem("adminToken") ? "Welcome, Admin" : `Welcome, ${profile?.name?.split(' ')[0] || 'User'}`}
-                  </span>
-                </div> */}
+            
                 
                 <button
                   onClick={handleLogout}
@@ -306,43 +291,87 @@ function Header() {
                     Contact Us
                   </Link>
                 </li>
-                    
-                {/* <li>
-                  <Link
-                    to="/blog"
-                    className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Blogs
-                  </Link>
-                </li> */}
+
               </ul>
             </nav>
 
             {/* Mobile Auth Section */}
-            <div className="border-t border-gray-200 pt-4">
-              {isLoggedIn ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between px-4 py-2">
-                    {/* <span className="text-sm text-gray-600">
-                      {localStorage.getItem("adminToken") ? "Admin User" : `Hello, ${profile?.name?.split(' ')[0] || ''}`}
-                    </span> */}
-                    <span className="text-sm text-gray-600">
-  {localStorage.getItem("adminToken") 
-    ? "Admin User" 
-    : profile?.first_name && profile?.last_name 
-      ? `Hello, ${profile.first_name} ${profile.last_name}`
-      : `Hello, ${profile?.first_name || profile?.name || 'User'}`
-  }
-</span>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
+<div className="border-t border-gray-200 pt-4">
+  {isLoggedIn ? (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between px-4 py-2">
+        <span className="text-sm text-gray-600">
+          {localStorage.getItem("adminToken") 
+            ? "Admin User" 
+            : profile?.first_name && profile?.last_name 
+              ? `Hello, ${profile.first_name} ${profile.last_name}`
+              : `Hello, ${profile?.first_name || profile?.name || 'User'}`
+          }
+        </span>
+      </div>
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        handleLogout();
+      }} className="w-full">
+        <button
+          type="submit"
+          className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+        >
+          Logout
+        </button>
+      </form>
+    </div>
+  ) : (
+    <div className="space-y-3">
+      <Link
+        to="/admin-login"
+        className="block py-3 px-4 text-center text-gray-700 hover:text-amber-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+        onClick={() => setIsMobileMenuOpen(false)}
+      >
+        Admin Login
+      </Link>
+      <Link
+        to="/login"
+        className="block py-3 px-4 text-center text-gray-700 hover:text-amber-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+        onClick={() => setIsMobileMenuOpen(false)}
+      >
+        Login
+      </Link>
+      <Link
+        to="/register"
+        className="block py-3 px-4 text-center bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+        onClick={() => setIsMobileMenuOpen(false)}
+      >
+        Register Free
+      </Link>
+    </div>
+  )}
+</div>
+
+  
+            {/* Mobile Auth Section
+<div className="border-t border-gray-200 pt-4">
+  {isLoggedIn ? (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between px-4 py-2">
+        <span className="text-sm text-gray-600">
+          {localStorage.getItem("adminToken") 
+            ? "Admin User" 
+            : profile?.first_name && profile?.last_name 
+              ? `Hello, ${profile.first_name} ${profile.last_name}`
+              : `Hello, ${profile?.first_name || profile?.name || 'User'}`
+          }
+        </span>
+      </div>
+      <form onSubmit={handleLogout} className="w-full">
+        <button
+          type="submit"
+          className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+        >
+          Logout
+        </button>
+      </form>
+    </div>
               ) : (
                 <div className="space-y-3">
                   <Link
@@ -368,7 +397,8 @@ function Header() {
                   </Link>
                 </div>
               )}
-            </div>
+            </div> */}
+
           </div>
         </div>
       </div>
@@ -386,3 +416,28 @@ export default Header;
 
 
 
+
+//             {/* Mobile Auth Section */}
+//             <div className="border-t border-gray-200 pt-4">
+//               {isLoggedIn ? (
+//                 <div className="space-y-3">
+//                   <div className="flex items-center justify-between px-4 py-2">
+//                     {/* <span className="text-sm text-gray-600">
+//                       {localStorage.getItem("adminToken") ? "Admin User" : `Hello, ${profile?.name?.split(' ')[0] || ''}`}
+//                     </span> */}
+//                     <span className="text-sm text-gray-600">
+//   {localStorage.getItem("adminToken") 
+//     ? "Admin User" 
+//     : profile?.first_name && profile?.last_name 
+//       ? `Hello, ${profile.first_name} ${profile.last_name}`
+//       : `Hello, ${profile?.first_name || profile?.name || 'User'}`
+//   }
+// </span>
+//                   </div>
+//                   <button
+//                     onClick={handleLogout}
+//                     className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+//                   >
+//                     Logout
+//                   </button>
+//                 </div> 

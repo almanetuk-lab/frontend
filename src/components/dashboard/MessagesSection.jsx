@@ -1,10 +1,9 @@
-
-
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { chatApi } from '../services/chatApi';
-import io from 'socket.io-client';
+import { chatApi } from "../services/chatApi";
+import io from "socket.io-client";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://backend-q0wc.onrender.com";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://backend-q0wc.onrender.com";
 
 export default function MessagesSection() {
   const [users, setUsers] = useState([]);
@@ -23,7 +22,7 @@ export default function MessagesSection() {
   const [recentChatsLoading, setRecentChatsLoading] = useState(true);
   const [showDeleteOption, setShowDeleteOption] = useState(null);
   const [deletingMessageId, setDeletingMessageId] = useState(null);
-  // for open img 
+  // for open img
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
 
@@ -39,7 +38,7 @@ export default function MessagesSection() {
       const response = await chatApi.getRecentChats(currentUserId);
       setRecentChats(response.data);
     } catch (error) {
-      console.error('Error fetching recent chats:', error);
+      console.error("Error fetching recent chats:", error);
     } finally {
       setRecentChatsLoading(false);
     }
@@ -50,7 +49,7 @@ export default function MessagesSection() {
     const user = {
       id: chat.user_id,
       name: chat.name,
-      email: chat.email
+      email: chat.email,
     };
     handleUserSelect(user);
     setShowSidebar(false);
@@ -66,22 +65,30 @@ export default function MessagesSection() {
   // ✅ Click outside to close reaction picker and delete option
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showReactionPicker && !event.target.closest('.reaction-picker') && !event.target.closest('.reaction-btn')) {
+      if (
+        showReactionPicker &&
+        !event.target.closest(".reaction-picker") &&
+        !event.target.closest(".reaction-btn")
+      ) {
         setShowReactionPicker(null);
       }
-      if (showDeleteOption && !event.target.closest('.delete-option') && !event.target.closest('.more-options-btn')) {
+      if (
+        showDeleteOption &&
+        !event.target.closest(".delete-option") &&
+        !event.target.closest(".more-options-btn")
+      ) {
         setShowDeleteOption(null);
       }
     };
 
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, [showReactionPicker, showDeleteOption]);
 
   // ✅ Get current user once
   useEffect(() => {
     try {
-      const storedUser = localStorage.getItem('currentUser');
+      const storedUser = localStorage.getItem("currentUser");
       if (storedUser) {
         const userData = JSON.parse(storedUser);
         const userId = userData.user_id || userData.id;
@@ -92,28 +99,28 @@ export default function MessagesSection() {
         }
       }
     } catch (err) {
-      console.error('Error getting user:', err);
+      console.error("Error getting user:", err);
     }
   }, []);
 
   // ✅ Image Modal Effects
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setShowImageModal(false);
       }
     };
 
     if (showImageModal) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [showImageModal]);
 
@@ -128,37 +135,40 @@ export default function MessagesSection() {
     }
 
     const socket = io(API_BASE_URL, {
-      transports: ['websocket', 'polling'],
+      transports: ["websocket", "polling"],
       reconnection: true,
       reconnectionAttempts: 5,
     });
 
     socketRef.current = socket;
 
-    socket.on('connect', () => {
-      console.log('✅ Socket connected');
+    socket.on("connect", () => {
+      console.log("✅ Socket connected");
       setSocketConnected(true);
-      socket.emit('join', { userId: currentUserId });
+      socket.emit("join", { userId: currentUserId });
     });
 
-    socket.on('disconnect', () => {
-      console.log('❌ Socket disconnected');
+    socket.on("disconnect", () => {
+      console.log("❌ Socket disconnected");
       setSocketConnected(false);
     });
 
     // ✅ HANDLE NEW REACTIONS VIA SOCKET
-    socket.on('new_reaction', (reactionData) => {
-      console.log('🎭 New reaction received via socket:', reactionData);
+    socket.on("new_reaction", (reactionData) => {
+      console.log("🎭 New reaction received via socket:", reactionData);
       if (reactionData && selectedUser) {
-        setReactions(prev => {
-          const exists = prev.some(r => 
-            r.id === reactionData.id || 
-            (r.message_id === reactionData.message_id && r.user_id === reactionData.user_id)
+        setReactions((prev) => {
+          const exists = prev.some(
+            (r) =>
+              r.id === reactionData.id ||
+              (r.message_id === reactionData.message_id &&
+                r.user_id === reactionData.user_id)
           );
           if (exists) {
-            return prev.map(r => 
-              (r.message_id === reactionData.message_id && r.user_id === reactionData.user_id) 
-                ? reactionData 
+            return prev.map((r) =>
+              r.message_id === reactionData.message_id &&
+              r.user_id === reactionData.user_id
+                ? reactionData
                 : r
             );
           }
@@ -169,23 +179,25 @@ export default function MessagesSection() {
 
     // ✅ Handle incoming messages
     const handleIncomingMessage = (message) => {
-      console.log('📩 Socket message received:', message);
+      console.log("📩 Socket message received:", message);
       fetchRecentChats();
-      
+
       if (!selectedUser) return;
 
-      const isRelevant = 
-        (message.sender_id === currentUserId && message.receiver_id === selectedUser.id) ||
-        (message.sender_id === selectedUser.id && message.receiver_id === currentUserId);
+      const isRelevant =
+        (message.sender_id === currentUserId &&
+          message.receiver_id === selectedUser.id) ||
+        (message.sender_id === selectedUser.id &&
+          message.receiver_id === currentUserId);
 
       if (isRelevant) {
-        setMessages(prev => {
-          const exists = prev.some(m => m.id === message.id);
+        setMessages((prev) => {
+          const exists = prev.some((m) => m.id === message.id);
           if (exists) return prev;
 
-          const filtered = prev.filter(m => 
-            !m.isTemporary || 
-            (m.isTemporary && m.content !== message.content)
+          const filtered = prev.filter(
+            (m) =>
+              !m.isTemporary || (m.isTemporary && m.content !== message.content)
           );
 
           return [...filtered, message];
@@ -193,11 +205,11 @@ export default function MessagesSection() {
       }
     };
 
-    socket.on('new_message', handleIncomingMessage);
+    socket.on("new_message", handleIncomingMessage);
 
     return () => {
-      socket.off('new_message', handleIncomingMessage);
-      socket.off('new_reaction');
+      socket.off("new_message", handleIncomingMessage);
+      socket.off("new_reaction");
       socket.disconnect();
     };
   }, [currentUserId, selectedUser]);
@@ -205,42 +217,47 @@ export default function MessagesSection() {
   // ✅ Auto-scroll
   useEffect(() => {
     if (messagesEndRef.current && messages.length > 0) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
   // ✅ Search users
-  const searchUsers = useCallback(async (query) => {
-    if (!query.trim() || !currentUserId) return;
-    setLoading(true);
-    try {
-      const response = await chatApi.searchUsers(query);
-      const filteredUsers = (response.data || [])
-        .filter(user => user.id !== currentUserId)
-        .map(user => ({
-          ...user,
-          name: user.name || user.email?.split('@')[0] || 'User',
-          email: user.email || 'No email',
-        }));
-      setUsers(filteredUsers);
-    } catch (error) {
-      console.error('Search error:', error);
-      setUsers([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUserId]);
+  const searchUsers = useCallback(
+    async (query) => {
+      if (!query.trim() || !currentUserId) return;
+      setLoading(true);
+      try {
+        const response = await chatApi.searchUsers(query);
+        const filteredUsers = (response.data || [])
+          .filter((user) => user.id !== currentUserId)
+          .map((user) => ({
+            ...user,
+            name: user.name || user.email?.split("@")[0] || "User",
+            email: user.email || "No email",
+          }));
+        setUsers(filteredUsers);
+      } catch (error) {
+        console.error("Search error:", error);
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [currentUserId]
+  );
 
   // ✅ LOAD MESSAGES
   const loadMessages = async (otherUserId) => {
     if (!currentUserId) return;
     try {
-      console.log(`📨 Loading messages between ${currentUserId} and ${otherUserId}`);
+      console.log(
+        `📨 Loading messages between ${currentUserId} and ${otherUserId}`
+      );
       setLoading(true);
-      
+
       const response = await chatApi.getMessages(otherUserId, currentUserId);
-      console.log('📝 Messages response:', response.data);
-      
+      console.log("📝 Messages response:", response.data);
+
       let messagesData = response.data;
       if (Array.isArray(response.data)) {
         messagesData = response.data;
@@ -251,16 +268,18 @@ export default function MessagesSection() {
       }
 
       const conversationMessages = messagesData
-        .filter(msg => 
-          (msg.sender_id === currentUserId && msg.receiver_id === otherUserId) ||
-          (msg.sender_id === otherUserId && msg.receiver_id === currentUserId)
+        .filter(
+          (msg) =>
+            (msg.sender_id === currentUserId &&
+              msg.receiver_id === otherUserId) ||
+            (msg.sender_id === otherUserId && msg.receiver_id === currentUserId)
         )
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
       console.log(`✅ Loaded ${conversationMessages.length} messages`);
       setMessages(conversationMessages);
     } catch (err) {
-      console.error('❌ Load messages error:', err);
+      console.error("❌ Load messages error:", err);
       setMessages([]);
     } finally {
       setLoading(false);
@@ -271,10 +290,12 @@ export default function MessagesSection() {
   const loadReactions = async (userId) => {
     if (!currentUserId || !userId) return;
     try {
-      console.log(`🎭 Loading reactions for users: ${currentUserId} and ${userId}`);
+      console.log(
+        `🎭 Loading reactions for users: ${currentUserId} and ${userId}`
+      );
       const res = await chatApi.getReactions(currentUserId, userId);
-      console.log('🎭 Reactions loaded from API:', res.data);
-      
+      console.log("🎭 Reactions loaded from API:", res.data);
+
       let reactionsData = [];
       if (Array.isArray(res.data)) {
         reactionsData = res.data;
@@ -283,11 +304,11 @@ export default function MessagesSection() {
       } else if (res.data && Array.isArray(res.data.data)) {
         reactionsData = res.data.data;
       }
-      
-      console.log('🎭 Final reactions data:', reactionsData);
+
+      console.log("🎭 Final reactions data:", reactionsData);
       setReactions(reactionsData);
     } catch (e) {
-      console.error('❌ Load reactions error:', e);
+      console.error("❌ Load reactions error:", e);
       setReactions([]);
     }
   };
@@ -295,20 +316,20 @@ export default function MessagesSection() {
   // ✅ SELECT USER - WITH MOBILE SUPPORT
   const handleUserSelect = async (user) => {
     if (!currentUserId) return;
-    
-    console.log('👤 Selecting user:', user.name);
+
+    console.log("👤 Selecting user:", user.name);
     const selectedUserData = {
       id: user.id,
-      name: user.name || user.email?.split('@')[0] || 'User',
+      name: user.name || user.email?.split("@")[0] || "User",
       email: user.email,
     };
-    
+
     setSelectedUser(selectedUserData);
-    
+
     if (window.innerWidth < 768) {
       setShowSidebar(false);
     }
-    
+
     await loadMessages(user.id);
     await loadReactions(user.id);
   };
@@ -316,11 +337,13 @@ export default function MessagesSection() {
   // ✅ DELETE MESSAGE FUNCTION
   const handleDeleteMessage = async (messageId) => {
     if (!messageId || !currentUserId) {
-      console.error('❌ Cannot delete: missing message ID or user ID');
+      console.error("❌ Cannot delete: missing message ID or user ID");
       return;
     }
 
-    const confirmDelete = window.confirm('Kya aap ye message delete karna chahte hain?');
+    const confirmDelete = window.confirm(
+      "Kya aap ye message delete karna chahte hain?"
+    );
     if (!confirmDelete) {
       setShowDeleteOption(null);
       return;
@@ -331,22 +354,21 @@ export default function MessagesSection() {
 
     try {
       const response = await chatApi.deleteMessage(messageId);
-      console.log('✅ Message deleted successfully:', response);
+      console.log("✅ Message deleted successfully:", response);
 
       // Remove message from state
-      setMessages(prev => prev.filter(msg => msg.id !== messageId));
-      
+      setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+
       // Update recent chats
       if (selectedUser) {
         fetchRecentChats();
       }
 
       // Show success message
-      alert('Message successfully deleted!');
-
+      alert("Message successfully deleted!");
     } catch (error) {
-      console.error('❌ Delete failed:', error);
-      alert('Message delete karne mein error aaya!');
+      console.error("❌ Delete failed:", error);
+      alert("Message delete karne mein error aaya!");
     } finally {
       setDeletingMessageId(null);
       setShowDeleteOption(null);
@@ -370,7 +392,7 @@ export default function MessagesSection() {
       isTemporary: true,
     };
 
-    setMessages(prev => [...prev, tempMsg]);
+    setMessages((prev) => [...prev, tempMsg]);
     setNewMessage("");
 
     try {
@@ -378,54 +400,56 @@ export default function MessagesSection() {
         sender_id: currentUserId,
         receiver_id: selectedUser.id,
         content: messageContent,
-        attachment_url: null
+        attachment_url: null,
       });
 
-      console.log('✅ Message sent successfully');
+      console.log("✅ Message sent successfully");
       fetchRecentChats();
 
       setTimeout(() => {
-        setMessages(prev => {
-          const realMessageExists = prev.some(msg => 
-            !msg.isTemporary && 
-            msg.sender_id === currentUserId && 
-            msg.content === messageContent
+        setMessages((prev) => {
+          const realMessageExists = prev.some(
+            (msg) =>
+              !msg.isTemporary &&
+              msg.sender_id === currentUserId &&
+              msg.content === messageContent
           );
-          
+
           if (!realMessageExists && response.data) {
-            console.log('🔄 Replacing temporary with real message');
-            return prev.map(msg => 
+            console.log("🔄 Replacing temporary with real message");
+            return prev.map((msg) =>
               msg.id === tempMsg.id ? response.data : msg
             );
           }
           return prev;
         });
       }, 3000);
-
     } catch (error) {
-      console.error('❌ Send failed:', error);
-      setMessages(prev => prev.filter(msg => msg.id !== tempMsg.id));
-      alert('Failed to send message');
+      console.error("❌ Send failed:", error);
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempMsg.id));
+      alert("Failed to send message");
     }
   };
 
   // ✅ ADD REACTION - PROPER REAL-TIME HANDLING
   const addReaction = async (messageId, emoji) => {
     if (!currentUserId || !messageId) {
-      console.error('❌ Cannot add reaction: missing user ID or message ID');
+      console.error("❌ Cannot add reaction: missing user ID or message ID");
       return;
     }
 
-    console.log(`🎭 Adding reaction: ${emoji} to message ${messageId} by user ${currentUserId}`);
+    console.log(
+      `🎭 Adding reaction: ${emoji} to message ${messageId} by user ${currentUserId}`
+    );
 
     try {
       const response = await chatApi.addReaction({
         message_id: messageId,
         user_id: currentUserId,
-        emoji: emoji
+        emoji: emoji,
       });
 
-      console.log('✅ Reaction sent successfully:', response.data);
+      console.log("✅ Reaction sent successfully:", response.data);
 
       if (selectedUser) {
         setTimeout(() => {
@@ -434,27 +458,26 @@ export default function MessagesSection() {
       }
 
       if (socketRef.current && response.data) {
-        socketRef.current.emit('send_reaction', response.data);
+        socketRef.current.emit("send_reaction", response.data);
       }
 
       setShowReactionPicker(null);
-
     } catch (err) {
-      console.error('❌ Reaction failed:', err);
-      alert('Failed to add reaction');
+      console.error("❌ Reaction failed:", err);
+      alert("Failed to add reaction");
     }
   };
 
   // ✅ GET REACTIONS FOR MESSAGE - SIMPLE AND WORKING
   const getMessageReactions = (messageId) => {
     if (!messageId) return [];
-    
-    const messageReactions = reactions.filter(r => {
+
+    const messageReactions = reactions.filter((r) => {
       return r.message_id == messageId;
     });
-    
+
     console.log(`🎭 Reactions for message ${messageId}:`, messageReactions);
-    
+
     return messageReactions;
   };
 
@@ -468,19 +491,19 @@ export default function MessagesSection() {
   // ✅ FILE UPLOAD
   const handleFileUpload = async (file) => {
     if (!selectedUser || !currentUserId) return;
-    
+
     setFileUploading(true);
     const tempId = `file-${Date.now()}`;
-    const tempMsg = { 
-      id: tempId, 
-      sender_id: currentUserId, 
-      receiver_id: selectedUser.id, 
-      content: `Sending: ${file.name}`, 
-      isTemporary: true, 
-      isUploading: true 
+    const tempMsg = {
+      id: tempId,
+      sender_id: currentUserId,
+      receiver_id: selectedUser.id,
+      content: `Sending: ${file.name}`,
+      isTemporary: true,
+      isUploading: true,
     };
-    
-    setMessages(prev => [...prev, tempMsg]);
+
+    setMessages((prev) => [...prev, tempMsg]);
 
     try {
       const uploadResponse = await chatApi.uploadFile(file);
@@ -489,16 +512,16 @@ export default function MessagesSection() {
           sender_id: currentUserId,
           receiver_id: selectedUser.id,
           content: `File: ${file.name}`,
-          attachment_url: uploadResponse.data.url
+          attachment_url: uploadResponse.data.url,
         });
-        
+
         setTimeout(() => {
-          setMessages(prev => prev.filter(msg => msg.id !== tempId));
+          setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
         }, 1000);
       }
     } catch (err) {
-      console.error('Upload failed:', err);
-      setMessages(prev => prev.filter(msg => msg.id !== tempId));
+      console.error("Upload failed:", err);
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
     } finally {
       setFileUploading(false);
     }
@@ -510,7 +533,7 @@ export default function MessagesSection() {
     if (file && selectedUser && currentUserId) {
       handleFileUpload(file);
     }
-    e.target.value = '';
+    e.target.value = "";
   };
 
   // ✅ SEARCH EFFECT
@@ -527,7 +550,7 @@ export default function MessagesSection() {
 
   // ✅ ENTER KEY HANDLING
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -535,11 +558,11 @@ export default function MessagesSection() {
 
   // ✅ FORMAT TIME
   const formatTime = (timestamp) => {
-    if (!timestamp) return '';
-    return new Date(timestamp).toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit', 
-      hour12: true 
+    if (!timestamp) return "";
+    return new Date(timestamp).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -547,35 +570,38 @@ export default function MessagesSection() {
   const renderAttachment = (message) => {
     if (!message.attachment_url) return null;
 
-    const isImage = message.attachment_url.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg|webp)$/i);
+    const isImage = message.attachment_url.match(
+      /\.(jpg|jpeg|png|gif|webp|bmp|svg|webp)$/i
+    );
 
     if (isImage) {
       return (
         <div className="mt-2">
-          <img 
+          <img
             src={message.attachment_url}
             onClick={() => {
               setSelectedImage({
                 url: message.attachment_url,
-                sender: message.sender_id === currentUserId ? 'You' : selectedUser?.name,
-                timestamp: message.created_at
+                sender:
+                  message.sender_id === currentUserId
+                    ? "You"
+                    : selectedUser?.name,
+                timestamp: message.created_at,
               });
               setShowImageModal(true);
             }}
             alt="Attachment"
             className="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition-opacity border border-gray-200 max-h-64 object-cover"
           />
-          <p className="text-xs text-gray-500 mt-1">
-            Click to view image
-          </p>
+          <p className="text-xs text-gray-500 mt-1">Click to view image</p>
         </div>
       );
     }
 
     return (
-      <a 
-        href={message.attachment_url} 
-        target="_blank" 
+      <a
+        href={message.attachment_url}
+        target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg border border-gray-300 hover:bg-gray-200 transition mt-2"
       >
@@ -592,7 +618,9 @@ export default function MessagesSection() {
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Messages</h2>
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🔒</div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">Please Login First</h3>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            Please Login First
+          </h3>
           <p className="text-gray-500">You need to login to access messages</p>
         </div>
       </div>
@@ -606,20 +634,20 @@ export default function MessagesSection() {
       {/* Status - Hidden on mobile */}
       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg hidden sm:block">
         <p className="text-blue-800 text-sm">
-          <strong>User:</strong> {currentUser?.full_name} (ID: {currentUserId}) | 
-          <strong> Socket:</strong> 
+          <strong>User:</strong> {currentUser?.full_name} (ID: {currentUserId})
+          |<strong> Socket:</strong>
           <span className={socketConnected ? "text-green-600" : "text-red-600"}>
             {socketConnected ? " 🟢 Connected" : " 🔴 Disconnected"}
           </span>
           {!socketConnected && (
-            <button 
-              onClick={reconnectSocket} 
+            <button
+              onClick={reconnectSocket}
               className="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
             >
               Reconnect
             </button>
-          )} | 
-          <strong> Chatting with:</strong> {selectedUser?.name || 'None'} |
+          )}{" "}
+          |<strong> Chatting with:</strong> {selectedUser?.name || "None"} |
           <strong> Messages:</strong> {messages.length} |
           <strong> Reactions:</strong> {reactions.length}
         </p>
@@ -627,11 +655,10 @@ export default function MessagesSection() {
 
       {/* ✅ RESPONSIVE CHAT CONTAINER */}
       <div className="bg-white rounded-2xl shadow-lg h-[70vh] sm:h-[600px] flex flex-col md:flex-row border border-gray-200 relative">
-        
         {/* ✅ MOBILE HEADER FOR CHAT */}
         {selectedUser && !showSidebar && (
           <div className="md:hidden p-4 border-b border-gray-200 bg-white flex items-center gap-3">
-            <button 
+            <button
               onClick={() => setShowSidebar(true)}
               className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
             >
@@ -639,10 +666,12 @@ export default function MessagesSection() {
             </button>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                {selectedUser.name?.charAt(0)?.toUpperCase() || 'U'}
+                {selectedUser.name?.charAt(0)?.toUpperCase() || "U"}
               </div>
               <div>
-                <p className="font-medium text-gray-800 text-sm">{selectedUser.name}</p>
+                <p className="font-medium text-gray-800 text-sm">
+                  {selectedUser.name}
+                </p>
                 <p className="text-xs text-gray-500">Online</p>
               </div>
             </div>
@@ -650,31 +679,33 @@ export default function MessagesSection() {
         )}
 
         {/* ✅ SIDEBAR - Responsive */}
-        <div className={`
-          ${showSidebar ? 'flex' : 'hidden'} 
+        <div
+          className={`
+          ${showSidebar ? "flex" : "hidden"} 
           md:flex
           w-full md:w-1/3 lg:w-1/4 
           border-r border-gray-200 
           flex-col 
           absolute md:relative 
           h-full bg-white z-10
-        `}>
+        `}
+        >
           {/* Search Header */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center gap-2">
               {/* Mobile back button */}
-              <button 
+              <button
                 onClick={() => setShowSidebar(false)}
                 className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
               >
                 ←
               </button>
-              <input 
-                type="text" 
-                placeholder="Search users..." 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)} 
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm" 
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
               />
             </div>
           </div>
@@ -682,37 +713,52 @@ export default function MessagesSection() {
           {/* ✅ RECENT CHATS SECTION - RESPONSIVE */}
           <div className="border-b border-gray-200">
             <div className="px-4 py-3 bg-gray-50">
-              <h3 className="text-sm font-medium text-gray-700">Recent Chats</h3>
+              <h3 className="text-sm font-medium text-gray-700">
+                Recent Chats
+              </h3>
             </div>
-            
+
             <div className="max-h-48 overflow-y-auto">
               {recentChatsLoading ? (
-                <div className="p-3 text-center text-gray-500 text-sm">Loading recent chats...</div>
+                <div className="p-3 text-center text-gray-500 text-sm">
+                  Loading recent chats...
+                </div>
               ) : recentChats.length === 0 ? (
-                <div className="p-3 text-center text-gray-500 text-sm">No recent conversations</div>
+                <div className="p-3 text-center text-gray-500 text-sm">
+                  No recent conversations
+                </div>
               ) : (
-                recentChats.map(chat => (
+                recentChats.map((chat) => (
                   <div
                     key={chat.user_id}
                     onClick={() => handleRecentChatSelect(chat)}
                     className={`p-3 cursor-pointer transition border-b border-gray-100 ${
-                      selectedUser?.id === chat.user_id ? 'bg-indigo-50 border-indigo-200' : 'hover:bg-gray-50'
+                      selectedUser?.id === chat.user_id
+                        ? "bg-indigo-50 border-indigo-200"
+                        : "hover:bg-gray-50"
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">
-                        {chat.name?.charAt(0)?.toUpperCase() || 'U'}
+                        {chat.name?.charAt(0)?.toUpperCase() || "U"}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center">
-                          <p className="font-medium text-gray-800 truncate text-sm">{chat.name}</p>
+                          <p className="font-medium text-gray-800 truncate text-sm">
+                            {chat.name}
+                          </p>
                           <span className="text-xs text-gray-500">
-                            {new Date(chat.last_message_time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                            {new Date(
+                              chat.last_message_time
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </span>
                         </div>
                         <div className="flex justify-between items-center mt-1">
                           <p className="text-xs text-gray-600 truncate">
-                            {chat.last_message || 'No messages yet'}
+                            {chat.last_message || "No messages yet"}
                           </p>
                           {chat.unread_count > 0 && (
                             <span className="bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
@@ -733,23 +779,31 @@ export default function MessagesSection() {
             {loading && searchTerm ? (
               <div className="p-4 text-center text-gray-500">Searching...</div>
             ) : users.length === 0 && searchTerm ? (
-              <div className="p-4 text-center text-gray-500">No users found</div>
+              <div className="p-4 text-center text-gray-500">
+                No users found
+              </div>
             ) : (
-              users.map(user => (
+              users.map((user) => (
                 <div
                   key={user.id}
                   onClick={() => handleUserSelect(user)}
                   className={`p-3 cursor-pointer transition border-b border-gray-100 ${
-                    selectedUser?.id === user.id ? 'bg-indigo-50 border-indigo-200' : 'hover:bg-gray-50'
+                    selectedUser?.id === user.id
+                      ? "bg-indigo-50 border-indigo-200"
+                      : "hover:bg-gray-50"
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-sm sm:text-base">
-                      {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                      {user.name?.charAt(0)?.toUpperCase() || "U"}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-800 truncate text-sm sm:text-base">{user.name}</p>
-                      <p className="text-xs sm:text-sm text-gray-600 truncate">{user.email}</p>
+                      <p className="font-medium text-gray-800 truncate text-sm sm:text-base">
+                        {user.name}
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">
+                        {user.email}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -766,11 +820,15 @@ export default function MessagesSection() {
               <div className="hidden md:flex p-4 border-b border-gray-200 bg-white">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold">
-                    {selectedUser.name?.charAt(0)?.toUpperCase() || 'U'}
+                    {selectedUser.name?.charAt(0)?.toUpperCase() || "U"}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-800">{selectedUser.name}</p>
-                    <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                    <p className="font-medium text-gray-800">
+                      {selectedUser.name}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {selectedUser.email}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -780,13 +838,17 @@ export default function MessagesSection() {
                 {loading ? (
                   <div className="flex items-center justify-center h-32">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                    <span className="ml-3 text-gray-600">Loading messages...</span>
+                    <span className="ml-3 text-gray-600">
+                      Loading messages...
+                    </span>
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="text-center text-gray-500 py-8">
                     <div className="text-4xl mb-2">💬</div>
                     <p className="font-medium">No messages yet</p>
-                    <p className="text-sm">Start the conversation with {selectedUser.name}</p>
+                    <p className="text-sm">
+                      Start the conversation with {selectedUser.name}
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-3 sm:space-y-4">
@@ -794,24 +856,34 @@ export default function MessagesSection() {
                       <div
                         key={message.id}
                         className={`flex ${
-                          message.sender_id === currentUserId ? 'justify-end' : 'justify-start'
+                          message.sender_id === currentUserId
+                            ? "justify-end"
+                            : "justify-start"
                         }`}
                       >
                         <div
                           className={`max-w-[85%] xs:max-w-xs sm:max-w-md relative message-bubble ${
-                            message.sender_id === currentUserId 
-                              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
-                              : 'bg-white text-gray-800 shadow-sm border border-gray-200'
+                            message.sender_id === currentUserId
+                              ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+                              : "bg-white text-gray-800 shadow-sm border border-gray-200"
                           } rounded-2xl p-3 sm:p-4 ${
-                            message.isTemporary ? 'opacity-70 border-2 border-dashed border-yellow-400' : ''
-                          } ${deletingMessageId === message.id ? 'opacity-50' : ''}`}
+                            message.isTemporary
+                              ? "opacity-70 border-2 border-dashed border-yellow-400"
+                              : ""
+                          } ${
+                            deletingMessageId === message.id ? "opacity-50" : ""
+                          }`}
                         >
                           {/* MORE OPTIONS BUTTON - Only show for user's own messages */}
                           {message.sender_id === currentUserId && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setShowDeleteOption(showDeleteOption === message.id ? null : message.id);
+                                setShowDeleteOption(
+                                  showDeleteOption === message.id
+                                    ? null
+                                    : message.id
+                                );
                               }}
                               className="absolute top-2 right-2 more-options-btn text-white/70 hover:text-white text-sm"
                               title="More options"
@@ -821,29 +893,28 @@ export default function MessagesSection() {
                           )}
 
                           {/* DELETE OPTION DROPDOWN */}
-                          {showDeleteOption === message.id && message.sender_id === currentUserId && (
-                            <div className="absolute top-8 right-2 bg-white border border-gray-200 rounded-lg shadow-lg p-1 delete-option z-20">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteMessage(message.id);
-                                }}
-                                disabled={deletingMessageId === message.id}
-                                className="flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 rounded-md text-sm font-medium w-full disabled:opacity-50"
-                              >
-                                {deletingMessageId === message.id ? (
-                                  <>
-                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600"></div>
-                                    Deleting...
-                                  </>
-                                ) : (
-                                  <>
-                                    🗑️ Delete Message
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          )}
+                          {showDeleteOption === message.id &&
+                            message.sender_id === currentUserId && (
+                              <div className="absolute top-8 right-2 bg-white border border-gray-200 rounded-lg shadow-lg p-1 delete-option z-20">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteMessage(message.id);
+                                  }}
+                                  disabled={deletingMessageId === message.id}
+                                  className="flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 rounded-md text-sm font-medium w-full disabled:opacity-50"
+                                >
+                                  {deletingMessageId === message.id ? (
+                                    <>
+                                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600"></div>
+                                      Deleting...
+                                    </>
+                                  ) : (
+                                    <>🗑️ Delete Message</>
+                                  )}
+                                </button>
+                              </div>
+                            )}
 
                           {/* Sender name for received messages */}
                           {message.sender_id !== currentUserId && (
@@ -854,7 +925,9 @@ export default function MessagesSection() {
 
                           {/* Message content */}
                           {message.content && (
-                            <p className="break-words whitespace-pre-wrap text-sm sm:text-base">{message.content}</p>
+                            <p className="break-words whitespace-pre-wrap text-sm sm:text-base">
+                              {message.content}
+                            </p>
                           )}
 
                           {/* Attachment */}
@@ -862,61 +935,75 @@ export default function MessagesSection() {
 
                           {/* Message Footer - Timestamp + Reaction Button */}
                           <div className="flex justify-between items-center mt-2">
-                            <p className={`text-xs ${
-                              message.sender_id === currentUserId ? 'text-indigo-200' : 'text-gray-500'
-                            }`}>
+                            <p
+                              className={`text-xs ${
+                                message.sender_id === currentUserId
+                                  ? "text-indigo-200"
+                                  : "text-gray-500"
+                              }`}
+                            >
                               {formatTime(message.created_at)}
-                              {message.isTemporary && ' • Sending...'}
-                              {deletingMessageId === message.id && ' • Deleting...'}
+                              {message.isTemporary && " • Sending..."}
+                              {deletingMessageId === message.id &&
+                                " • Deleting..."}
                             </p>
 
                             {/* WhatsApp Style Reaction Button */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setShowReactionPicker(showReactionPicker === message.id ? null : message.id);
+                                setShowReactionPicker(
+                                  showReactionPicker === message.id
+                                    ? null
+                                    : message.id
+                                );
                               }}
                               className={`text-xs p-1 rounded-full reaction-btn ${
-                                message.sender_id === currentUserId 
-                                  ? 'bg-white/20 hover:bg-white/30 text-white' 
-                                  : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
+                                message.sender_id === currentUserId
+                                  ? "bg-white/20 hover:bg-white/30 text-white"
+                                  : "bg-gray-200 hover:bg-gray-300 text-gray-600"
                               } transition`}
                               title="Add reaction"
                             >
                               ⊕
                             </button>
                           </div>
-
                           {/* ✅ REACTIONS DISPLAY */}
                           <div className="flex flex-wrap gap-1 mt-2">
-                            {getMessageReactions(message.id).map((reaction, index) => (
-                              <span 
-                                key={reaction.id || index} 
-                                className="text-xs bg-white bg-opacity-90 px-2 py-1 rounded-full border border-gray-300 flex items-center gap-1 shadow-sm"
-                                title={`Reaction by user`}
-                              >
-                                <span className="text-sm">
-                                  {reaction.emoji || reaction.reaction || '❤️'}
+                            {getMessageReactions(message.id).map(
+                              (reaction, index) => (
+                                <span
+                                  key={reaction.id || index}
+                                  className="text-xs bg-white bg-opacity-90 px-2 py-1 rounded-full border border-gray-300 flex items-center gap-1 shadow-sm"
+                                  title={`Reaction by user`}
+                                >
+                                  <span className="text-sm">
+                                    {reaction.emoji ||
+                                      reaction.reaction ||
+                                      "❤️"}
+                                  </span>
                                 </span>
-                              </span>
-                            ))}
+                              )
+                            )}
                           </div>
 
-                          {/* Reaction Picker */}
+                          {/* Reaction Picker - LEFT SIDE FOR USER MESSAGES */}
                           {showReactionPicker === message.id && (
-                            <div className="absolute bottom-full right-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-lg p-2 flex gap-1 reaction-picker z-10">
-                              {['❤️', '👍', '😂', '😮', '😢', '🎉'].map((emoji) => (
-                                <button
-                                  key={emoji}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    addReaction(message.id, emoji);
-                                  }}
-                                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition text-lg"
-                                >
-                                  {emoji}
-                                </button>
-                              ))}
+                            <div className="absolute -top-10 left-0 bg-white border border-gray-200 rounded-xl shadow-lg p-2 flex gap-1 reaction-picker z-50">
+                              {["❤️", "👍", "😂", "😮", "😢", "🎉"].map(
+                                (emoji) => (
+                                  <button
+                                    key={emoji}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addReaction(message.id, emoji);
+                                    }}
+                                    className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition text-lg"
+                                  >
+                                    {emoji}
+                                  </button>
+                                )
+                              )}
                             </div>
                           )}
                         </div>
@@ -926,7 +1013,6 @@ export default function MessagesSection() {
                   </div>
                 )}
               </div>
-
               {/* Input Area */}
               <div className="p-3 sm:p-4 border-t border-gray-200 bg-white">
                 <div className="flex gap-2">
@@ -935,7 +1021,7 @@ export default function MessagesSection() {
                     disabled={fileUploading}
                     className="px-3 py-2 sm:px-4 sm:py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:opacity-50 text-sm"
                   >
-                    {fileUploading ? '📤' : '📎'}
+                    {fileUploading ? "📤" : "📎"}
                   </button>
                   <input
                     type="file"
@@ -966,10 +1052,12 @@ export default function MessagesSection() {
             <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50">
               <div className="text-center">
                 <div className="text-4xl sm:text-6xl mb-4">💬</div>
-                <p className="text-lg font-medium">Select a user to start chatting</p>
+                <p className="text-lg font-medium">
+                  Select a user to start chatting
+                </p>
                 <p className="text-sm mt-2">Search for users in the sidebar</p>
                 {/* Mobile sidebar toggle */}
-                <button 
+                <button
                   onClick={() => setShowSidebar(true)}
                   className="md:hidden mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
                 >
@@ -983,11 +1071,11 @@ export default function MessagesSection() {
 
       {/* Image Preview Modal */}
       {showImageModal && selectedImage && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
           onClick={() => setShowImageModal(false)}
         >
-          <div 
+          <div
             className="relative max-w-4xl max-h-full"
             onClick={(e) => e.stopPropagation()}
           >
@@ -998,14 +1086,14 @@ export default function MessagesSection() {
             >
               ×
             </button>
-            
+
             {/* Image */}
-            <img 
-              src={selectedImage.url} 
-              alt="Preview" 
+            <img
+              src={selectedImage.url}
+              alt="Preview"
               className="max-w-full max-h-[80vh] object-contain rounded-lg"
             />
-            
+
             {/* Image Info */}
             <div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-60 text-white p-3 rounded-lg">
               <div className="flex justify-between items-center text-sm">
@@ -1014,16 +1102,16 @@ export default function MessagesSection() {
               </div>
               <div className="flex gap-2 mt-2">
                 <button
-                  onClick={() => window.open(selectedImage.url, '_blank')}
+                  onClick={() => window.open(selectedImage.url, "_blank")}
                   className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
                 >
                   Open in New Tab
                 </button>
                 <button
                   onClick={() => {
-                    const link = document.createElement('a');
+                    const link = document.createElement("a");
                     link.href = selectedImage.url;
-                    link.download = 'image';
+                    link.download = "image";
                     link.click();
                   }}
                   className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-xs"
@@ -1038,271 +1126,3 @@ export default function MessagesSection() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

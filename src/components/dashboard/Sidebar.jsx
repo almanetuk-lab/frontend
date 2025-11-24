@@ -2,23 +2,38 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SidebarItem = ({ icon, label, active = false, onClick, isDropdown = false, isOpen = false, onToggle, children }) => {
+const SidebarItem = ({
+  icon,
+  label,
+  active = false,
+  onClick,
+  isDropdown = false,
+  isOpen = false,
+  onToggle,
+  children,
+}) => {
   if (isDropdown) {
     return (
       <div className="relative">
         <button
           onClick={onToggle}
           className={`w-full flex items-center gap-3 px-4 py-4 text-left rounded-xl transition-all duration-200 ${
-            active ? 'bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 border-r-2 border-indigo-600 shadow-sm' : 'text-gray-700 hover:bg-gray-50 hover:translate-x-1'
+            active
+              ? "bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 border-r-2 border-indigo-600 shadow-sm"
+              : "text-gray-700 hover:bg-gray-50 hover:translate-x-1"
           }`}
         >
           <span className="text-xl">{icon}</span>
           <span className="flex-1 font-medium">{label}</span>
-          <span className={`transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+          <span
+            className={`transform transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          >
             ▼
           </span>
         </button>
-        
+
         {isOpen && (
           <div className="ml-6 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
             {children}
@@ -32,9 +47,9 @@ const SidebarItem = ({ icon, label, active = false, onClick, isDropdown = false,
     <button
       onClick={onClick}
       className={`flex items-center w-full px-4 py-4 text-left rounded-xl transition-all duration-200 ${
-        active 
-          ? 'bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 border-r-2 border-indigo-600 shadow-sm' 
-          : 'text-gray-700 hover:bg-gray-50 hover:translate-x-1'
+        active
+          ? "bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 border-r-2 border-indigo-600 shadow-sm"
+          : "text-gray-700 hover:bg-gray-50 hover:translate-x-1"
       }`}
     >
       <span className="mr-3 text-xl">{icon}</span>
@@ -43,7 +58,12 @@ const SidebarItem = ({ icon, label, active = false, onClick, isDropdown = false,
   );
 };
 
-export default function Sidebar({ profile, activeSection, sidebarOpen, setSidebarOpen }) {
+export default function Sidebar({
+  profile,
+  activeSection,
+  sidebarOpen,
+  setSidebarOpen,
+}) {
   const navigate = useNavigate();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
@@ -51,15 +71,18 @@ export default function Sidebar({ profile, activeSection, sidebarOpen, setSideba
     <>
       {/* Overlay - Only for mobile */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
+
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 h-screen flex flex-col overflow-hidden`}>
-        
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 h-screen flex flex-col overflow-hidden`}
+      >
         <div className="flex-shrink-0 p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-800 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
             MingleHub
@@ -69,20 +92,22 @@ export default function Sidebar({ profile, activeSection, sidebarOpen, setSideba
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-4">
           <nav className="space-y-1">
-            <SidebarItem 
-              icon="🏠" 
-              label="Dashboard" 
+            <SidebarItem
+              icon="🏠"
+              label="Dashboard"
               active={activeSection === "dashboard"}
               onClick={() => {
                 navigate("/dashboard");
                 setSidebarOpen(false);
               }}
             />
-            
-            <SidebarItem 
-              icon="👤" 
-              label="Profile" 
-              active={activeSection === "profile" || activeSection === "edit-profile"}
+
+            <SidebarItem
+              icon="👤"
+              label="Profile"
+              active={
+                activeSection === "profile" || activeSection === "edit-profile"
+              }
               isDropdown={true}
               isOpen={profileDropdownOpen}
               onToggle={() => setProfileDropdownOpen(!profileDropdownOpen)}
@@ -110,52 +135,52 @@ export default function Sidebar({ profile, activeSection, sidebarOpen, setSideba
                 <span className="font-medium">Edit Profile</span>
               </button>
             </SidebarItem>
-            
-            <SidebarItem 
-              icon="💬" 
-              label="Messages" 
+
+            <SidebarItem
+              icon="💬"
+              label="Messages"
               active={activeSection === "messages"}
               onClick={() => {
                 navigate("/dashboard/messages");
                 setSidebarOpen(false);
               }}
             />
-            <SidebarItem 
-              icon="🔍" 
-              label="Advanced Search" 
+            <SidebarItem
+              icon="🔍"
+              label="Advanced Search"
               active={activeSection === "search"}
               onClick={() => {
                 navigate("/dashboard/search");
                 setSidebarOpen(false);
               }}
             />
-            <SidebarItem 
-              icon="👥" 
-              label="My Matches" 
+            <SidebarItem
+              icon="👥"
+              label="My Matches"
               active={activeSection === "matches"}
               onClick={() => {
                 navigate("/dashboard/matches");
                 setSidebarOpen(false);
               }}
             />
-            <SidebarItem 
-              icon="👥" 
-              label="Browse Members" 
+            <SidebarItem
+              icon="👥"
+              label="Browse Members"
               onClick={() => {
                 navigate("/dashboard/members");
                 setSidebarOpen(false);
               }}
             />
 
-             <SidebarItem icon="💳"
-            label="Plan"
-            active={activeSection === "plans"}
-            onClick={() => {
-              navigate("/dashboard/plans");
-              setSidebarOpen(false);
-            }}
+            <SidebarItem
+              icon="💳"
+              label="Plan"
+              active={activeSection === "plans"}
+              onClick={() => {
+                navigate("/dashboard/plans");
+                setSidebarOpen(false);
+              }}
             />
-
           </nav>
         </div>
 
@@ -169,7 +194,7 @@ export default function Sidebar({ profile, activeSection, sidebarOpen, setSideba
               />
             ) : (
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold">
-                {profile?.full_name?.charAt(0) || 'U'}
+                {profile?.full_name?.charAt(0) || "U"}
               </div>
             )}
             <div className="flex-1 min-w-0">
@@ -195,43 +220,3 @@ export default function Sidebar({ profile, activeSection, sidebarOpen, setSideba
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
