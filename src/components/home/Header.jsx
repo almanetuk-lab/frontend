@@ -30,28 +30,29 @@ function Header() {
     clearProfile();
     setIsMobileMenuOpen(false);
     // window.location.href = '/#/';
-      navigate('/');
+    navigate("/");
 
-        setTimeout(() => {
-    window.location.reload();
-  }, 100);
-};
-  
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
 
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target)
+      ) {
         setIsMobileMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -81,7 +82,7 @@ function Header() {
                   Home
                 </Link>
               </li>
-              
+
               {isLoggedIn && (
                 <>
                   <li>
@@ -110,7 +111,7 @@ function Header() {
                   </li>
                 </>
               )}
-              
+
               <li>
                 <Link
                   to="/contact"
@@ -119,7 +120,7 @@ function Header() {
                   Contact Us
                 </Link>
               </li>
-                  
+
               <li>
                 <Link
                   to="/blog"
@@ -131,12 +132,11 @@ function Header() {
             </ul>
           </nav>
 
-
           {/* Desktop Auth Section - Hidden on mobile */}
           <div className="hidden lg:flex items-center gap-4">
             {isLoggedIn ? (
               <>
-                   <Link
+                <Link
                   to="/cart"
                   className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
                 >
@@ -144,9 +144,7 @@ function Header() {
                 </Link>
 
                 {localStorage.getItem("accessToken") && <NotificationBell />}
-                
-            
-                
+
                 <button
                   onClick={handleLogout}
                   className="bg-amber-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-700 transition-all duration-200"
@@ -160,14 +158,14 @@ function Header() {
                   to="/login"
                   className="text-gray-700 hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
                 >
-                Login
+                  Login
                 </Link>
 
                 <Link
                   to="/admin-login"
                   className="text-gray-700 hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
                 >
-                   Admin Login
+                  Admin Login
                 </Link>
                 <Link
                   to="/register"
@@ -179,19 +177,24 @@ function Header() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center gap-3">
-            {/* Notification Bell for mobile */}
-            {isLoggedIn && localStorage.getItem("accessToken") && <NotificationBell />}
-            
-            {/* User Avatar for mobile */}
+            {/* Cart for mobile */}
             {isLoggedIn && (
-              <div className="flex items-center gap-2 text-gray-700">
-                 <div className="w-0 h-1 bg-white rounded-full flex items-center justify-center">
-                  <span className="text-amber-600 font-semibold text-sm">
-                    {/* {profile?.name?.charAt(0) || 'Hello'} */}
-                  </span>
-                </div> 
+              <div className="mr-3 lg:hidden">
+                <Link
+                  to="/cart"
+                  className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+                >
+                 cart 
+                </Link>
+              </div>
+            )}
+
+              {/* Mobile Menu Button */}
+          <div className="lg:hidden flex items-center gap-4">
+            {/* Notification Bell for mobile */}
+            {isLoggedIn && localStorage.getItem("accessToken") && (
+              <div className="mr-2">
+                <NotificationBell />
               </div>
             )}
 
@@ -202,13 +205,33 @@ function Header() {
             >
               {isMobileMenuOpen ? (
                 // Close Icon
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
                 // Hamburger Icon
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               )}
             </button>
@@ -217,14 +240,19 @@ function Header() {
 
         {/* Mobile Menu Overlay */}
         {isMobileMenuOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)}></div>
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          ></div>
         )}
 
         {/* Mobile Menu Content */}
-        <div 
+        <div
           ref={mobileMenuRef}
           className={`lg:hidden absolute top-full left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+            isMobileMenuOpen
+              ? "max-h-96 opacity-100"
+              : "max-h-0 opacity-0 overflow-hidden"
           }`}
         >
           <div className="container mx-auto px-4 py-4">
@@ -249,7 +277,7 @@ function Header() {
                     About
                   </Link>
                 </li>
-                
+
                 {isLoggedIn && (
                   <>
                     <li>
@@ -281,7 +309,7 @@ function Header() {
                     </li>
                   </>
                 )}
-                
+
                 <li>
                   <Link
                     to="/contact"
@@ -291,64 +319,66 @@ function Header() {
                     Contact Us
                   </Link>
                 </li>
-
               </ul>
             </nav>
 
             {/* Mobile Auth Section */}
-<div className="border-t border-gray-200 pt-4">
-  {isLoggedIn ? (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between px-4 py-2">
-        <span className="text-sm text-gray-600">
-          {localStorage.getItem("adminToken") 
-            ? "Admin User" 
-            : profile?.first_name && profile?.last_name 
-              ? `Hello, ${profile.first_name} ${profile.last_name}`
-              : `Hello, ${profile?.first_name || profile?.name || 'User'}`
-          }
-        </span>
-      </div>
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        handleLogout();
-      }} className="w-full">
-        <button
-          type="submit"
-          className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
-        >
-          Logout
-        </button>
-      </form>
-    </div>
-  ) : (
-    <div className="space-y-3">
-      <Link
-        to="/admin-login"
-        className="block py-3 px-4 text-center text-gray-700 hover:text-amber-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        Admin Login
-      </Link>
-      <Link
-        to="/login"
-        className="block py-3 px-4 text-center text-gray-700 hover:text-amber-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        Login
-      </Link>
-      <Link
-        to="/register"
-        className="block py-3 px-4 text-center bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-colors"
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        Register Free
-      </Link>
-    </div>
-  )}
-</div>
+            <div className="border-t border-gray-200 pt-4">
+              {isLoggedIn ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between px-4 py-2">
+                    <span className="text-sm text-gray-600">
+                      {localStorage.getItem("adminToken")
+                        ? "Admin User"
+                        : profile?.first_name && profile?.last_name
+                        ? `Hello, ${profile.first_name} ${profile.last_name}`
+                        : `Hello, ${
+                            profile?.first_name || profile?.name || "User"
+                          }`}
+                    </span>
+                  </div>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleLogout();
+                    }}
+                    className="w-full"
+                  >
+                    <button
+                      type="submit"
+                      className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </form>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <Link
+                    to="/admin-login"
+                    className="block py-3 px-4 text-center text-gray-700 hover:text-amber-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Admin Login
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="block py-3 px-4 text-center text-gray-700 hover:text-amber-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="block py-3 px-4 text-center bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Register Free
+                  </Link>
+                </div>
+              )}
+            </div>
 
-  
             {/* Mobile Auth Section
 <div className="border-t border-gray-200 pt-4">
   {isLoggedIn ? (
@@ -398,7 +428,6 @@ function Header() {
                 </div>
               )}
             </div> */}
-
           </div>
         </div>
       </div>
@@ -407,15 +436,6 @@ function Header() {
 }
 
 export default Header;
-
-
-
-
-
-
-
-
-
 
 //             {/* Mobile Auth Section */}
 //             <div className="border-t border-gray-200 pt-4">
@@ -426,9 +446,9 @@ export default Header;
 //                       {localStorage.getItem("adminToken") ? "Admin User" : `Hello, ${profile?.name?.split(' ')[0] || ''}`}
 //                     </span> */}
 //                     <span className="text-sm text-gray-600">
-//   {localStorage.getItem("adminToken") 
-//     ? "Admin User" 
-//     : profile?.first_name && profile?.last_name 
+//   {localStorage.getItem("adminToken")
+//     ? "Admin User"
+//     : profile?.first_name && profile?.last_name
 //       ? `Hello, ${profile.first_name} ${profile.last_name}`
 //       : `Hello, ${profile?.first_name || profile?.name || 'User'}`
 //   }
@@ -440,4 +460,4 @@ export default Header;
 //                   >
 //                     Logout
 //                   </button>
-//                 </div> 
+//                 </div>
