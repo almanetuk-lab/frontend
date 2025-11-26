@@ -342,7 +342,7 @@ export default function MessagesSection() {
     }
 
     const confirmDelete = window.confirm(
-      "Kya aap ye message delete karna chahte hain?"
+      "You want to Delete this messagee"
     );
     if (!confirmDelete) {
       setShowDeleteOption(null);
@@ -354,7 +354,7 @@ export default function MessagesSection() {
 
     try {
       const response = await chatApi.deleteMessage(messageId);
-      console.log("✅ Message deleted successfully:", response);
+      console.log(" Message deleted successfully:", response);
 
       // Remove message from state
       setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
@@ -365,10 +365,10 @@ export default function MessagesSection() {
       }
 
       // Show success message
-      alert("Message successfully deleted!");
+      alert("Message deleted successfully!");
     } catch (error) {
       console.error("❌ Delete failed:", error);
-      alert("Message delete karne mein error aaya!");
+      alert("faild to some erro for Dlete this Meaasage");
     } finally {
       setDeletingMessageId(null);
       setShowDeleteOption(null);

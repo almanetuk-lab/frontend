@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { chatApi } from '../services/chatApi'; // ChatApi import karo
+import { chatApi } from "../services/chatApi"; // ChatApi import karo
 import { useUserProfile } from "../context/UseProfileContext";
-import io from 'socket.io-client';
+import io from "socket.io-client";
+import { FaBell } from "react-icons/fa";
 
 // Notification Bell Component
 const NotificationBell = () => {
@@ -17,75 +18,75 @@ const NotificationBell = () => {
     try {
       if (profile?.id) return profile.id;
       if (profile?.user_id) return profile.user_id;
-      
-      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
       if (userData.id) return userData.id;
       if (userData.user_id) return userData.user_id;
-      
+
       return null;
     } catch (error) {
-      console.error('Error getting user ID:', error);
+      console.error("Error getting user ID:", error);
       return null;
     }
   };
   // ✅ FILE UPLOAD - Using updated endpoint
-const handleFileUpload = async (file) => {
-  if (!selectedUser || !currentUserId) return;
-  
-  setFileUploading(true);
-  const tempId = `file-${Date.now()}`;
-  const tempMsg = { 
-    id: tempId, 
-    sender_id: currentUserId, 
-    receiver_id: selectedUser.id, 
-    content: `Sending: ${file.name}`, 
-    isTemporary: true, 
-    isUploading: true 
-  };
-  
-  setMessages(prev => [...prev, tempMsg]);
+  const handleFileUpload = async (file) => {
+    if (!selectedUser || !currentUserId) return;
 
-  try {
-    const uploadResponse = await chatApi.uploadFile(file); // ✅ This will now use /api/chat/upload
-    if (uploadResponse.data?.url) {
-      await chatApi.sendMessage({
-        sender_id: currentUserId,
-        receiver_id: selectedUser.id,
-        content: `File: ${file.name}`,
-        attachment_url: uploadResponse.data.url
-      });
-      
-      setTimeout(() => {
-        setMessages(prev => prev.filter(msg => msg.id !== tempId));
-      }, 1000);
+    setFileUploading(true);
+    const tempId = `file-${Date.now()}`;
+    const tempMsg = {
+      id: tempId,
+      sender_id: currentUserId,
+      receiver_id: selectedUser.id,
+      content: `Sending: ${file.name}`,
+      isTemporary: true,
+      isUploading: true,
+    };
+
+    setMessages((prev) => [...prev, tempMsg]);
+
+    try {
+      const uploadResponse = await chatApi.uploadFile(file); // ✅ This will now use /api/chat/upload
+      if (uploadResponse.data?.url) {
+        await chatApi.sendMessage({
+          sender_id: currentUserId,
+          receiver_id: selectedUser.id,
+          content: `File: ${file.name}`,
+          attachment_url: uploadResponse.data.url,
+        });
+
+        setTimeout(() => {
+          setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
+        }, 1000);
+      }
+    } catch (err) {
+      console.error("Upload failed:", err);
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
+    } finally {
+      setFileUploading(false);
     }
-  } catch (err) {
-    console.error('Upload failed:', err);
-    setMessages(prev => prev.filter(msg => msg.id !== tempId));
-  } finally {
-    setFileUploading(false);
-  }
-};
+  };
 
   // Socket.IO connection
   useEffect(() => {
     const userId = getUserId();
     if (!userId) {
-      console.log('No user ID found for notifications');
+      console.log("No user ID found for notifications");
       return;
     }
 
-    const socket = io('https://backend-q0wc.onrender.com');
-    
+    const socket = io("https://backend-q0wc.onrender.com");
+
     // Register user for real-time notifications
-    socket.emit('register_user', userId);
-    console.log('Registered user for notifications:', userId);
+    socket.emit("register_user", userId);
+    console.log("Registered user for notifications:", userId);
 
     // Listen for new notifications
-    socket.on('new_notification', (notification) => {
-      console.log('New notification received:', notification);
-      setNotifications(prev => [notification, ...prev]);
-      setUnreadCount(prev => prev + 1);
+    socket.on("new_notification", (notification) => {
+      console.log("New notification received:", notification);
+      setNotifications((prev) => [notification, ...prev]);
+      setUnreadCount((prev) => prev + 1);
     });
 
     return () => {
@@ -96,28 +97,29 @@ const handleFileUpload = async (file) => {
   // ✅ FIXED: Fetch notifications using chatApi (axios)
   const fetchNotifications = async () => {
     const userId = getUserId();
-    
+
     if (!userId) {
-      console.error('User ID not found');
+      console.error("User ID not found");
       return;
     }
 
     try {
       setLoading(true);
-      console.log('Fetching notifications for user:', userId);
-      
+      console.log("Fetching notifications for user:", userId);
+
       // ✅ Use chatApi instead of fetch
       const response = await chatApi.getUserNotifications(userId);
-      console.log('Notifications data:', response.data);
-      
+      console.log("Notifications data:", response.data);
+
       setNotifications(response.data || []);
-      
+
       // Calculate unread count
-      const unread = (response.data || []).filter(notif => !notif.is_read).length;
+      const unread = (response.data || []).filter(
+        (notif) => !notif.is_read
+      ).length;
       setUnreadCount(unread);
-      
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error("Error fetching notifications:", error);
       setNotifications([]);
     } finally {
       setLoading(false);
@@ -129,55 +131,42 @@ const handleFileUpload = async (file) => {
     try {
       // ✅ Use chatApi instead of fetch
       const response = await chatApi.markChatAsRead(notificationId);
-      
+
       if (response.data) {
         // Update local state
-        setNotifications(prev => 
-          prev.map(notif => 
+        setNotifications((prev) =>
+          prev.map((notif) =>
             notif.id === notificationId ? { ...notif, is_read: true } : notif
           )
         );
-        setUnreadCount(prev => Math.max(0, prev - 1));
+        setUnreadCount((prev) => Math.max(0, prev - 1));
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error("Error marking notification as read:", error);
     }
   };
 
   // ✅ FIXED: Mark all as read using chatApi
   const markAllAsRead = async () => {
     try {
-      const unreadNotifications = notifications.filter(notif => !notif.is_read);
-      
+      const unreadNotifications = notifications.filter(
+        (notif) => !notif.is_read
+      );
+
       // Mark each unread notification as read
       for (const notif of unreadNotifications) {
         await chatApi.markChatAsRead(notif.id);
       }
-      
+
       // Update local state
-      setNotifications(prev => 
-        prev.map(notif => ({ ...notif, is_read: true }))
+      setNotifications((prev) =>
+        prev.map((notif) => ({ ...notif, is_read: true }))
       );
       setUnreadCount(0);
-      
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      console.error("Error marking all as read:", error);
     }
   };
-
-  // ✅ FIXED: Get unread chat notifications count
-  // const fetchUnreadCount = async () => {
-  //   const userId = getUserId();
-  //   if (!userId) return;
-
-  //   try {
-  //     const response = await chatApi.getUnreadChatCount(userId);
-  //     console.log('Unread count:', response.data);
-  //     setUnreadCount(response.data?.count || 0);
-  //   } catch (error) {
-  //     console.error('Error fetching unread count:', error);
-  //   }
-  // };
 
   // ✅ FIXED: Get unread chat notifications
   const fetchUnreadChats = async () => {
@@ -186,40 +175,38 @@ const handleFileUpload = async (file) => {
 
     try {
       const response = await chatApi.getUnreadChats(userId);
-      console.log('Unread chats:', response.data);
+      console.log("Unread chats:", response.data);
       // You can use this for chat-specific notifications
     } catch (error) {
-      console.error('Error fetching unread chats:', error);
+      console.error("Error fetching unread chats:", error);
     }
   };
 
   async function markAllNotificationsAsRead(userId) {
-  try {
-    const response = await chatAPI.markNotificationsAsRead(userId);
-    
-    if (response.data.success) {
-      console.log('Notifications marked as read:', response.data.message);
+    try {
+      const response = await chatAPI.markNotificationsAsRead(userId);
+
+      if (response.data.success) {
+        console.log("Notifications marked as read:", response.data.message);
+        return {
+          success: true,
+          message: response.data.message,
+          updatedCount: response.data.updated,
+        };
+      }
+
       return {
-        success: true,
-        message: response.data.message,
-        updatedCount: response.data.updated
+        success: false,
+        message: "Failed to mark notifications as read",
+      };
+    } catch (error) {
+      console.error("Error marking notifications as read:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Network error",
       };
     }
-    
-    return {
-      success: false,
-      message: 'Failed to mark notifications as read'
-    };
-    
-  } catch (error) {
-    console.error('Error marking notifications as read:', error);
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Network error'
-    };
   }
-}
-
 
   // Toggle dropdown
   const toggleDropdown = () => {
@@ -237,19 +224,19 @@ const handleFileUpload = async (file) => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   // Format date
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -265,25 +252,13 @@ const handleFileUpload = async (file) => {
         onClick={toggleDropdown}
         className="relative p-2 text-gray-600 hover:text-amber-600 transition-colors"
       >
-        {/* Bell Icon */}
-        <svg 
-          className="w-6 h-6" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M15 17h5l-5 5v-5zM10.24 8.56a5.97 5.97 0 01-3.79 1.44 5.97 5.97 0 01-3.79-1.44M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-          />
-        </svg>
+        {/* ball icons  */}
+        <FaBell className="w-5 h-5 text-gray-600" />
 
         {/* Notification Badge */}
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
@@ -294,7 +269,9 @@ const handleFileUpload = async (file) => {
           {/* Header */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Notifications
+              </h3>
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
@@ -315,17 +292,17 @@ const handleFileUpload = async (file) => {
               </div>
             ) : notifications.length === 0 ? (
               <div className="p-6 text-center">
-                <svg 
-                  className="w-12 h-12 text-gray-300 mx-auto mb-3" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-12 h-12 text-gray-300 mx-auto mb-3"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={1} 
-                    d="M15 17h5l-5 5v-5zM10.24 8.56a5.97 5.97 0 01-3.79 1.44 5.97 5.97 0 01-3.79-1.44M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M15 17h5l-5 5v-5zM10.24 8.56a5.97 5.97 0 01-3.79 1.44 5.97 5.97 0 01-3.79-1.44M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
                 <p className="text-gray-500">No notifications yet</p>
@@ -336,14 +313,14 @@ const handleFileUpload = async (file) => {
                   <div
                     key={notification.id}
                     className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                      !notification.is_read ? 'bg-amber-50' : ''
+                      !notification.is_read ? "bg-amber-50" : ""
                     }`}
                     onClick={() => markAsRead(notification.id)}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-800 text-sm">
-                          {notification.title || 'New Message'}
+                          {notification.title || "New Message"}
                         </h4>
                         <p className="text-gray-600 text-sm mt-1">
                           {notification.content || notification.message}
@@ -352,7 +329,7 @@ const handleFileUpload = async (file) => {
                           {formatDate(notification.created_at)}
                         </p>
                       </div>
-                      
+
                       {/* Unread indicator */}
                       {!notification.is_read && (
                         <div className="w-2 h-2 bg-amber-500 rounded-full ml-2 mt-1"></div>
@@ -380,16 +357,3 @@ const handleFileUpload = async (file) => {
 };
 
 export default NotificationBell;
-
-
-
-
-
-
-
-
-
-
-
-
-

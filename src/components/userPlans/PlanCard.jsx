@@ -32,7 +32,7 @@ export default function PlanCard({ plan, theme, addToCart, handleBuy }) {
                         <i className="fa-solid fa-headset text-blue-500"></i>
                         Audio Call Limit: {plan.audio_call_limit}
                     </li>
-                   
+                    
                 </ul>
 
                 {/* Buttons */}

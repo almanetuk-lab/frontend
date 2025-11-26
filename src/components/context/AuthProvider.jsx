@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (err) {
       console.error("❌ Login failed:", err);
-      // logout(); // Only logout if token is actually invalid, not just wrong credentials
+      // logout(); 
       setLoading(false);
       throw err;
     }
@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
       }}
     >
       {/* Render children only when not loading to avoid flickering */}
-      {loading ? <div>Loading Auth...</div> : children} 
+      {loading ? <div className="text-center align-top text-2xl">Please Wait For Loading....</div> : children} 
     </AuthContext.Provider>
   );
 };
