@@ -94,4 +94,20 @@ deleteMessage: async (messageId) => {
 
 };
 
+export const getCurrentUserId = () => {
+  return localStorage.getItem('userId') || '82'; // Default agar nahi mile to
+};
+
+export const getSuggestedMatches = async () => {
+  try {
+    const userId = localStorage.getItem('userId') || '';
+    const response = await api.get(`/api/my_matches/${userId}`);
+    return response.data;
+  } catch (error) {
+    
+  
+  }
+};
+
+
 export default api;
