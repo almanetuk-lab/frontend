@@ -1,9 +1,3 @@
-
-
-
-
-
-
 // src/components/dashboard/DashboardHome.jsx
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +6,7 @@ import MatchCard from "../comman/MatchCard";
 import ActivityItem from "../comman/ActivityItem";
 import QuickAction from "../comman/QuickAction";
 import { chatApi } from "../services/chatApi"; // Adjust path as needed
-import { getSuggestedMatches } from '../services/chatApi';
+import { getSuggestedMatches } from "../services/chatApi";
 
 export default function DashboardHome({ profile }) {
   const navigate = useNavigate();
@@ -24,37 +18,36 @@ export default function DashboardHome({ profile }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch matches
+  useEffect(() => {
+    fetchMatches();
+  }, []);
 
-// Fetch matches
-useEffect(() => {
-  fetchMatches();
-}, []);
+  // Fetch function
+  const fetchMatches = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-// Fetch function
-const fetchMatches = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    
-    // API se data lo
-    const data = await getSuggestedMatches();
-    
-    // Data ko set karo
-    if (Array.isArray(data)) {
-      setSuggestedMatches(data);
-    } else if (data) {
-      setSuggestedMatches([data]);
-    } else {
-      setSuggestedMatches([]);
+      // API se data lo
+      const data = await getSuggestedMatches();
+
+      // Data ko set karo
+      if (Array.isArray(data)) {
+        setSuggestedMatches(data);
+      } else if (data) {
+        setSuggestedMatches([data]);
+      } else {
+        setSuggestedMatches([]);
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Error:", err);
+      setError("Failed to load matches");
+      setLoading(false);
     }
-    
-    setLoading(false);
-  } catch (err) {
-    console.error('Error:', err);
-    setError('Failed to load matches');
-    setLoading(false);
-  }
-};
+  };
 
   // Retry button ke liye
   const handleRetry = () => {
@@ -503,67 +496,70 @@ const fetchMatches = async () => {
             </div>
           </div>
 
-{/* Right Column */}
-<div className="space-y-4 sm:space-y-6">
-  {/* Suggested Matches */}
-  <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
-    <div className="flex items-center justify-between mb-3 sm:mb-4">
-      <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-        Suggested Matches
-      </h3>
-      <span className="text-xs sm:text-sm text-indigo-600 font-medium">
-        {!loading && !error ? `${suggestedMatches.length}+` : "0+"}
-      </span>
-    </div>
-    
-    {loading ? (
-      // Loading state - SAME
-      <div className="space-y-3 sm:space-y-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="flex items-center p-3 bg-gray-50 rounded-lg animate-pulse">
-            <div className="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
-            <div className="flex-1">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    ) : error ? (
-      // Error state - SIMPLE VERSION
-      <div className="text-center py-4">
-        <p className="text-red-500 mb-2">{error}</p>
-        <button
-          onClick={fetchMatches}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-        >
-          Try Again
-        </button>
-      </div>
-    ) : suggestedMatches.length === 0 ? (
-      // No matches state
-      <div className="text-center py-4">
-        <p className="text-gray-500">No matches found</p>
-      </div>
-    ) : (
-      // Show matches
-      <div className="space-y-3 sm:space-y-4">
-        {suggestedMatches.slice(0, 3).map((user) => (
-          <MatchCard key={user.id} user={user} />
-        ))}
-      </div>
-    )}
-    
-    {/* View All Button */}
-    <button
-      onClick={() => navigate("/dashboard/matches")}
-      className="w-full mt-3 sm:mt-4 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-100 transition font-medium text-sm sm:text-base"
-    >
-      View All Matches
-    </button>
-  </div>
+          {/* Right Column */}
+          <div className="space-y-4 sm:space-y-6">
+            {/* Suggested Matches */}
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+                  Suggested Matches
+                </h3>
+                <span className="text-xs sm:text-sm text-indigo-600 font-medium">
+                  {!loading && !error ? `${suggestedMatches.length}+` : "0+"}
+                </span>
+              </div>
 
-{/*          
+              {loading ? (
+                // Loading state - SAME
+                <div className="space-y-3 sm:space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="flex items-center p-3 bg-gray-50 rounded-lg animate-pulse"
+                    >
+                      <div className="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : error ? (
+                // Error state - SIMPLE VERSION
+                <div className="text-center py-4">
+                  <p className="text-red-500 mb-2">{error}</p>
+                  <button
+                    onClick={fetchMatches}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : suggestedMatches.length === 0 ? (
+                // No matches state
+                <div className="text-center py-4">
+                  <p className="text-gray-500">No matches found</p>
+                </div>
+              ) : (
+                // Show matches
+                <div className="space-y-3 sm:space-y-4">
+                  {suggestedMatches.slice(0, 3).map((user) => (
+                    <MatchCard key={user.id} user={user} />
+                  ))}
+                </div>
+              )}
+
+              {/* View All Button */}
+              <button
+                onClick={() => navigate("/dashboard/matches")}
+                className="w-full mt-3 sm:mt-4 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-100 transition font-medium text-sm sm:text-base"
+              >
+                View All Matches
+              </button>
+            </div>
+
+            {/*          
           <div className="space-y-4 sm:space-y-6">
             Suggested Matches
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
@@ -603,7 +599,6 @@ const fetchMatches = async () => {
           </div>
         </div>
       </div>
-</div>
-
+    </div>
   );
 }
