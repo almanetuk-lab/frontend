@@ -1,8 +1,146 @@
 // MemberPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {chatApi} from '../services/chatApi'; // अपना API file path डालें
+
 
 const MemberPage = () => {
-  const [members] = useState([
+  const navigate = useNavigate();
+  
+  // State for members (now from API)
+  const [members, setMembers] = useState([]);
+  const [filteredMembers, setFilteredMembers] = useState([]);
+  
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedGender, setSelectedGender] = useState('All');
+  const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [debounceTimer, setDebounceTimer] = useState(null);
+
+  // Initial load of members
+  useEffect(() => {
+    fetchMembers();
+  }, []);
+
+  // Search with debounce
+  useEffect(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    if (searchTerm.trim() === '') {
+      // If search is empty, show all members
+      setFilteredMembers(members);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      performSearch();
+    }, 500); // 500ms debounce
+
+    setDebounceTimer(timer);
+
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [searchTerm]);
+
+  // Filter by gender
+  useEffect(() => {
+    filterMembersByGender();
+  }, [selectedGender, members]);
+
+  // Fetch initial members
+  const fetchMembers = async () => {
+    try {
+      setLoading(true);
+      const response = await chatApi.searchUsers('');
+      if (response.data) {
+        // Adjust according to your API response structure
+        const membersData = Array.isArray(response.data) ? response.data : 
+                           response.data.data || response.data.users || [];
+        setMembers(membersData);
+        setFilteredMembers(membersData);
+      }
+    } catch (error) {
+      console.error('Error fetching members:', error);
+      // Fallback to dummy data if API fails
+      setMembers(getDummyMembers());
+      setFilteredMembers(getDummyMembers());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Perform search using API
+  const performSearch = async () => {
+    if (!searchTerm.trim()) return;
+
+    try {
+      setSearchLoading(true);
+      const response = await chatApi.searchUsers(searchTerm);
+      if (response.data) {
+        const searchResults = Array.isArray(response.data) ? response.data : 
+                             response.data.data || response.data.users || [];
+        setMembers(searchResults);
+        // Apply gender filter if selected
+        if (selectedGender !== 'All') {
+          const genderFiltered = searchResults.filter(member => 
+            member.gender?.toLowerCase() === selectedGender.toLowerCase() ||
+            member.gender?.toLowerCase() === (selectedGender === 'Man' ? 'male' : 'female')
+          );
+          setFilteredMembers(genderFiltered);
+        } else {
+          setFilteredMembers(searchResults);
+        }
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  // Filter members by gender
+  const filterMembersByGender = () => {
+    if (selectedGender === 'All') {
+      setFilteredMembers(members);
+    } else {
+      const filtered = members.filter(member => {
+        const memberGender = member.gender?.toLowerCase();
+        const selected = selectedGender.toLowerCase();
+        return memberGender === selected || 
+               (selected === 'man' && memberGender === 'male') ||
+               (selected === 'woman' && memberGender === 'female');
+      });
+      setFilteredMembers(filtered);
+    }
+  };
+
+  // Handle search form submit
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    performSearch();
+  };
+
+  // Navigate to profile
+  const handleViewProfile = (memberId) => {
+    navigate(`/dashboard/profile/${memberId}`);
+  };
+
+  // Navigate to messages
+  const handleSendMessage = (memberId) => {
+    navigate(`/dashboard/messages?user=${memberId}`);
+  };
+
+  // Dummy data fallback
+  const getDummyMembers = () => [
     {
       id: 1,
       name: "Krish Ghosh",
@@ -10,7 +148,6 @@ const MemberPage = () => {
       gender: "Man",
       location: "Lakhimpur, India",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
-      profileUrl: "https://wpmatrimony.wpdating.com/profile/KrishGhosh",
       profession: "Software Engineer",
       education: "BTech Computer Science"
     },
@@ -21,7 +158,6 @@ const MemberPage = () => {
       gender: "Woman",
       location: "Delhi, India",
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
-      profileUrl: "#",
       profession: "Marketing Manager",
       education: "MBA"
     },
@@ -32,7 +168,6 @@ const MemberPage = () => {
       gender: "Man",
       location: "Mumbai, India",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
-      profileUrl: "#",
       profession: "Business Analyst",
       education: "MTech"
     },
@@ -43,7 +178,6 @@ const MemberPage = () => {
       gender: "Woman",
       location: "Bangalore, India",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
-      profileUrl: "#",
       profession: "Doctor",
       education: "MBBS, MD"
     },
@@ -54,7 +188,6 @@ const MemberPage = () => {
       gender: "Man",
       location: "Ahmedabad, India",
       image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
-      profileUrl: "#",
       profession: "Architect",
       education: "BArch"
     },
@@ -65,77 +198,109 @@ const MemberPage = () => {
       gender: "Woman",
       location: "Kolkata, India",
       image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=face",
-      profileUrl: "#",
       profession: "Fashion Designer",
       education: "BDes"
     }
-  ]);
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGender, setSelectedGender] = useState('All');
-
-  const filteredMembers = members.filter(member => {
-    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         member.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         member.profession.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesGender = selectedGender === 'All' || member.gender === selectedGender;
-    
-    return matchesSearch && matchesGender;
-  });
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-   
-
       {/* Search Section */}
       <div className="bg-gray-100 py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-sm p-6">
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                {/* Search Input */}
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    placeholder="Search Members by name, location or profession..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                  />
-                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+            <form onSubmit={handleSearchSubmit}>
+              <div className="bg-white rounded-2xl shadow-sm p-6">
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                  {/* Search Input */}
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      placeholder="Search Members by name, location or profession..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                      disabled={searchLoading}
+                    />
+                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                      {searchLoading ? (
+                        <div className="w-5 h-5 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Gender Filter */}
-                <div className="w-full md:w-48">
-                  <select
-                    value={selectedGender}
-                    onChange={(e) => setSelectedGender(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  {/* Gender Filter */}
+                  <div className="w-full md:w-48">
+                    <select
+                      value={selectedGender}
+                      onChange={(e) => setSelectedGender(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                    >
+                      <option value="All">All Genders</option>
+                      <option value="Man">Men</option>
+                      <option value="Woman">Women</option>
+                    </select>
+                  </div>
+
+                  {/* Search Button */}
+                  <button
+                    type="submit"
+                    className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all"
                   >
-                    <option value="All">All Genders</option>
-                    <option value="Man">Men</option>
-                    <option value="Woman">Women</option>
-                  </select>
+                    Search
+                  </button>
+                </div>
+
+                {/* Results Count */}
+                <div className="text-center text-gray-600">
+                  {searchLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-pink-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Searching...
+                    </div>
+                  ) : (
+                    <div>
+                      Showing {filteredMembers.length} of {members.length} members
+                      {searchTerm && (
+                        <span className="ml-2 text-sm text-pink-600">
+                          for "{searchTerm}"
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Results Count */}
-              <div className="text-center text-gray-600">
-                Showing {filteredMembers.length} of {members.length} members
-              </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
 
       {/* Members Grid */}
       <div className="container mx-auto px-4 py-12">
-        {filteredMembers.length > 0 ? (
+        {loading ? (
+          // Loading state
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white rounded-2xl shadow-lg overflow-hidden animate-pulse">
+                <div className="h-80 bg-gray-300"></div>
+                <div className="p-6 space-y-4">
+                  <div className="h-6 bg-gray-300 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+                  <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                  <div className="flex gap-3 mt-6">
+                    <div className="flex-1 h-10 bg-gray-300 rounded-xl"></div>
+                    <div className="flex-1 h-10 bg-gray-300 rounded-xl"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredMembers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredMembers.map(member => (
               <div
@@ -145,31 +310,21 @@ const MemberPage = () => {
                 {/* Member Image */}
                 <div className="relative h-80 overflow-hidden">
                   <img
-                    src={member.image}
+                    src={member.image || `https://ui-avatars.com/api/?name=${member.name}&background=random`}
                     alt={member.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   
-                  {/* Overlay on Hover */}
-                  <div className="absolute inset-0 bg-pink-600 bg-opacity-0 group-hover:bg-opacity-80 transition-all duration-300 flex items-center justify-center">
-                    <a
-                      href={member.profileUrl}
-                      className="bg-white text-pink-600 px-6 py-3 rounded-full font-semibold transform translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gray-50 hover:scale-105"
-                    >
-                      View Full Profile
-                    </a>
-                  </div>
-
                   {/* Age Badge */}
                   <div className="absolute top-4 right-4 bg-white bg-opacity-90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
-                    {member.age} years
+                    {member.age || 'N/A'} years
                   </div>
                 </div>
 
                 {/* Member Info */}
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-pink-600 transition-colors">
-                    {member.name}
+                    {member.name || `User ${member.id}`}
                   </h3>
                   
                   <div className="space-y-2 mb-4">
@@ -178,32 +333,40 @@ const MemberPage = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      {member.location}
+                      {member.location || member.city || 'Location not specified'}
                     </p>
                     
                     <p className="text-gray-600 flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
-                      {member.profession}
+                      {member.profession || 'Profession not specified'}
                     </p>
                     
-                    <p className="text-gray-600 flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l-9 5m9-5v6" />
-                      </svg>
-                      {member.education}
-                    </p>
+                    {member.education && (
+                      <p className="text-gray-600 flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l-9 5m9-5v6" />
+                        </svg>
+                        {member.education}
+                      </p>
+                    )}
                   </div>
 
-                  {/* Action Buttons */}
+                  {/* Action Buttons - UPDATED */}
                   <div className="flex gap-3">
-                    <button className="flex-1 bg-pink-600 text-white py-3 rounded-xl font-semibold hover:bg-pink-700 transform hover:-translate-y-1 transition-all duration-200 shadow-lg hover:shadow-xl">
-                      Connect
+                    <button 
+                      onClick={() => handleViewProfile(member.id || member.user_id)}
+                      className="flex-1 bg-pink-600 text-white py-3 rounded-xl font-semibold hover:bg-pink-700 transform hover:-translate-y-1 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      View Profile
                     </button>
-                    <button className="flex-1 border-2 border-pink-600 text-pink-600 py-3 rounded-xl font-semibold hover:bg-pink-600 hover:text-white transform hover:-translate-y-1 transition-all duration-200">
-                      Shortlist
+                    <button 
+                      onClick={() => handleSendMessage(member.id || member.user_id)}
+                      className="flex-1 border-2 border-pink-600 text-pink-600 py-3 rounded-xl font-semibold hover:bg-pink-600 hover:text-white transform hover:-translate-y-1 transition-all duration-200"
+                    >
+                      Message
                     </button>
                   </div>
                 </div>
@@ -219,19 +382,260 @@ const MemberPage = () => {
             </div>
             <h3 className="text-xl font-semibold text-gray-600 mb-2">No members found</h3>
             <p className="text-gray-500">Try adjusting your search criteria or filters</p>
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedGender('All');
+                fetchMembers();
+              }}
+              className="mt-4 px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition"
+            >
+              Reset Filters
+            </button>
           </div>
         )}
       </div>
-
-      {/* Footer
-      <footer className="bg-gray-800 text-white py-8 mt-12">
-        <div className="container mx-auto px-4 text-center">
-          <p>&copy; 2024 WP Matrimony. All rights reserved.</p>
-          <p className="text-gray-400 mt-2">Find your perfect match with us</p>
-        </div>
-      </footer> */}
     </div>
   );
 };
 
 export default MemberPage;
+
+
+// // MemberPage.jsx
+// import React, { useState } from 'react';
+
+// const MemberPage = () => {
+//   const [members] = useState([
+//     {
+//       id: 1,
+//       name: "Krish Ghosh",
+//       age: 29,
+//       gender: "Man",
+//       location: "Lakhimpur, India",
+//       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
+//       profileUrl: "https://wpmatrimony.wpdating.com/profile/KrishGhosh",
+//       profession: "Software Engineer",
+//       education: "BTech Computer Science"
+//     },
+//     {
+//       id: 2,
+//       name: "Pihu Malik",
+//       age: 26,
+//       gender: "Woman",
+//       location: "Delhi, India",
+//       image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
+//       profileUrl: "#",
+//       profession: "Marketing Manager",
+//       education: "MBA"
+//     },
+//     {
+//       id: 3,
+//       name: "Rahul Sharma",
+//       age: 31,
+//       gender: "Man",
+//       location: "Mumbai, India",
+//       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
+//       profileUrl: "#",
+//       profession: "Business Analyst",
+//       education: "MTech"
+//     },
+//     {
+//       id: 4,
+//       name: "Priya Singh",
+//       age: 27,
+//       gender: "Woman",
+//       location: "Bangalore, India",
+//       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
+//       profileUrl: "#",
+//       profession: "Doctor",
+//       education: "MBBS, MD"
+//     },
+//     {
+//       id: 5,
+//       name: "Amit Patel",
+//       age: 32,
+//       gender: "Man",
+//       location: "Ahmedabad, India",
+//       image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
+//       profileUrl: "#",
+//       profession: "Architect",
+//       education: "BArch"
+//     },
+//     {
+//       id: 6,
+//       name: "Neha Gupta",
+//       age: 28,
+//       gender: "Woman",
+//       location: "Kolkata, India",
+//       image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=face",
+//       profileUrl: "#",
+//       profession: "Fashion Designer",
+//       education: "BDes"
+//     }
+//   ]);
+
+//   const [searchTerm, setSearchTerm] = useState('');
+//   const [selectedGender, setSelectedGender] = useState('All');
+
+//   const filteredMembers = members.filter(member => {
+//     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//                          member.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//                          member.profession.toLowerCase().includes(searchTerm.toLowerCase());
+    
+//     const matchesGender = selectedGender === 'All' || member.gender === selectedGender;
+    
+//     return matchesSearch && matchesGender;
+//   });
+
+//   return (
+//     <div className="min-h-screen bg-gray-50">
+   
+
+//       {/* Search Section */}
+//       <div className="bg-gray-100 py-8">
+//         <div className="container mx-auto px-4">
+//           <div className="max-w-4xl mx-auto">
+//             <div className="bg-white rounded-2xl shadow-sm p-6">
+//               <div className="flex flex-col md:flex-row gap-4 mb-6">
+//                 {/* Search Input */}
+//                 <div className="flex-1 relative">
+//                   <input
+//                     type="text"
+//                     placeholder="Search Members by name, location or profession..."
+//                     value={searchTerm}
+//                     onChange={(e) => setSearchTerm(e.target.value)}
+//                     className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+//                   />
+//                   <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+//                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+//                     </svg>
+//                   </div>
+//                 </div>
+
+//                 {/* Gender Filter */}
+//                 <div className="w-full md:w-48">
+//                   <select
+//                     value={selectedGender}
+//                     onChange={(e) => setSelectedGender(e.target.value)}
+//                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+//                   >
+//                     <option value="All">All Genders</option>
+//                     <option value="Man">Men</option>
+//                     <option value="Woman">Women</option>
+//                   </select>
+//                 </div>
+//               </div>
+
+//               {/* Results Count */}
+//               <div className="text-center text-gray-600">
+//                 Showing {filteredMembers.length} of {members.length} members
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Members Grid */}
+//       <div className="container mx-auto px-4 py-12">
+//         {filteredMembers.length > 0 ? (
+//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+//             {filteredMembers.map(member => (
+//               <div
+//                 key={member.id}
+//                 className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group"
+//               >
+//                 {/* Member Image */}
+//                 <div className="relative h-80 overflow-hidden">
+//                   <img
+//                     src={member.image}
+//                     alt={member.name}
+//                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+//                   />
+                  
+//                   {/* Overlay on Hover */}
+//                   <div className="absolute inset-0 bg-pink-600 bg-opacity-0 group-hover:bg-opacity-80 transition-all duration-300 flex items-center justify-center">
+//                     <a
+//                       href={member.profileUrl}
+//                       className="bg-white text-pink-600 px-6 py-3 rounded-full font-semibold transform translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gray-50 hover:scale-105"
+//                     >
+//                       View Full Profile
+//                     </a>
+//                   </div>
+
+//                   {/* Age Badge */}
+//                   <div className="absolute top-4 right-4 bg-white bg-opacity-90 px-3 py-1 rounded-full text-sm font-semibold text-gray-800">
+//                     {member.age} years
+//                   </div>
+//                 </div>
+
+//                 {/* Member Info */}
+//                 <div className="p-6">
+//                   <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-pink-600 transition-colors">
+//                     {member.name}
+//                   </h3>
+                  
+//                   <div className="space-y-2 mb-4">
+//                     <p className="text-gray-600 flex items-center gap-2">
+//                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+//                       </svg>
+//                       {member.location}
+//                     </p>
+                    
+//                     <p className="text-gray-600 flex items-center gap-2">
+//                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+//                       </svg>
+//                       {member.profession}
+//                     </p>
+                    
+//                     <p className="text-gray-600 flex items-center gap-2">
+//                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l-9 5m9-5v6" />
+//                       </svg>
+//                       {member.education}
+//                     </p>
+//                   </div>
+
+//                   {/* Action Buttons */}
+//                   <div className="flex gap-3">
+//                     <button className="flex-1 bg-pink-600 text-white py-3 rounded-xl font-semibold hover:bg-pink-700 transform hover:-translate-y-1 transition-all duration-200 shadow-lg hover:shadow-xl">
+//                       Connect
+//                     </button>
+//                     <button className="flex-1 border-2 border-pink-600 text-pink-600 py-3 rounded-xl font-semibold hover:bg-pink-600 hover:text-white transform hover:-translate-y-1 transition-all duration-200">
+//                       Shortlist
+//                     </button>
+//                   </div>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         ) : (
+//           <div className="text-center py-16">
+//             <div className="text-gray-400 mb-4">
+//               <svg className="w-24 h-24 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+//               </svg>
+//             </div>
+//             <h3 className="text-xl font-semibold text-gray-600 mb-2">No members found</h3>
+//             <p className="text-gray-500">Try adjusting your search criteria or filters</p>
+//           </div>
+//         )}
+//       </div>
+
+//       {/* Footer
+//       <footer className="bg-gray-800 text-white py-8 mt-12">
+//         <div className="container mx-auto px-4 text-center">
+//           <p>&copy; 2024 WP Matrimony. All rights reserved.</p>
+//           <p className="text-gray-400 mt-2">Find your perfect match with us</p>
+//         </div>
+//       </footer> */}
+//     </div>
+//   );
+// };
+
+// export default MemberPage;

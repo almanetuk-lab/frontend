@@ -23,31 +23,64 @@ export default function DashboardHome({ profile }) {
     fetchMatches();
   }, []);
 
-  // Fetch function
   const fetchMatches = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // API se data lo
-      const data = await getSuggestedMatches();
-
-      // Data ko set karo
-      if (Array.isArray(data)) {
-        setSuggestedMatches(data);
-      } else if (data) {
-        setSuggestedMatches([data]);
-      } else {
-        setSuggestedMatches([]);
+  try {
+    setLoading(true);
+    setError(null);
+    const data = await getSuggestedMatches();
+    
+    // IMPORTANT: Handle different response structures
+    let matchesArray = [];
+    
+    if (Array.isArray(data)) {
+      matchesArray = data;
+    } else if (data && typeof data === 'object') {
+      // If single object, create array with it
+      if (data.id) {
+        matchesArray = [data];
+      } else if (data.data) {
+        // If response has data property
+        matchesArray = Array.isArray(data.data) ? data.data : [data.data];
       }
-
-      setLoading(false);
-    } catch (err) {
-      console.error("Error:", err);
-      setError("Failed to load matches");
-      setLoading(false);
     }
-  };
+    
+    // Take only first 5 users
+    const limitedMatches = matchesArray.slice(0, 5);
+    setSuggestedMatches(limitedMatches);
+  } catch (err) {
+    console.error('Error fetching matches:', err);
+    setError('Failed to load matches. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // Fetch function
+
+  // const fetchMatches = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setError(null);
+
+  //     // API se data lo
+  //     const data = await getSuggestedMatches();
+
+  //     // Data ko set karo
+  //     if (Array.isArray(data)) {
+  //       setSuggestedMatches(data);
+  //     } else if (data) {
+  //       setSuggestedMatches([data]);
+  //     } else {
+  //       setSuggestedMatches([]);
+  //     }
+
+  //     setLoading(false);
+  //   } catch (err) {
+  //     console.error("Error:", err);
+  //     setError("Failed to load matches");
+  //     setLoading(false);
+  //   }
+  // };
 
   // Retry button ke liye
   const handleRetry = () => {
@@ -496,9 +529,13 @@ export default function DashboardHome({ profile }) {
             </div>
           </div>
 
-          {/* Right Column */}
+
+
+{/* 
+
+          // {/* Right Column /}
           <div className="space-y-4 sm:space-y-6">
-            {/* Suggested Matches */}
+            Suggested Matches
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800">
@@ -550,39 +587,90 @@ export default function DashboardHome({ profile }) {
                 </div>
               )}
 
-              {/* View All Button */}
+              View All Button
               <button
                 onClick={() => navigate("/dashboard/matches")}
                 className="w-full mt-3 sm:mt-4 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-100 transition font-medium text-sm sm:text-base"
               >
                 View All Matches
               </button>
-            </div>
+            </div> */}
 
-            {/*          
-          <div className="space-y-4 sm:space-y-6">
-            Suggested Matches
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-                  Suggested Matches
-                </h3>
-                <span className="text-xs sm:text-sm text-indigo-600 font-medium">
-                  3+
-                </span>
-              </div>
-              <div className="space-y-3 sm:space-y-4">
-                {randomMatches.map((user) => (
-                  <MatchCard key={user.id} user={user} />
-                ))}
-              </div>
-              <button
-                onClick={() => navigate("/dashboard/matches")}
-                className="w-full mt-3 sm:mt-4 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-100 transition font-medium text-sm sm:text-base"
-              >
-                View All Matches
-              </button>
-            </div>  */}
+            {/* Right Column */}
+            {/* Right Column */}
+<div className="space-y-4 sm:space-y-6">
+  {/* Suggested Matches */}
+  <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-lg font-semibold text-gray-800">Suggested Matches</h3>
+      <span className="text-sm text-indigo-600 font-medium">
+        {suggestedMatches.length} matches
+      </span>
+    </div>
+
+    {loading ? (
+      // Loading - Show 5 loading cards
+      <div className="space-y-4">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="flex items-center p-3 bg-gray-50 rounded-lg animate-pulse">
+            <div className="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
+            <div className="flex-1">
+              <div className="h-4 bg-gray-300 rounded w-24 mb-2"></div>
+              <div className="h-3 bg-gray-300 rounded w-32"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : error ? (
+      <div className="text-center py-4">
+        <p className="text-red-500 mb-2">{error}</p>
+        <button
+          onClick={fetchMatches}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+        >
+          Try Again
+        </button>
+      </div>
+    ) : (
+      // SHOW EXACTLY 5 USERS
+      <div className="space-y-4">
+        {suggestedMatches.map((user) => (
+          <div key={user.id || user.user_id} className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+            {/* Avatar */}
+            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
+              {user.name?.[0] || 'U'}
+            </div>
+            
+            {/* User Info */}
+            <div className="flex-1">
+              <h4 className="font-medium text-gray-800">
+                {user.name || `User ${user.id || user.user_id}`}
+              </h4>
+              <p className="text-sm text-gray-600">
+                {user.profession || 'Profession not set'}
+              </p>
+            </div>
+            
+            {/* Connect Button */}
+            <button className="px-3 py-1 bg-blue-500 text-white text-sm rounded-full">
+              +
+            </button>
+          </div>
+        ))}
+      </div>
+    )}
+
+  {/* View All Button - Only if we have users */}
+{suggestedMatches.length > 0 && (
+  <button 
+    onClick={() => navigate("/dashboard/matches")}
+    className="w-full mt-4 p-3 text-center text-blue-600 font-medium border-t pt-4 hover:bg-gray-50 rounded-b-lg"
+  >
+    View All Matches
+  </button>
+)}
+
+</div>
 
             {/* Quick Actions */}
             <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">

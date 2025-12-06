@@ -100,14 +100,13 @@ export const getCurrentUserId = () => {
 
 export const getSuggestedMatches = async () => {
   try {
-    const userId = localStorage.getItem('userId') || '';
+    const userId = getCurrentUserId(); 
     const response = await api.get(`/api/my_matches/${userId}`);
     return response.data;
   } catch (error) {
-    
-  
+    console.error('Error fetching suggested matches:', error);
+    throw error; 
   }
 };
-
 
 export default api;
