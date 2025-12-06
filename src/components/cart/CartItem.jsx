@@ -24,7 +24,7 @@ export default function CartItem({ item, handleRemove /* OLD: , handleBuy */ }) 
       console.log("Testing payment with user_id:", user_id, "plan:", item.plan);
 
       const response = await fetch(
-        "http://localhost:3435/payments/create-checkout-session",
+        "https://backend-q0wc.onrender.com/payments/create-checkout-session",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

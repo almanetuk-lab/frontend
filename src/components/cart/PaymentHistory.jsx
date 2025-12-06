@@ -10,7 +10,7 @@ export default function PaymentHistory({ onClose }) {
     const fetchHistory = async () => {
       try {
         const user_id = localStorage.getItem("user_id");
-        const res = await fetch(`http://localhost:3435/payments/${user_id}`);
+        const res = await fetch(`https://backend-q0wc.onrender.com/payments/${user_id}`);
         const data = await res.json();
         setHistory(data);
       } catch (err) {
