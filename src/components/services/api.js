@@ -9,7 +9,7 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// ONLY REQUEST INTERCEPTOR (Token attach karne ke liye)
+// ONLY REQUEST INTERCEPTOR Token attach karne ke liye hai 
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
@@ -85,7 +85,7 @@ export const getUserProfile = async () => {
   }
 };
 
-// ✅ Image Upload API
+//  Image Upload API HAI
 export const uploadImage = (formData) => {
   return api.post('/upload', formData, {
     headers: {
@@ -94,7 +94,7 @@ export const uploadImage = (formData) => {
   });
 };
 
-// ✅ Save Profile Image API
+// Save Profile Image API
 export const saveProfileImage = (user_id, imageUrl) => {
   return api.post('/saveProfileImage', {
     user_id,
@@ -102,14 +102,14 @@ export const saveProfileImage = (user_id, imageUrl) => {
   });
 };
 
-// ✅ NEW: Remove Profile Image API
+//  NEW: Remove Profile Image API
 export const removeProfileImage = (user_id) => {
   return api.post('/remove/profile-picture', {
     user_id,
   });
 };
 
-// ✅ ADDED: Refresh Token API (Dummy implementation) - EXPORT KARO
+//  ADDED: Refresh Token API (Dummy implementation) - EXPORT KARO
 export const refreshAuthToken = async (refreshToken) => {
   try {
     console.log("🔄 Attempting token refresh...");
@@ -117,7 +117,7 @@ export const refreshAuthToken = async (refreshToken) => {
     // Since refresh API doesn't exist, we'll try to reuse current token
     const currentToken = localStorage.getItem("accessToken");
     if (currentToken) {
-      console.log("✅ Using current token as fallback");
+      console.log(" Using current token as fallback");
       return { 
         token: currentToken, 
         refresh: refreshToken 

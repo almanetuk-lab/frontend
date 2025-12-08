@@ -17,6 +17,10 @@ export const chatApi = {
     return api.get(`/api/users?search=${encodeURIComponent(searchQuery)}`);
   },
 
+
+      // SEARCH PROFILES - Add this line only
+  searchProfiles: (searchParams) => api.get('/search', { params: searchParams }),
+  
   //  Get messages between users
   getMessages: (userId, currentUserId) => {
     return api.get(`/api/messages/${userId}?myUserId=${currentUserId}`);
@@ -66,13 +70,6 @@ getUserNotifications: (userId) => {
     return api.put(`/api/notifications/read/messages/${userId}`);
   },
 
-//   //  DELETE MESSAGE API
-// deleteMessage: async (messageId) => {
-//   // Server automatically current user detect karega token se hoga
-//   const response = await api.delete(`/api/message/${messageId}`);
-//   return response;
-// },
-
 //  DELETE MESSAGE API hai yeh 
 deleteMessage: async (messageId) => {
   // Get current user ID from localStorage
@@ -95,7 +92,7 @@ deleteMessage: async (messageId) => {
 };
 
 export const getCurrentUserId = () => {
-  return localStorage.getItem('userId') || '82'; // Default agar nahi mile to
+  return localStorage.getItem('userId') || '82'; 
 };
 
 export const getSuggestedMatches = async () => {
