@@ -1,8 +1,12 @@
+
+
+
 // src/components/home/Header.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
 import NotificationBell from "../notifybell/NotificationBell";
+import logo from "../../assets/logo.jpg";
 
 // Main Header Component
 function Header() {
@@ -13,7 +17,7 @@ function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef(null);
 
-  // ✅ FIXED: Proper login status check
+  //  FIXED: Proper login status check
   const checkLoginStatus = () => {
     const userToken = localStorage.getItem("accessToken");
     const adminToken = localStorage.getItem("adminToken");
@@ -22,7 +26,7 @@ function Header() {
 
   const isLoggedIn = checkLoginStatus();
 
-  // ✅ FIXED: Proper logout function
+  //  FIXED: Proper logout function
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
@@ -31,8 +35,7 @@ function Header() {
     localStorage.removeItem("user");
     clearProfile();
     setIsMobileMenuOpen(false);
-    window.location.href = '/#/';
-    // navigate("/");
+    window.location.href = "/#/";
 
     setTimeout(() => {
       window.location.reload();
@@ -56,94 +59,47 @@ function Header() {
     };
   }, []);
 
-useEffect(() => {
-  const updateCartCount = () => {
-    try {
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      console.log("🔄 Header Cart Count:", cart.length);
-      setCartCount(cart.length);
-    } catch (error) {
-      console.error("Error updating cart count:", error);
-      setCartCount(0);
-    }
-  };
+  useEffect(() => {
+    const updateCartCount = () => {
+      try {
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        console.log("🔄 Header Cart Count:", cart.length);
+        setCartCount(cart.length);
+      } catch (error) {
+        console.error("Error updating cart count:", error);
+        setCartCount(0);
+      }
+    };
 
-  // ✅ INITIAL COUNT - FORCEFULLY
-  updateCartCount();
-  
-  // ✅ EVENT LISTENERS
-  window.addEventListener('storage', updateCartCount);
-  window.addEventListener('cartUpdated', updateCartCount);
-  
-  // ✅ EXTRA: PAGE LOAD/FOCUS PAR BHI UPDATE
-  window.addEventListener('load', updateCartCount);
-  window.addEventListener('focus', updateCartCount);
-  
-  return () => {
-    window.removeEventListener('storage', updateCartCount);
-    window.removeEventListener('cartUpdated', updateCartCount);
-    window.removeEventListener('load', updateCartCount);
-    window.removeEventListener('focus', updateCartCount);
-  };
-}, []);
+    //  INITIAL COUNT - FORCEFULLY
+    updateCartCount();
 
-//   useEffect(() => {
-//   const updateCartCount = () => {
-//     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-//     console.log("Cart updated, new count:", cart.length);
-//     setCartCount(cart.length);
-//   };
+    //  EVENT LISTENERS
+    window.addEventListener("storage", updateCartCount);
+    window.addEventListener("cartUpdated", updateCartCount);
 
-//   // Initial count set karo
-//   updateCartCount();
-  
-//   // Event listeners add karo
-//   window.addEventListener('storage', updateCartCount);
-//   window.addEventListener('cartUpdated', updateCartCount);
-  
-//   return () => {
-//     window.removeEventListener('storage', updateCartCount);
-//     window.removeEventListener('cartUpdated', updateCartCount); // ✅ YEH LINE UNCOMMENT KARO
-//   };
-// }, []);
+    //  EXTRA: PAGE LOAD/FOCUS PAR BHI UPDATE
+    window.addEventListener("load", updateCartCount);
+    window.addEventListener("focus", updateCartCount);
 
-
-
-// useEffect(() => {
-//   const updateCartCount = () => {
-//     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-//     console.log("Cart updated, new count:", cart.length);
-//     setCartCount(cart.length);
-//   };
-
-//   // Initial count set karo
-//   updateCartCount();
-  
-//   // Event listeners add karo
-//   window.addEventListener('storage', updateCartCount);
-//   window.addEventListener('cartUpdated', updateCartCount);
-  
-//   // Extra safety - har 500ms check karo
-//   // const interval = setInterval(updateCartCount, 500);
-  
-//   return () => {
-//     window.removeEventListener('storage', updateCartCount);
-//     // window.removeEventListener('cartUpdated', updateCartCount);
-//     // clearInterval(interval);
-//   };
-// }, []);
-
+    return () => {
+      window.removeEventListener("storage", updateCartCount);
+      window.removeEventListener("cartUpdated", updateCartCount);
+      window.removeEventListener("load", updateCartCount);
+      window.removeEventListener("focus", updateCartCount);
+    };
+  }, []);
 
   return (
-    <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-[#4D6D9E] shadow-lg border-b border-[#8F8DA5] sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6">
         {/* Main Header Row */}
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-3">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 className="text-xl sm:text-2xl font-bold text-amber-600">
-              Mingle <span className="text-gray-800">Hub</span>
-            </h1>
+            <Link to="/" className="inline-block">
+              <span className="text-[#F5F5F5] text-xl font-bold">Logo</span>
+            </Link>
           </div>
 
           {/* Desktop Navigation - Hidden on mobile */}
@@ -152,7 +108,7 @@ useEffect(() => {
               <li>
                 <Link
                   to="/"
-                  className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+                  className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                 >
                   Home
                 </Link>
@@ -163,7 +119,7 @@ useEffect(() => {
                   <li>
                     <Link
                       to="/dashboard"
-                      className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+                      className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                     >
                       Dashboard
                     </Link>
@@ -171,7 +127,7 @@ useEffect(() => {
                   <li>
                     <Link
                       to="/members"
-                      className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+                      className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                     >
                       Members
                     </Link>
@@ -179,7 +135,7 @@ useEffect(() => {
                   <li>
                     <Link
                       to="/edit-profile"
-                      className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+                      className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                     >
                       Edit Profile
                     </Link>
@@ -190,7 +146,7 @@ useEffect(() => {
               <li>
                 <Link
                   to="/contact"
-                  className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+                  className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                 >
                   Contact Us
                 </Link>
@@ -199,7 +155,7 @@ useEffect(() => {
               <li>
                 <Link
                   to="/blog"
-                  className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+                  className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                 >
                   Blogs
                 </Link>
@@ -208,45 +164,29 @@ useEffect(() => {
           </nav>
 
           <div className="hidden lg:flex items-center gap-4">
-  {isLoggedIn ? (
-    <>
-      {/* Cart with Counter */}
-      <div className="relative">
-        <Link
-          to="/cart"
-          className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200 flex items-center"
-        >
-          Cart 🛒
-        </Link>
-        {/* ✅ COUNTER KO ALAG SE LINK KE BAHAR - UPPER RIGHT CORNER */}
-        {cartCount > 0 && (
-          <span className="absolute -top-4 -right-3 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs border-2 border-white">
-            {cartCount}
-          </span>
-        )}
-      </div>
-
-          {/* Desktop Auth Section - Hidden on mobile
-          <div className="hidden lg:flex items-center gap-4">
             {isLoggedIn ? (
               <>
-                <Link
-                  to="/cart"
-                  className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
-                >
-                 Cart 🛒
-                     {cartCount > 0 && (
-            <span className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-              {cartCount}
-            </span>
-          )}
-                </Link> */}
+                {/* Cart with Counter */}
+                <div className="relative">
+                  <Link
+                    to="/cart"
+                    className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200 flex items-center"
+                  >
+                    Cart 🛒
+                  </Link>
+                  {/* ✅ COUNTER KO ALAG SE LINK KE BAHAR - UPPER RIGHT CORNER */}
+                  {cartCount > 0 && (
+                    <span className="absolute -top-4 -right-3 bg-[#FF66CC] text-white rounded-full w-6 h-6 flex items-center justify-center text-xs border-2 border-[#F5F5F5]">
+                      {cartCount}
+                    </span>
+                  )}
+                </div>
 
                 {localStorage.getItem("accessToken") && <NotificationBell />}
 
                 <button
                   onClick={handleLogout}
-                  className="bg-amber-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-700 transition-all duration-200"
+                  className="bg-[#FF66CC] text-[#F5F5F5] px-4 py-2 rounded-lg font-semibold hover:bg-[#ff4dc2] transition-all duration-200"
                 >
                   Logout
                 </button>
@@ -255,20 +195,20 @@ useEffect(() => {
               <div className="flex items-center gap-3">
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
+                  className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200 px-3 py-1"
                 >
                   Login
                 </Link>
 
                 <Link
                   to="/admin-login"
-                  className="text-gray-700 hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
+                  className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200 px-3 py-1"
                 >
                   Admin Login
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-amber-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-700 transition-all duration-200"
+                  className="bg-[#FF66CC] text-[#F5F5F5] px-4 py-2 rounded-lg font-semibold hover:bg-[#ff4dc2] transition-all duration-200"
                 >
                   Register Free
                 </Link>
@@ -281,11 +221,11 @@ useEffect(() => {
             <div className="mr-3 lg:hidden relative">
               <Link
                 to="/cart"
-                className="text-gray-600 hover:text-amber-600 font-semibold transition-colors duration-200 flex items-center"
+                className="text-[#F5F5F5] hover:text-[#FF66CC] font-semibold transition-colors duration-200 flex items-center"
               >
                 cart🛒
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-3 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                  <span className="absolute -top-2 -right-3 bg-[#FF66CC] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                     {cartCount}
                   </span>
                 )}
@@ -305,7 +245,7 @@ useEffect(() => {
             {/* Hamburger Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-lg text-gray-600 hover:text-amber-600 hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-lg text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] transition-colors"
             >
               {isMobileMenuOpen ? (
                 // Close Icon
@@ -353,7 +293,7 @@ useEffect(() => {
         {/* Mobile Menu Content */}
         <div
           ref={mobileMenuRef}
-          className={`lg:hidden absolute top-full left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
+          className={`lg:hidden absolute top-full left-0 right-0 bg-[#4D6D9E] border-t border-[#8F8DA5] shadow-lg z-50 transition-all duration-300 ease-in-out ${
             isMobileMenuOpen
               ? "max-h-96 opacity-100"
               : "max-h-0 opacity-0 overflow-hidden"
@@ -366,7 +306,7 @@ useEffect(() => {
                 <li>
                   <Link
                     to="/"
-                    className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                    className="block py-2 px-4 text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Home
@@ -375,7 +315,7 @@ useEffect(() => {
                 <li>
                   <Link
                     to="/"
-                    className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                    className="block py-2 px-4 text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     About
@@ -387,7 +327,7 @@ useEffect(() => {
                     <li>
                       <Link
                         to="/dashboard"
-                        className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        className="block py-2 px-4 text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg transition-colors"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         Dashboard
@@ -396,7 +336,7 @@ useEffect(() => {
                     <li>
                       <Link
                         to="/members"
-                        className="block py-2 px-4 text-amber-600 bg-amber-50 rounded-lg font-medium"
+                        className="block py-2 px-4 text-[#FF66CC] bg-[#8F8DA5] rounded-lg font-medium"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         Members
@@ -405,7 +345,7 @@ useEffect(() => {
                     <li>
                       <Link
                         to="/edit-profile"
-                        className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        className="block py-2 px-4 text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg transition-colors"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         Edit Profile
@@ -417,7 +357,7 @@ useEffect(() => {
                 <li>
                   <Link
                     to="/contact"
-                    className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                    className="block py-2 px-4 text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Contact Us
@@ -427,11 +367,11 @@ useEffect(() => {
             </nav>
 
             {/* Mobile Auth Section */}
-            <div className="border-t border-gray-200 pt-4">
+            <div className="border-t border-[#8F8DA5] pt-4">
               {isLoggedIn ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between px-4 py-2">
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-[#BFBFBF]">
                       {localStorage.getItem("adminToken")
                         ? "Admin User"
                         : profile?.first_name && profile?.last_name
@@ -450,7 +390,7 @@ useEffect(() => {
                   >
                     <button
                       type="submit"
-                      className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+                      className="w-full bg-[#FF66CC] text-[#F5F5F5] py-3 rounded-lg font-semibold hover:bg-[#ff4dc2] transition-colors"
                     >
                       Logout
                     </button>
@@ -460,21 +400,21 @@ useEffect(() => {
                 <div className="space-y-3">
                   <Link
                     to="/admin-login"
-                    className="block py-3 px-4 text-center text-gray-700 hover:text-amber-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+                    className="block py-3 px-4 text-center text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg border border-[#8F8DA5] transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Admin Login
                   </Link>
                   <Link
                     to="/login"
-                    className="block py-3 px-4 text-center text-gray-700 hover:text-amber-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+                    className="block py-3 px-4 text-center text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg border border-[#8F8DA5] transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
-                    className="block py-3 px-4 text-center bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+                    className="block py-3 px-4 text-center bg-[#FF66CC] text-[#F5F5F5] rounded-lg font-semibold hover:bg-[#ff4dc2] transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Register Free
@@ -490,3 +430,458 @@ useEffect(() => {
 }
 
 export default Header;
+
+
+
+
+
+
+
+
+
+
+
+
+// // src/components/home/Header.jsx
+// import React, { useState, useEffect, useRef } from "react";
+// import { Link, useNavigate } from "react-router-dom";
+// import { useUserProfile } from "../context/UseProfileContext";
+// import NotificationBell from "../notifybell/NotificationBell";
+// import logo from "../../assets/logo.jpg";
+
+// // Main Header Component
+// function Header() {
+//   const [cartCount, setCartCount] = useState(0);
+
+//   const navigate = useNavigate();
+//   const { profile, clearProfile } = useUserProfile();
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+//   const mobileMenuRef = useRef(null);
+
+//   //  FIXED: Proper login status check
+//   const checkLoginStatus = () => {
+//     const userToken = localStorage.getItem("accessToken");
+//     const adminToken = localStorage.getItem("adminToken");
+//     return !!(userToken || adminToken);
+//   };
+
+//   const isLoggedIn = checkLoginStatus();
+
+//   //  FIXED: Proper logout function
+//   const handleLogout = () => {
+//     localStorage.removeItem("accessToken");
+//     localStorage.removeItem("refreshToken");
+//     localStorage.removeItem("adminToken");
+//     localStorage.removeItem("adminData");
+//     localStorage.removeItem("user");
+//     clearProfile();
+//     setIsMobileMenuOpen(false);
+//     window.location.href = "/#/";
+//     // navigate("/");
+
+//     setTimeout(() => {
+//       window.location.reload();
+//     }, 100);
+//   };
+
+//   // Close mobile menu when clicking outside
+//   useEffect(() => {
+//     const handleClickOutside = (event) => {
+//       if (
+//         mobileMenuRef.current &&
+//         !mobileMenuRef.current.contains(event.target)
+//       ) {
+//         setIsMobileMenuOpen(false);
+//       }
+//     };
+
+//     document.addEventListener("mousedown", handleClickOutside);
+//     return () => {
+//       document.removeEventListener("mousedown", handleClickOutside);
+//     };
+//   }, []);
+
+//   useEffect(() => {
+//     const updateCartCount = () => {
+//       try {
+//         const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+//         console.log("🔄 Header Cart Count:", cart.length);
+//         setCartCount(cart.length);
+//       } catch (error) {
+//         console.error("Error updating cart count:", error);
+//         setCartCount(0);
+//       }
+//     };
+
+//     //  INITIAL COUNT - FORCEFULLY
+//     updateCartCount();
+
+//     //  EVENT LISTENERS
+//     window.addEventListener("storage", updateCartCount);
+//     window.addEventListener("cartUpdated", updateCartCount);
+
+//     //  EXTRA: PAGE LOAD/FOCUS PAR BHI UPDATE
+//     window.addEventListener("load", updateCartCount);
+//     window.addEventListener("focus", updateCartCount);
+
+//     return () => {
+//       window.removeEventListener("storage", updateCartCount);
+//       window.removeEventListener("cartUpdated", updateCartCount);
+//       window.removeEventListener("load", updateCartCount);
+//       window.removeEventListener("focus", updateCartCount);
+//     };
+//   }, []);
+
+//   return (
+//     <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
+//       <div className="container mx-auto px-4 sm:px-6">
+//         {/* Main Header Row */}
+//         <div className="flex justify-between items-center py-4">
+//           {/* Logo */}
+//           <div className="flex items-center">
+//             {/* Logo */}
+//   <Link to="/" className="inline-block">
+//   logo
+//     {/* <img
+//       src={logo}
+//       alt="Intentional Connections"
+//       className="h-auto w-25 sm:w-44 md:w-48 lg:w-25"
+//     /> */}
+//   </Link>
+
+// {/*             
+//             <img
+//               src={logo}
+//               alt="Intentional Connections"
+//               className="h-12 sm:h-12 w-auto object-contain"
+//             /> */}
+//           </div>
+
+//           {/* Desktop Navigation - Hidden on mobile */}
+//           <nav className="hidden lg:flex flex-1 justify-center">
+//             <ul className="flex gap-6 lg:gap-8">
+//               <li>
+//                 <Link
+//                   to="/"
+//                   className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+//                 >
+//                   Home
+//                 </Link>
+//               </li>
+
+//               {isLoggedIn && (
+//                 <>
+//                   <li>
+//                     <Link
+//                       to="/dashboard"
+//                       className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+//                     >
+//                       Dashboard
+//                     </Link>
+//                   </li>
+//                   <li>
+//                     <Link
+//                       to="/members"
+//                       className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+//                     >
+//                       Members
+//                     </Link>
+//                   </li>
+//                   <li>
+//                     <Link
+//                       to="/edit-profile"
+//                       className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+//                     >
+//                       Edit Profile
+//                     </Link>
+//                   </li>
+//                 </>
+//               )}
+
+//               <li>
+//                 <Link
+//                   to="/contact"
+//                   className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+//                 >
+//                   Contact Us
+//                 </Link>
+//               </li>
+
+//               <li>
+//                 <Link
+//                   to="/blog"
+//                   className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200"
+//                 >
+//                   Blogs
+//                 </Link>
+//               </li>
+//             </ul>
+//           </nav>
+
+//           <div className="hidden lg:flex items-center gap-4">
+//             {isLoggedIn ? (
+//               <>
+//                 {/* Cart with Counter */}
+//                 <div className="relative">
+//                   <Link
+//                     to="/cart"
+//                     className="text-gray-600 hover:text-amber-600 font-medium transition-colors duration-200 flex items-center"
+//                   >
+//                     Cart 🛒
+//                   </Link>
+//                   {/* ✅ COUNTER KO ALAG SE LINK KE BAHAR - UPPER RIGHT CORNER */}
+//                   {cartCount > 0 && (
+//                     <span className="absolute -top-4 -right-3 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs border-2 border-white">
+//                       {cartCount}
+//                     </span>
+//                   )}
+//                 </div>
+
+//                 {localStorage.getItem("accessToken") && <NotificationBell />}
+
+//                 <button
+//                   onClick={handleLogout}
+//                   className="bg-amber-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-700 transition-all duration-200"
+//                 >
+//                   Logout
+//                 </button>
+//               </>
+//             ) : (
+//               <div className="flex items-center gap-3">
+//                 <Link
+//                   to="/login"
+//                   className="text-gray-700 hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
+//                 >
+//                   Login
+//                 </Link>
+
+//                 <Link
+//                   to="/admin-login"
+//                   className="text-gray-700 hover:text-amber-600 font-medium transition-colors duration-200 px-3 py-1"
+//                 >
+//                   Admin Login
+//                 </Link>
+//                 <Link
+//                   to="/register"
+//                   className="bg-amber-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-amber-700 transition-all duration-200"
+//                 >
+//                   Register Free
+//                 </Link>
+//               </div>
+//             )}
+//           </div>
+
+//           {/* Cart for mobile */}
+//           {isLoggedIn && (
+//             <div className="mr-3 lg:hidden relative">
+//               <Link
+//                 to="/cart"
+//                 className="text-gray-600 hover:text-amber-600 font-semibold transition-colors duration-200 flex items-center"
+//               >
+//                 cart🛒
+//                 {cartCount > 0 && (
+//                   <span className="absolute -top-2 -right-3 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+//                     {cartCount}
+//                   </span>
+//                 )}
+//               </Link>
+//             </div>
+//           )}
+
+//           {/* Mobile Menu Button */}
+//           <div className="lg:hidden flex items-center gap-4">
+//             {/* Notification Bell for mobile */}
+//             {isLoggedIn && localStorage.getItem("accessToken") && (
+//               <div className="mr-2">
+//                 <NotificationBell />
+//               </div>
+//             )}
+
+//             {/* Hamburger Menu Button */}
+//             <button
+//               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+//               className="p-2 rounded-lg text-gray-600 hover:text-amber-600 hover:bg-gray-100 transition-colors"
+//             >
+//               {isMobileMenuOpen ? (
+//                 // Close Icon
+//                 <svg
+//                   className="w-6 h-6"
+//                   fill="none"
+//                   stroke="currentColor"
+//                   viewBox="0 0 24 24"
+//                 >
+//                   <path
+//                     strokeLinecap="round"
+//                     strokeLinejoin="round"
+//                     strokeWidth={2}
+//                     d="M6 18L18 6M6 6l12 12"
+//                   />
+//                 </svg>
+//               ) : (
+//                 // Hamburger Icon
+//                 <svg
+//                   className="w-6 h-6"
+//                   fill="none"
+//                   stroke="currentColor"
+//                   viewBox="0 0 24 24"
+//                 >
+//                   <path
+//                     strokeLinecap="round"
+//                     strokeLinejoin="round"
+//                     strokeWidth={2}
+//                     d="M4 6h16M4 12h16M4 18h16"
+//                   />
+//                 </svg>
+//               )}
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Mobile Menu Overlay */}
+//         {isMobileMenuOpen && (
+//           <div
+//             className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+//             onClick={() => setIsMobileMenuOpen(false)}
+//           ></div>
+//         )}
+
+//         {/* Mobile Menu Content */}
+//         <div
+//           ref={mobileMenuRef}
+//           className={`lg:hidden absolute top-full left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 transition-all duration-300 ease-in-out ${
+//             isMobileMenuOpen
+//               ? "max-h-96 opacity-100"
+//               : "max-h-0 opacity-0 overflow-hidden"
+//           }`}
+//         >
+//           <div className="container mx-auto px-4 py-4">
+//             {/* Mobile Navigation Links */}
+//             <nav className="mb-6">
+//               <ul className="space-y-3">
+//                 <li>
+//                   <Link
+//                     to="/"
+//                     className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+//                     onClick={() => setIsMobileMenuOpen(false)}
+//                   >
+//                     Home
+//                   </Link>
+//                 </li>
+//                 <li>
+//                   <Link
+//                     to="/"
+//                     className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+//                     onClick={() => setIsMobileMenuOpen(false)}
+//                   >
+//                     About
+//                   </Link>
+//                 </li>
+
+//                 {isLoggedIn && (
+//                   <>
+//                     <li>
+//                       <Link
+//                         to="/dashboard"
+//                         className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+//                         onClick={() => setIsMobileMenuOpen(false)}
+//                       >
+//                         Dashboard
+//                       </Link>
+//                     </li>
+//                     <li>
+//                       <Link
+//                         to="/members"
+//                         className="block py-2 px-4 text-amber-600 bg-amber-50 rounded-lg font-medium"
+//                         onClick={() => setIsMobileMenuOpen(false)}
+//                       >
+//                         Members
+//                       </Link>
+//                     </li>
+//                     <li>
+//                       <Link
+//                         to="/edit-profile"
+//                         className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+//                         onClick={() => setIsMobileMenuOpen(false)}
+//                       >
+//                         Edit Profile
+//                       </Link>
+//                     </li>
+//                   </>
+//                 )}
+
+//                 <li>
+//                   <Link
+//                     to="/contact"
+//                     className="block py-2 px-4 text-gray-700 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+//                     onClick={() => setIsMobileMenuOpen(false)}
+//                   >
+//                     Contact Us
+//                   </Link>
+//                 </li>
+//               </ul>
+//             </nav>
+
+//             {/* Mobile Auth Section */}
+//             <div className="border-t border-gray-200 pt-4">
+//               {isLoggedIn ? (
+//                 <div className="space-y-3">
+//                   <div className="flex items-center justify-between px-4 py-2">
+//                     <span className="text-sm text-gray-600">
+//                       {localStorage.getItem("adminToken")
+//                         ? "Admin User"
+//                         : profile?.first_name && profile?.last_name
+//                         ? `Hello, ${profile.first_name} ${profile.last_name}`
+//                         : `Hello, ${
+//                             profile?.first_name || profile?.name || "User"
+//                           }`}
+//                     </span>
+//                   </div>
+//                   <form
+//                     onSubmit={(e) => {
+//                       e.preventDefault();
+//                       handleLogout();
+//                     }}
+//                     className="w-full"
+//                   >
+//                     <button
+//                       type="submit"
+//                       className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+//                     >
+//                       Logout
+//                     </button>
+//                   </form>
+//                 </div>
+//               ) : (
+//                 <div className="space-y-3">
+//                   <Link
+//                     to="/admin-login"
+//                     className="block py-3 px-4 text-center text-gray-700 hover:text-amber-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+//                     onClick={() => setIsMobileMenuOpen(false)}
+//                   >
+//                     Admin Login
+//                   </Link>
+//                   <Link
+//                     to="/login"
+//                     className="block py-3 px-4 text-center text-gray-700 hover:text-amber-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+//                     onClick={() => setIsMobileMenuOpen(false)}
+//                   >
+//                     Login
+//                   </Link>
+//                   <Link
+//                     to="/register"
+//                     className="block py-3 px-4 text-center bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+//                     onClick={() => setIsMobileMenuOpen(false)}
+//                   >
+//                     Register Free
+//                   </Link>
+//                 </div>
+//               )}
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </header>
+//   );
+// }
+
+// export default Header;

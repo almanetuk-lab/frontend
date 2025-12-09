@@ -3,6 +3,8 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { UserProfileProvider } from "./components/context/UseProfileContext";
 import Header from "./components/home/Header";
 import Footer from "./components/home/Footer";
+// App.jsx / main component
+// import './styles/lumira-theme.css';
 
 // Auth Pages
 import Login from "./components/pages/Login";
