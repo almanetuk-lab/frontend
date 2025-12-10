@@ -1,12 +1,10 @@
 
-
-
 // src/components/home/Header.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
 import NotificationBell from "../notifybell/NotificationBell";
-import logo from "../../assets/logo.jpg";
+import logo from "../../assets/logo.png";
 
 // Main Header Component
 function Header() {
@@ -98,7 +96,12 @@ function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="inline-block">
-              <span className="text-[#F5F5F5] text-xl font-bold">Logo</span>
+               <img 
+        src={logo} 
+        alt="Logo"
+   className="h-14 sm:h-16 w-auto object-contain"
+      />
+              {/* <span className="text-[#F5F5F5] text-xl font-bold">Logo</span> */}
             </Link>
           </div>
 
