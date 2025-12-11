@@ -1,249 +1,149 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSuggestedMatches } from '../services/chatApi'; 
+
 export default function MatchesPage() {
   const navigate = useNavigate();
   
-  // State for matches data
   const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({
-    status: 'All Matches',
-    sortBy: 'Newest',
-    ageRange: 'Any',
-    gender: 'All'
-  });
-
-  // Fetch matches using your existing function
+  
+  // API से REAL DATA FETCH करो
   const fetchMatches = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching matches using getSuggestedMatches...');
+      // ये तुम्हारा API function है
+      const apiData = await getSuggestedMatches();
       
-      // Use your existing API function
-      const data = await getSuggestedMatches();
-      
-      console.log('Matches API Response:', data);
-      
-      // Ensure we have an array
-      if (Array.isArray(data)) {
-        setMatches(data);
-        console.log(`Loaded ${data.length} matches`);
+      // API response format: [{ data }]
+      // Check if response is valid array
+      if (Array.isArray(apiData)) {
+        // Filter out any null/undefined items
+        const validMatches = apiData.filter(item => item && (item.user_id || item.id));
+        
+        if (validMatches.length === 0) {
+          setError('No matches found in the database');
+          setMatches([]);
+        } else {
+          setMatches(validMatches);
+          console.log('Real matches loaded:', validMatches.length);
+          console.log('First match data:', validMatches[5]);
+        }
       } else {
-        console.error('API response is not an array:', data);
+        setError('Invalid data format from server');
         setMatches([]);
       }
       
       setLoading(false);
     } catch (err) {
-      console.error('Error fetching matches:', err);
-      setError(`Failed to load matches: ${err.message || 'Please try again.'}`);
+      console.error('API Error:', err);
+      setError(`Failed to load matches: ${err.message || 'Network error'}`);
+      setMatches([]);
       setLoading(false);
-      
-      // Fallback data
-      const fallbackData = [
-        {
-          id: 122,
-          user_id: 125,
-          gender: "Male",
-          marital_status: "Single",
-          profession: "Backend developer",
-          city: "ujjain",
-          age: 22,
-          first_name: "Aman",
-          last_name: "sharma",
-          image_url: "https://res.cloudinary.com/ddzkw1vme/image/upload/v1763206949/user_uploads/jxkmbjygn2x1hg84nd3b.jpg",
-          is_active: true,
-          is_submitted: true,
-          company: "TCS",
-          match_score: 4
-        },
-        {
-          id: 130,
-          user_id: 133,
-          gender: "Male",
-          marital_status: "Single",
-          profession: "frontend developer",
-          city: "ujjain",
-          age: 25,
-          first_name: "Mukul",
-          last_name: "Soni",
-          image_url: "https://res.cloudinary.com/ddzkw1vme/image/upload/v1763441581/user_uploads/eq6qlk7migbxdt6nqg8z.jpg",
-          is_active: true,
-          is_submitted: true,
-          company: "TCS",
-          match_score: 4
-        },
-        {
-          id: 71,
-          user_id: 75,
-          gender: "Male",
-          marital_status: "Married",
-          profession: "software engineer",
-          city: "jaipur",
-          age: 25,
-          first_name: null,
-          last_name: null,
-          image_url: null,
-          is_active: true,
-          is_submitted: true,
-          company: "Almanet Professional Services",
-          match_score: 3
-        },
-        {
-          id: 66,
-          user_id: 74,
-          gender: "Female",
-          marital_status: "Single",
-          profession: "Backend developer",
-          city: "jaipur",
-          age: 30,
-          first_name: null,
-          last_name: null,
-          image_url: null,
-          is_active: true,
-          is_submitted: true,
-          company: "Almanet",
-          match_score: 3
-        }
-      ];
-      setMatches(fallbackData);
     }
   };
 
-  // Fetch matches on component mount
   useEffect(() => {
-    console.log('MatchesPage mounted, fetching data...');
     fetchMatches();
   }, []);
 
-  // Helper function to get full name
-  const getFullName = (user) => {
+  // REAL API DATA से नाम बनाओ
+  const getDisplayName = (user) => {
     if (!user) return "User";
     
+    // API में first_name, last_name null हैं, इसलिए profession use करो
     if (user.first_name && user.last_name) {
       return `${user.first_name} ${user.last_name}`;
     } else if (user.first_name) {
       return user.first_name;
     } else if (user.last_name) {
       return user.last_name;
-    } else if (user.name) {
-      return user.name;
+    } else if (user.profession) {
+      return user.profession; // Profession को name की तरह show करो
+    } else if (user.company) {
+      return user.company;
+    } else if (user.about) {
+      return user.about.substring(0, 20) + '...';
     } else {
-      return `User ${user.user_id || user.id}`;
+      return `User ${user.user_id || user.id || ''}`;
     }
   };
 
-  // Helper function to get location
+  // REAL API DATA से profile image लो
+  const getProfileImage = (user) => {
+    if (!user) {
+      return 'https://ui-avatars.com/api/?name=User&background=random&color=fff';
+    }
+    
+    // तुम्हारे API में image_url है (अगर है तो)
+    if (user.image_url) {
+      if (user.image_url.startsWith('http')) {
+        return user.image_url;
+      } else {
+        // Relative path हो तो तुम्हारे backend URL के साथ join करो
+        return `https://backend-q0wc.onrender.com${user.image_url}`;
+      }
+    }
+    
+    // Avatar generate करो
+    const displayName = getDisplayName(user);
+    const nameForAvatar = displayName.replace(/[^a-zA-Z0-9 ]/g, '');
+    const encodedName = encodeURIComponent(nameForAvatar || 'User');
+    
+    return `https://ui-avatars.com/api/?name=${encodedName}&background=random&color=fff&bold=true`;
+  };
+
+  // REAL API DATA से location लो
   const getLocation = (user) => {
     if (!user) return "Location not set";
     
-    if (user.city && user.state) {
-      return `${user.city}, ${user.state}`;
-    } else if (user.city) {
-      return user.city;
-    } else if (user.state) {
-      return user.state;
-    } else if (user.country) {
-      return user.country;
+    const locations = [];
+    if (user.city) locations.push(user.city);
+    if (user.state) locations.push(user.state);
+    if (user.country) locations.push(user.country);
+    
+    if (locations.length > 0) {
+      return locations.join(', ');
     } else if (user.address) {
       return user.address.split(',')[0];
-    } else {
-      return "Location not set";
-    }
-  };
-
-  // Helper function to get last active time
-  const getLastActive = (user) => {
-    if (!user.updated_at) {
-      return user.is_active ? "Online now" : "Recently";
     }
     
-    const updatedTime = new Date(user.updated_at);
-    const now = new Date();
-    const diffHours = Math.floor((now - updatedTime) / (1000 * 60 * 60));
-    
-    if (diffHours < 1 && user.is_active) {
-      return "Online now";
-    } else if (diffHours < 24) {
-      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    } else {
-      const diffDays = Math.floor(diffHours / 24);
-      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    }
+    return "Location not set";
   };
 
-  // Helper function to get profile image or placeholder
-  const getProfileImage = (user) => {
-    if (user.image_url) {
-      return user.image_url;
+  // REAL API DATA से skills लो
+  const getSkills = (user) => {
+    if (!user) return [];
+    
+    if (user.skills && Array.isArray(user.skills)) {
+      return user.skills.filter(skill => skill && skill.trim());
     }
     
-    // Return placeholder based on gender
-    if (user.gender === 'Female') {
-      return 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400';
-    } else {
-      return 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400';
+    if (user.skills && typeof user.skills === 'string') {
+      return user.skills.split(',').map(s => s.trim()).filter(s => s);
     }
+    
+    return [];
   };
 
-  // Filter and sort matches
-  const getFilteredMatches = () => {
-    let filtered = [...matches];
-
-    // Apply status filter
-    if (filters.status === 'Online Now') {
-      filtered = filtered.filter(match => match.is_active);
-    } else if (filters.status === 'Verified Only') {
-      filtered = filtered.filter(match => match.is_submitted);
+  // REAL API DATA से interests लो
+  const getInterests = (user) => {
+    if (!user) return [];
+    
+    if (user.interests && Array.isArray(user.interests)) {
+      return user.interests.filter(interest => interest && interest.trim());
     }
-
-    // Apply gender filter
-    if (filters.gender !== 'All') {
-      filtered = filtered.filter(match => match.gender === filters.gender);
+    
+    if (user.interests && typeof user.interests === 'string') {
+      return user.interests.split(',').map(i => i.trim()).filter(i => i);
     }
-
-    // Apply age range filter
-    if (filters.ageRange === '18-25') {
-      filtered = filtered.filter(match => match.age >= 18 && match.age <= 25);
-    } else if (filters.ageRange === '26-35') {
-      filtered = filtered.filter(match => match.age >= 26 && match.age <= 35);
-    } else if (filters.ageRange === '36+') {
-      filtered = filtered.filter(match => match.age >= 36);
-    }
-
-    // Apply sorting
-    if (filters.sortBy === 'Match Score') {
-      filtered.sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
-    } else if (filters.sortBy === 'Newest') {
-      filtered.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-    } else if (filters.sortBy === 'Recently Active') {
-      filtered.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
-    }
-
-    return filtered;
-  };
-
-  // Handle filter changes
-  const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
-  };
-
-  // Handle reset filters
-  const handleResetFilters = () => {
-    setFilters({
-      status: 'All Matches',
-      sortBy: 'Newest',
-      ageRange: 'Any',
-      gender: 'All'
-    });
+    
+    return [];
   };
 
   const handleViewProfile = (userId) => {
@@ -254,36 +154,24 @@ export default function MatchesPage() {
     navigate(`/chat/${userId}`);
   };
 
-  const filteredMatches = getFilteredMatches();
-
-  // Calculate stats
+  // Stats calculation
   const totalMatches = matches.length;
-  const onlineNow = matches.filter(match => match.is_active).length;
-  const verifiedProfiles = matches.filter(match => match.is_submitted).length;
+  const onlineNow = matches.filter(match => match.is_active === true).length;
+  const verifiedProfiles = matches.filter(match => match.is_submitted === true).length;
   const averageMatchScore = matches.length > 0 
     ? Math.round(matches.reduce((sum, match) => sum + (match.match_score || 0), 0) / matches.length)
     : 0;
-
-  // Debug: Check if data is loading
-  useEffect(() => {
-    console.log('Current matches state:', matches);
-    console.log('Filtered matches:', filteredMatches);
-    console.log('Loading:', loading);
-    console.log('Error:', error);
-  }, [matches, filteredMatches, loading, error]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Your Matches</h1>
-            <p className="text-gray-600">Loading matches...</p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">My Matches</h1>
+            <p className="text-gray-600">Loading matches from API...</p>
           </div>
-          
-          {/* Loading skeletons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+            {[1, 2, 3, 4].map(i => (
               <div key={i} className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
                 <div className="w-full h-48 bg-gray-300"></div>
                 <div className="p-4">
@@ -307,18 +195,18 @@ export default function MatchesPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Your Matches</h1>
-          <p className="text-gray-600">Discover people who match your preferences</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">My Matches</h1>
+          <p className="text-gray-600">Find Your Perfect Match</p>
           
-          {/* Debug Info - Remove in production */}
-          <div className="mt-4 p-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-xs">
-            <p><strong>Debug Info:</strong> Showing {filteredMatches.length} of {totalMatches} matches</p>
-            <p>First user: {matches[0] ? getFullName(matches[0]) : 'No data'}</p>
-            <p>Average match score: {averageMatchScore}/10</p>
+          {/* API Data Info */}
+          <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-lg border border-green-200 text-xs">
+            <p><strong>✅ Real API Data Loaded:</strong> Showing {totalMatches} matches from your backend</p>
+            <p><strong>Backend URL:</strong> https://backend-q0wc.onrender.com</p>
+            <p><strong>Note:</strong> Using profession/company as display name</p>
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats from REAL API DATA */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white p-4 rounded-lg shadow-sm border">
             <p className="text-2xl font-bold text-indigo-600">{totalMatches}</p>
@@ -338,107 +226,63 @@ export default function MatchesPage() {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white p-4 rounded-lg shadow-sm border mb-6">
-          <div className="flex flex-wrap gap-4 items-center">
-            <select 
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-            >
-              <option>All Matches</option>
-              <option>Online Now</option>
-              <option>Verified Only</option>
-              <option>High Match Score</option>
-            </select>
-            
-            <select 
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              value={filters.sortBy}
-              onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-            >
-              <option>Sort by: Newest</option>
-              <option>Sort by: Match Score</option>
-              <option>Sort by: Recently Active</option>
-            </select>
-
-            <select 
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              value={filters.ageRange}
-              onChange={(e) => handleFilterChange('ageRange', e.target.value)}
-            >
-              <option>Age: Any</option>
-              <option>18-25</option>
-              <option>26-35</option>
-              <option>36+</option>
-            </select>
-
-            <select 
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              value={filters.gender}
-              onChange={(e) => handleFilterChange('gender', e.target.value)}
-            >
-              <option>Gender: All</option>
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-
-            <button 
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-              onClick={handleResetFilters}
-            >
-              Reset Filters
-            </button>
-          </div>
-        </div>
-
         {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-yellow-700">{error}</p>
+            <button 
+              onClick={fetchMatches}
+              className="mt-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition text-sm"
+            >
+              Retry
+            </button>
           </div>
         )}
 
-        {/* Matches Grid */}
-        {filteredMatches.length === 0 ? (
+        {/* REAL MATCHES GRID */}
+        {matches.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow-sm border">
             <div className="text-gray-400 text-5xl mb-4">👥</div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No matches found</h3>
-            <p className="text-gray-500 mb-6">Try adjusting your filters or check back later</p>
+            <p className="text-gray-500 mb-6">Try refreshing or check back later</p>
             <button
-              onClick={handleResetFilters}
+              onClick={fetchMatches}
               className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
             >
-              Reset Filters
+              Refresh
             </button>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredMatches.map((match, index) => {
-                const fullName = getFullName(match);
+              {matches.map((match) => {
+                const displayName = getDisplayName(match);
                 const location = getLocation(match);
-                const lastActive = getLastActive(match);
-                const isOnline = lastActive === 'Online now';
                 const profileImage = getProfileImage(match);
+                const skills = getSkills(match);
+                const interests = getInterests(match);
+                const isOnline = match.is_active === true;
+                const isVerified = match.is_submitted === true;
                 
                 return (
-                  <div key={match.id || match.user_id || index} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                  <div key={match.id || match.user_id} 
+                       className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                    
                     {/* Profile Image */}
-                    <div className="relative">
+                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                       <img
                         src={profileImage}
-                        alt={fullName}
-                        className="w-full h-48 object-cover"
+                        alt={displayName}
+                        className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = match.gender === 'Female' 
-                            ? 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400'
-                            : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400';
+                          const nameForAvatar = displayName.replace(/[^a-zA-Z0-9 ]/g, '');
+                          const encodedName = encodeURIComponent(nameForAvatar || 'User');
+                          e.target.src = `https://ui-avatars.com/api/?name=${encodedName}&background=random&color=fff`;
                         }}
                       />
                       
-                      {/* Online Status */}
+                      {/* Online Status Badge */}
                       {isOnline && (
                         <div className="absolute top-3 right-3">
                           <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Online</span>
@@ -446,15 +290,15 @@ export default function MatchesPage() {
                       )}
                       
                       {/* Verified Badge */}
-                      {match.is_submitted && (
+                      {isVerified && (
                         <div className="absolute top-3 left-3">
                           <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">✓ Verified</span>
                         </div>
                       )}
                       
                       {/* Match Score Badge */}
-                      {match.match_score && (
-                        <div className="absolute top-3 right-3">
+                      {match.match_score > 0 && (
+                        <div className="absolute bottom-3 right-3">
                           <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
                             {match.match_score}/10
                           </span>
@@ -465,55 +309,54 @@ export default function MatchesPage() {
                     {/* Profile Info */}
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="font-bold text-lg text-gray-800">{fullName}</h3>
-                          <p className="text-gray-600 text-sm">
-                            {match.age ? `${match.age} years` : 'Age not specified'}
-                            {match.gender && ` • ${match.gender}`}
-                            {match.marital_status && ` • ${match.marital_status}`}
-                          </p>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg text-gray-800 truncate">{displayName}</h3>
+                          <div className="text-gray-600 text-sm mt-1">
+                            {match.age && match.age > 0 && <span>{match.age} yrs</span>}
+                            {match.gender && <span> • {match.gender}</span>}
+                            {match.marital_status && <span> • {match.marital_status}</span>}
+                          </div>
                         </div>
-                        <button className="text-gray-400 hover:text-red-500 transition">
+                        <button className="text-gray-400 hover:text-red-500 transition text-xl ml-2">
                           ♡
                         </button>
                       </div>
 
-                      <p className="text-gray-700 mb-1">
-                        {match.profession || match.headline || 'Profession not specified'}
-                      </p>
-                      <p className="text-gray-500 text-sm mb-3 flex items-center">
-                        📍 {location}
-                      </p>
-
-                      <div className="flex items-center justify-between mb-4">
-                        <p className={`text-xs ${isOnline ? 'text-green-500' : 'text-gray-400'}`}>
-                          {isOnline ? '🟢 Online now' : `Last active: ${lastActive}`}
+                      {/* Location */}
+                      {location !== "Location not set" && (
+                        <p className="text-gray-500 text-sm mb-3 flex items-center">
+                          📍 {location}
                         </p>
-                        {match.company && (
-                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                            {match.company}
-                          </span>
-                        )}
+                      )}
+
+                      {/* Company */}
+                      {match.company && match.company !== displayName && (
+                        <p className="text-gray-500 text-sm mb-3">
+                          🏢 {match.company}
+                        </p>
+                      )}
+
+                      {/* Status */}
+                      <div className="mb-4">
+                        <p className={`text-xs ${isOnline ? 'text-green-500' : 'text-gray-400'}`}>
+                          {isOnline ? '🟢 Online now' : '⚫ Offline'}
+                        </p>
                       </div>
 
                       {/* Skills/Interests */}
-                      {(match.skills || match.interests) && (
+                      {(skills.length > 0 || interests.length > 0) && (
                         <div className="mb-3">
                           <div className="flex flex-wrap gap-1">
-                            {match.skills && Array.isArray(match.skills) && 
-                              match.skills.slice(0, 2).map((skill, index) => (
-                                <span key={index} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">
-                                  {skill}
-                                </span>
-                              ))
-                            }
-                            {match.interests && Array.isArray(match.interests) && 
-                              match.interests.slice(0, 2).map((interest, index) => (
-                                <span key={index} className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded">
-                                  {interest}
-                                </span>
-                              ))
-                            }
+                            {skills.slice(0, 3).map((skill, idx) => (
+                              <span key={idx} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">
+                                {skill}
+                              </span>
+                            ))}
+                            {interests.slice(0, 2).map((interest, idx) => (
+                              <span key={idx} className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded">
+                                {interest}
+                              </span>
+                            ))}
                           </div>
                         </div>
                       )}
@@ -539,7 +382,7 @@ export default function MatchesPage() {
               })}
             </div>
 
-            {/* Load More Button */}
+            {/* Refresh Button */}
             <div className="text-center mt-8">
               <button 
                 className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
@@ -554,9 +397,6 @@ export default function MatchesPage() {
     </div>
   );
 }
-
-
-
 
 // import React from 'react';
 // import { useNavigate } from 'react-router-dom';

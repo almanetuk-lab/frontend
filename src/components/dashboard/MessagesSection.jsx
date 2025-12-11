@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { chatApi } from "../services/chatApi";
 import io from "socket.io-client";
+import { useLocation } from 'react-router-dom';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://backend-q0wc.onrender.com";
@@ -30,7 +31,29 @@ export default function MessagesSection() {
   const fileInputRef = useRef();
   const messagesEndRef = useRef();
   const [socketConnected, setSocketConnected] = useState(false);
+    const location = useLocation();
 
+  useEffect(() => {
+    if (location.state?.selectedUser) {
+      console.log("📍 User received from location state:", location.state.selectedUser);
+      const userFromState = location.state.selectedUser;
+      setSelectedUser(userFromState);
+      
+      // Auto-select and load messages for this user
+      if (userFromState.id && currentUserId) {
+        console.log("🔄 Auto-loading messages for user:", userFromState.name);
+        // Hide sidebar on mobile for better UX
+        if (window.innerWidth < 768) {
+          setShowSidebar(false);
+        }
+        // Load messages for this user
+        loadMessages(userFromState.id);
+        loadReactions(userFromState.id);
+      }
+    }
+  }, [location.state, currentUserId]);
+
+  
   // ✅ Fetch recent chats
   const fetchRecentChats = async () => {
     try {
