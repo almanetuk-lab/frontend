@@ -89,7 +89,7 @@ function Header() {
   }, []);
 
   return (
-    <header className="bg-[#4D6D9E] shadow-lg border-b border-[#8F8DA5] sticky top-0 z-50">
+    <header className="bg-[#fcfdfd] shadow-lg border-b border-[#8F8DA5] sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6">
         {/* Main Header Row */}
         <div className="flex justify-between items-center py-3">
@@ -111,7 +111,7 @@ function Header() {
               <li>
                 <Link
                   to="/"
-                  className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
+                  className="text-[#4f07f8] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                 >
                   Home
                 </Link>
@@ -122,7 +122,7 @@ function Header() {
                   <li>
                     <Link
                       to="/dashboard"
-                      className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
+                      className="text-[#4f07f8] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                     >
                       Dashboard
                     </Link>
@@ -130,7 +130,7 @@ function Header() {
                   <li>
                     <Link
                       to="/members"
-                      className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
+                      className="text-[#4f07f8] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                     >
                       Members
                     </Link>
@@ -138,7 +138,7 @@ function Header() {
                   <li>
                     <Link
                       to="/edit-profile"
-                      className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
+                      className="text-[#4f07f8] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                     >
                       Edit Profile
                     </Link>
@@ -149,7 +149,7 @@ function Header() {
               <li>
                 <Link
                   to="/contact"
-                  className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
+                  className="text-[#4f07f8] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                 >
                   Contact Us
                 </Link>
@@ -158,7 +158,7 @@ function Header() {
               <li>
                 <Link
                   to="/blog"
-                  className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200"
+                  className="text-[#4f07f8] hover:text-[#FF66CC] font-medium transition-colors duration-200"
                 >
                   Blogs
                 </Link>
@@ -173,7 +173,7 @@ function Header() {
                 <div className="relative">
                   <Link
                     to="/cart"
-                    className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200 flex items-center"
+                    className="text-[#4f07f8] hover:text-[#FF66CC] font-medium transition-colors duration-200 flex items-center"
                   >
                     Cart 🛒
                   </Link>
@@ -198,14 +198,14 @@ function Header() {
               <div className="flex items-center gap-3">
                 <Link
                   to="/login"
-                  className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200 px-3 py-1"
+                  className="text-[#4f07f8] hover:text-[#FF66CC] font-medium transition-colors duration-200 px-3 py-1"
                 >
                   Login
                 </Link>
 
                 <Link
                   to="/admin-login"
-                  className="text-[#F5F5F5] hover:text-[#FF66CC] font-medium transition-colors duration-200 px-3 py-1"
+                  className="text-[#4f07f8] hover:text-[#FF66CC] font-medium transition-colors duration-200 px-3 py-1"
                 >
                   Admin Login
                 </Link>

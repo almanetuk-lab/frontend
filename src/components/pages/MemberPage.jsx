@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminAPI } from "../services/adminApi";
@@ -184,87 +182,65 @@ const MemberPage = () => {
     performSearch();
   };
 
-  // ✅ FIXED: View Profile with getUserDetails API
+  // ✅ FIXED: View Profile Function
   const handleViewProfile = async (memberId, memberName = "") => {
     try {
-      console.log("🎯 VIEW PROFILE CLICKED!");
-      console.log("📌 Member ID:", memberId);
-      console.log("📌 Member Name:", memberName);
-      
-      // Try to fetch complete user details using getUserDetails API
-      console.log("🔍 Calling getUserDetails API...");
-      try {
-        const response = await adminAPI.getUserDetails(memberId);
-        console.log("✅ getUserDetails API Response:", response);
+      console.log("🎯 VIEW PROFILE FUNCTION CALLED");
+      console.log("Member Name:", memberName);
+      console.log("Member ID (user_id):", memberId);
+
+      // Find member from current list using user_id
+      const currentMember = members.find(m => m.user_id == memberId);
+
+      console.log("Found member data:", currentMember);
+
+      if (currentMember) {
+        // ✅ Navigate with member data
+        navigate(`/dashboard/profile/${memberId}`, {
+          state: {
+            userProfile: currentMember,
+            memberId: memberId,
+            name: memberName,
+            from: "member_page"
+          }
+        });
+        console.log("✅ Navigation successful");
+      } else {
+        console.log("⚠️ Member not found by user_id, trying with id...");
+        // Try with id as fallback
+        const fallbackMember = members.find(m => m.id == memberId);
         
-        if (response.data) {
-          console.log("✅ User data received:", response.data);
-          
-          // Navigate with complete user data from API
+        if (fallbackMember) {
+          console.log("✅ Found using id fallback:", fallbackMember);
           navigate(`/dashboard/profile/${memberId}`, {
             state: {
-              userProfile: response.data,
+              userProfile: fallbackMember,
               memberId: memberId,
-              name: response.data.name || 
-                    `${response.data.first_name || ''} ${response.data.last_name || ''}`.trim() || 
-                    memberName,
-              image_url: response.data.image_url,
-              profession: response.data.profession,
-              city: response.data.city,
-              gender: response.data.gender,
-              age: response.data.age,
-              email: response.data.email,
-              phone: response.data.phone,
-              from: "member_page_api"
+              name: memberName,
+              from: "member_page_fallback"
             }
           });
         } else {
-          // Fallback if API returns no data
-          console.log("⚠️ No data in API response, using fallback");
-          navigateWithFallback(memberId, memberName);
+          console.log("❌ Member not found at all");
+          navigate(`/dashboard/profile/${memberId}`);
         }
-        
-      } catch (apiError) {
-        console.error("❌ getUserDetails API failed:", apiError);
-        console.error("❌ Error details:", apiError.response || apiError.message);
-        
-        // Fallback to using current member data
-        navigateWithFallback(memberId, memberName);
       }
-      
+
     } catch (error) {
-      console.error("❌ Error in handleViewProfile:", error);
-      navigate(`/dashboard/profile/${memberId}`);
+      console.error("❌ Navigation error:", error);
+      // Direct URL fallback
+      window.location.href = `/dashboard/profile/${memberId}`;
     }
   };
 
-  // Fallback navigation function
-  const navigateWithFallback = (memberId, memberName) => {
-    const currentMember = members.find(m => 
-      m.id == memberId || m.user_id == memberId
-    );
-    
-    console.log("🔄 Using fallback data:", currentMember);
-    
-    navigate(`/dashboard/profile/${memberId}`, {
-      state: {
-        memberData: currentMember || null,
-        memberId: memberId,
-        name: memberName,
-        from: "member_page_fallback"
-      }
-    });
-  };
-
-  // ✅ Chat Function - WORKING
+  // ✅ FIXED: Chat Function
   const handleSendMessage = async (memberId, memberName = "") => {
     try {
       console.log("💬 CHAT CLICKED for:", memberName, "ID:", memberId);
-      const currentUserId = getCurrentUserId();
       
       // Navigate to messages page with user info
-      navigate(`/dashboard/messages`, { 
-        state: { 
+      navigate(`/dashboard/messages`, {
+        state: {
           selectedUser: {
             id: memberId,
             name: memberName,
@@ -272,10 +248,18 @@ const MemberPage = () => {
           }
         }
       });
-      
+
     } catch (error) {
       console.error("Error starting chat:", error);
-      navigate(`/dashboard/messages?user=${memberId}`);
+      // Fallback navigation
+      navigate(`/dashboard/messages`, {
+        state: {
+          selectedUser: {
+            id: memberId,
+            name: memberName
+          }
+        }
+      });
     }
   };
 
@@ -299,6 +283,7 @@ const MemberPage = () => {
   const getDummyMembers = () => [
     {
       id: 1,
+      user_id: 1,
       first_name: "Pihu",
       last_name: "Malik",
       age: 26,
@@ -310,6 +295,7 @@ const MemberPage = () => {
     },
     {
       id: 2,
+      user_id: 2,
       first_name: "Ishaan",
       last_name: "Kumar",
       age: 38,
@@ -321,6 +307,7 @@ const MemberPage = () => {
     },
     {
       id: 3,
+      user_id: 3,
       first_name: "Priya",
       last_name: "Sharma",
       age: 29,
@@ -332,6 +319,7 @@ const MemberPage = () => {
     },
     {
       id: 4,
+      user_id: 4,
       first_name: "Krish",
       last_name: "Ghosh",
       age: 32,
@@ -549,11 +537,12 @@ const MemberPage = () => {
                       <button
                         onClick={() => {
                           console.log("🟢 VIEW PROFILE BUTTON CLICKED");
-                          console.log("Member ID:", member.id || member.user_id);
-                          handleViewProfile(
-                            member.id || member.user_id,
-                            formatName(member)
-                          );
+                          console.log("Member:", member);
+                          console.log("Using user_id:", member.user_id);
+                          console.log("Member Name:", formatName(member));
+                          
+                          // ✅ Use user_id for navigation
+                          handleViewProfile(member.user_id, formatName(member));
                         }}
                         className="flex-1 bg-amber-500 text-white py-2.5 rounded-lg font-semibold hover:bg-amber-600 transition-all hover:-translate-y-0.5 active:translate-y-0"
                       >
@@ -561,12 +550,14 @@ const MemberPage = () => {
                       </button>
 
                       <button
-                        onClick={() =>
-                          handleSendMessage(
-                            member.id || member.user_id,
-                            formatName(member)
-                          )
-                        }
+                        onClick={() => {
+                          console.log("💬 CHAT BUTTON CLICKED");
+                          console.log("For user_id:", member.user_id);
+                          console.log("Name:", formatName(member));
+                          
+                          // ✅ Use user_id for chat
+                          handleSendMessage(member.user_id, formatName(member));
+                        }}
                         className="flex-1 border border-amber-500 text-amber-600 py-2.5 rounded-lg font-semibold hover:bg-amber-50 transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
                       >
                         <svg
@@ -652,32 +643,10 @@ export default MemberPage;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// // working code 
 // import React, { useState, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
 // import { adminAPI } from "../services/adminApi";
-// // ⬇️ YEH NAYA IMPORT ADD KARNA HAI ⬇️
 // import { chatApi, getCurrentUserId } from "../services/chatApi";
 
 // const MemberPage = () => {
@@ -859,50 +828,146 @@ export default MemberPage;
 //     performSearch();
 //   };
 
-//   // Navigate to profile
-//   const handleViewProfile = (memberId) => {
-//     navigate(`/dashboard/profile/${memberId}`);
-//   };
+//   // // ✅ FIXED: View Profile Function
+//   // const handleViewProfile = async (memberId, memberName = "") => {
+//   //   try {
+//   //     console.log("🎯 VIEW PROFILE FUNCTION CALLED");
+//   //     console.log("Member Name:", memberName);
+//   //     console.log("Member ID:", memberId);
+//   //     console.log("Navigating to:", `/dashboard/profile/${memberId}`);
 
-//   // ⬇️ YEH NAYA FUNCTION ADD KARNA HAI - Chat API use karega ⬇️
-//   const handleSendMessage = async (memberId, memberName = "") => {
+//   //     // Find member from current list
+//   //     const currentMember = members.find(m =>
+//   //       m.id == memberId || m.user_id == memberId
+//   //     );
+
+//   //     console.log("Found member data:", currentMember);
+
+//   //     if (currentMember) {
+//   //       // ✅ Navigate with member data
+//   //       navigate(`/dashboard/profile/${memberId}`, {
+//   //         state: {
+//   //           userProfile: currentMember,
+//   //           memberId: memberId,
+//   //           name: memberName,
+//   //           from: "member_page",
+//   //           timestamp: Date.now()
+//   //         }
+//   //       });
+//   //       console.log("✅ Navigation successful");
+//   //     } else {
+//   //       console.log("⚠️ Member not found in list, using fallback");
+//   //       // Fallback navigation
+//   //       navigate(`/dashboard/profile/${memberId}`, {
+//   //         state: {
+//   //           memberId: memberId,
+//   //           name: memberName,
+//   //           from: "member_page_fallback"
+//   //         }
+//   //       });
+//   //     }
+
+//   //   } catch (error) {
+//   //     console.error("❌ Navigation error:", error);
+//   //     // Direct URL fallback
+//   //     window.location.href = `/dashboard/profile/${memberId}`;
+//   //   }
+//   // };
+
+//   // // ✅ Chat Function - WORKING
+//   // const handleSendMessage = async (memberId, memberName = "") => {
+//   //   try {
+//   //     console.log("💬 CHAT CLICKED for:", memberName, "ID:", memberId);
+//   //     const currentUserId = getCurrentUserId();
+
+//   //     // Navigate to messages page with user info
+//   //     navigate(`/dashboard/messages`, {
+//   //       state: {
+//   //         selectedUser: {
+//   //           id: memberId,
+//   //           name: memberName,
+//   //           receiverId: memberId
+//   //         }
+//   //       }
+//   //     });
+
+//   //   } catch (error) {
+//   //     console.error("Error starting chat:", error);
+//   //     navigate(`/dashboard/messages?user=${memberId}`);
+//   //   }
+//   // };
+
+//   // ✅ CORRECTED: View Profile function
+//   const handleViewProfile = async (
+//     memberId,
+//     memberName = "",
+//     useUserId = true
+//   ) => {
 //     try {
-//       const currentUserId = getCurrentUserId();
-//       const receiverId = memberId;
+//       console.log("🎯 VIEW PROFILE DEBUG ===");
+//       console.log("Selected Member Name:", memberName);
+//       console.log("Using user_id?", useUserId);
 
-//       // 1. Pahle check kare ki koi existing chat hai ya nahi
-//       try {
-//         // Aapki existing API se messages check kare
-//         const response = await chatApi.getMessages(receiverId, currentUserId);
-//         console.log("Existing messages:", response.data);
-//       } catch (error) {
-//         console.log("No existing chat found, starting new chat");
-//       }
+//       // ✅ ALWAYS use user_id (not id)
+//       const userIdToUse = useUserId ? memberId : memberId;
 
-//       // 2. Direct chat page par navigate kare with user info
-//       navigate(`/dashboard/messages`, {
-//         state: {
-//           selectedUser: {
-//             id: receiverId,
-//             name: memberName,
-//             receiverId: receiverId,
-//           },
-//         },
+//       // Find member by user_id
+//       const currentMember = members.find((m) => {
+//         console.log(
+//           `Checking: ${formatName(m)} - id:${m.id}, user_id:${m.user_id}`
+//         );
+//         return m.user_id == userIdToUse;
 //       });
 
-//       // 3. Alternative: Agar separate chat page ho
-//       // navigate(`/dashboard/chat/${receiverId}`, {
-//       //   state: {
-//       //     receiverName: memberName,
-//       //     receiverId: receiverId
-//       //   }
-//       // });
-//     } catch (error) {
-//       console.error("Error starting chat:", error);
+//       if (!currentMember) {
+//         console.log("⚠️ Not found by user_id, trying with id...");
+//         // Fallback: try with id
+//         const fallbackMember = members.find((m) => m.id == userIdToUse);
 
-//       // Fallback: Simple navigation
-//       navigate(`/dashboard/messages?user=${memberId}`);
+//         if (fallbackMember) {
+//           console.log("✅ Found using id fallback:", fallbackMember);
+//           navigateToProfilePage(fallbackMember, userIdToUse, memberName);
+//         } else {
+//           console.log("❌ Member not found at all");
+//           navigate(`/dashboard/profile/${userIdToUse}`);
+//         }
+//         return;
+//       }
+
+//       console.log("✅ Found correct member:", {
+//         name: formatName(currentMember),
+//         user_id: currentMember.user_id,
+//         id: currentMember.id,
+//         first_name: currentMember.first_name,
+//         last_name: currentMember.last_name,
+//       });
+
+//       // ✅ Navigate with CORRECT user_id
+//       navigateToProfilePage(
+//         currentMember,
+//         currentMember.user_id || userIdToUse,
+//         memberName
+//       );
+//     } catch (error) {
+//       console.error("❌ Error in handleViewProfile:", error);
+//       navigate(`/dashboard/profile/${memberId}`);
 //     }
+//   };
+
+//   // ✅ Helper function
+//   const navigateToProfilePage = (member, userId, memberName) => {
+//     navigate(`/dashboard/profile/${userId}`, {
+//       state: {
+//         userProfile: member, // Full member data
+//         memberId: userId, // Correct user_id
+//         name: memberName,
+//         from: "member_page",
+//         actualUserId: member.user_id,
+//         actualMemberId: member.id,
+//         timestamp: Date.now(),
+//       },
+//     });
+//     console.log(`✅ Navigating to profile/${userId} for ${memberName}`);
 //   };
 
 //   // Helper function to format name
@@ -919,17 +984,6 @@ export default MemberPage;
 //       return `${member.city}, India`;
 //     }
 //     return member.address || "Location not specified";
-//   };
-
-//   // Get gender icon
-//   const getGenderIcon = (gender) => {
-//     const genderLower = gender?.toLowerCase();
-//     if (genderLower === "male" || genderLower === "man") {
-//       return "👨";
-//     } else if (genderLower === "female" || genderLower === "woman") {
-//       return "👩";
-//     }
-//     return "👤";
 //   };
 
 //   // Dummy data fallback
@@ -1088,14 +1142,12 @@ export default MemberPage;
 //       {/* Members Grid */}
 //       <div className="container mx-auto px-4 py-12">
 //         {loading ? (
-//           // Loading state
 //           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 //             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
 //               <div
 //                 key={i}
 //                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-0 overflow-hidden animate-pulse"
 //               >
-//                 {/* Profile Image Skeleton */}
 //                 <div className="h-48 bg-gray-300"></div>
 //                 <div className="p-6">
 //                   <div className="h-6 bg-gray-300 rounded w-3/4 mb-4"></div>
@@ -1118,7 +1170,6 @@ export default MemberPage;
 //                   key={member.id || member.user_id}
 //                   className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100 hover:border-amber-100"
 //                 >
-//                   {/* Profile Image - Full Width */}
 //                   <div className="h-48 overflow-hidden bg-gray-100">
 //                     <img
 //                       src={
@@ -1138,14 +1189,11 @@ export default MemberPage;
 //                     />
 //                   </div>
 
-//                   {/* Member Info */}
 //                   <div className="p-6">
-//                     {/* Name - Full width single line */}
 //                     <h3 className="text-lg font-bold text-gray-800 mb-3 truncate">
 //                       {formatName(member)}
 //                     </h3>
 
-//                     {/* Profession with icon */}
 //                     <div className="flex items-center gap-2 text-gray-600 mb-2">
 //                       <svg
 //                         className="w-4 h-4 text-gray-500 flex-shrink-0"
@@ -1165,7 +1213,6 @@ export default MemberPage;
 //                       </span>
 //                     </div>
 
-//                     {/* Location with icon */}
 //                     <div className="flex items-center gap-2 text-gray-500 text-sm mb-6">
 //                       <svg
 //                         className="w-4 h-4 text-gray-500 flex-shrink-0"
@@ -1189,27 +1236,49 @@ export default MemberPage;
 //                       <span className="truncate">{getDisplayCity(member)}</span>
 //                     </div>
 
-//                     {/* Action Buttons */}
 //                     <div className="flex gap-3">
 //                       <button
-//                         onClick={() =>
-//                           handleViewProfile(
-//                             member.id || member.user_id,
-//                             formatName(member)
-//                           )
-//                         }
+//                         onClick={() => {
+//                           console.log("=== VIEW PROFILE BUTTON CLICKED ===");
+//                           console.log("Member Object:", {
+//                             id: member.id, // 10 (WRONG for Yeshwant)
+//                             user_id: member.user_id, // 18 (CORRECT for Yeshwant)
+//                             name: formatName(member),
+//                             first_name: member.first_name,
+//                             last_name: member.last_name,
+//                           });
+
+//                           // ✅ IMPORTANT: Use user_id (18) not id (10)
+//                           const correctUserId = member.user_id; // 18 for Yeshwant
+
+//                           console.log(
+//                             `Using user_id: ${correctUserId} for navigation`
+//                           );
+
+//                           handleViewProfile(correctUserId, formatName(member));
+//                         }}
 //                         className="flex-1 bg-amber-500 text-white py-2.5 rounded-lg font-semibold hover:bg-amber-600 transition-all hover:-translate-y-0.5 active:translate-y-0"
 //                       >
 //                         View Profile
 //                       </button>
+
 //                       {/* <button
-//                         onClick={() => handleViewProfile(member.id || member.user_id)}
+//                         onClick={() => {
+//                           console.log("🟢 VIEW PROFILE BUTTON CLICKED");
+//                           console.log("Member:", member);
+//                           console.log("Member ID:", member.id || member.user_id);
+//                           console.log("Member Name:", formatName(member));
+                          
+//                           handleViewProfile(
+//                             member.id || member.user_id,
+//                             formatName(member)
+//                           );
+//                         }}
 //                         className="flex-1 bg-amber-500 text-white py-2.5 rounded-lg font-semibold hover:bg-amber-600 transition-all hover:-translate-y-0.5 active:translate-y-0"
 //                       >
 //                         View Profile
 //                       </button> */}
 
-//                       {/* ⬇️ YEH BUTTON UPDATE KARNA HAI ⬇️ */}
 //                       <button
 //                         onClick={() =>
 //                           handleSendMessage(
@@ -1240,7 +1309,6 @@ export default MemberPage;
 //               ))}
 //             </div>
 
-//             {/* Load More Button */}
 //             {hasMoreMembers() && (
 //               <div className="text-center mt-12">
 //                 <button
@@ -1292,13 +1360,22 @@ export default MemberPage;
 //     </div>
 //   );
 // };
-// // chat system
+
 // export default MemberPage;
 
-// old code
+
+
+
+
+
+
+
+
+
 // import React, { useState, useEffect } from "react";
 // import { useNavigate } from "react-router-dom";
 // import { adminAPI } from "../services/adminApi";
+// import { chatApi, getCurrentUserId } from "../services/chatApi";
 
 // const MemberPage = () => {
 //   const navigate = useNavigate();
@@ -1354,7 +1431,7 @@ export default MemberPage;
 
 //       const response = await adminAPI.searchProfiles({
 //         search_mode: "basic",
-//         first_name: ""
+//         first_name: "",
 //       });
 
 //       console.log("Initial members response:", response.data);
@@ -1390,7 +1467,7 @@ export default MemberPage;
 
 //       const response = await adminAPI.searchProfiles({
 //         search_mode: "basic",
-//         first_name: searchTerm
+//         first_name: searchTerm,
 //       });
 
 //       console.log("Search response:", response.data);
@@ -1403,17 +1480,15 @@ export default MemberPage;
 //         setMembers(searchResults);
 
 //         if (selectedGender !== "All") {
-//           const genderFiltered = searchResults.filter(
-//             (member) => {
-//               const memberGender = member.gender?.toLowerCase();
-//               const selected = selectedGender.toLowerCase();
-//               return (
-//                 memberGender === selected ||
-//                 (selected === "man" && memberGender === "male") ||
-//                 (selected === "woman" && memberGender === "female")
-//               );
-//             }
-//           );
+//           const genderFiltered = searchResults.filter((member) => {
+//             const memberGender = member.gender?.toLowerCase();
+//             const selected = selectedGender.toLowerCase();
+//             return (
+//               memberGender === selected ||
+//               (selected === "man" && memberGender === "male") ||
+//               (selected === "woman" && memberGender === "female")
+//             );
+//           });
 //           setFilteredMembers(genderFiltered.slice(0, 12));
 //         } else {
 //           setFilteredMembers(searchResults.slice(0, 12));
@@ -1481,14 +1556,132 @@ export default MemberPage;
 //     performSearch();
 //   };
 
-//   // Navigate to profile
-//   const handleViewProfile = (memberId) => {
+//   // ✅ SIMPLE FIX: Use existing selectedUser data
+// const handleViewProfile = async (memberId, memberName = "") => {
+//   try {
+//     console.log("VIEW PROFILE clicked for:", memberName, "ID:", memberId);
+
+//     // Find member from current list
+//     const currentMember = members.find(m =>
+//       m.id == memberId || m.user_id == memberId
+//     );
+
+//     console.log("Found member:", currentMember);
+
+//     if (currentMember) {
+//       // ✅ Navigate with EXACT SAME data structure as UserDetailsModal
+//       navigate(`/dashboard/profile/${memberId}`, {
+//         state: {
+//           userProfile: currentMember, // ✅ Same as selectedUser
+//           memberId: memberId,
+//           name: memberName,
+//           from: "member_page"
+//         }
+//       });
+//     } else {
+//       // Fallback
+//       navigate(`/dashboard/profile/${memberId}`);
+//     }
+
+//   } catch (error) {
+//     console.error("Error:", error);
 //     navigate(`/dashboard/profile/${memberId}`);
+//   }
+// };
+
+//   // // ✅ FIXED: View Profile with getUserDetails API
+//   // const handleViewProfile = async (memberId, memberName = "") => {
+//   //   try {
+//   //     console.log("🎯 VIEW PROFILE CLICKED!");
+//   //     console.log("📌 Member ID:", memberId);
+//   //     console.log("📌 Member Name:", memberName);
+
+//   //     // Try to fetch complete user details using getUserDetails API
+//   //     console.log("🔍 Calling getUserDetails API...");
+//   //     try {
+//   //       const response = await adminAPI.getUserDetails(memberId);
+//   //       console.log("✅ getUserDetails API Response:", response);
+
+//   //       if (response.data) {
+//   //         console.log("✅ User data received:", response.data);
+
+//   //         // Navigate with complete user data from API
+//   //         navigate(`/dashboard/profile/${memberId}`, {
+//   //           state: {
+//   //             userProfile: response.data,
+//   //             memberId: memberId,
+//   //             name: response.data.name ||
+//   //                   `${response.data.first_name || ''} ${response.data.last_name || ''}`.trim() ||
+//   //                   memberName,
+//   //             image_url: response.data.image_url,
+//   //             profession: response.data.profession,
+//   //             city: response.data.city,
+//   //             gender: response.data.gender,
+//   //             age: response.data.age,
+//   //             email: response.data.email,
+//   //             phone: response.data.phone,
+//   //             from: "member_page_api"
+//   //           }
+//   //         });
+//   //       } else {
+//   //         // Fallback if API returns no data
+//   //         console.log("⚠️ No data in API response, using fallback");
+//   //         navigateWithFallback(memberId, memberName);
+//   //       }
+
+//   //     } catch (apiError) {
+//   //       console.error("❌ getUserDetails API failed:", apiError);
+//   //       console.error("❌ Error details:", apiError.response || apiError.message);
+
+//   //       // Fallback to using current member data
+//   //       navigateWithFallback(memberId, memberName);
+//   //     }
+
+//   //   } catch (error) {
+//   //     console.error("❌ Error in handleViewProfile:", error);
+//   //     navigate(`/dashboard/profile/${memberId}`);
+//   //   }
+//   // };
+
+//   // Fallback navigation function
+//   const navigateWithFallback = (memberId, memberName) => {
+//     const currentMember = members.find(m =>
+//       m.id == memberId || m.user_id == memberId
+//     );
+
+//     console.log("🔄 Using fallback data:", currentMember);
+
+//     navigate(`/dashboard/profile/${memberId}`, {
+//       state: {
+//         memberData: currentMember || null,
+//         memberId: memberId,
+//         name: memberName,
+//         from: "member_page_fallback"
+//       }
+//     });
 //   };
 
-//   // Navigate to messages
-//   const handleSendMessage = (memberId) => {
-//     navigate(`/dashboard/messages?user=${memberId}`);
+//   // ✅ Chat Function - WORKING
+//   const handleSendMessage = async (memberId, memberName = "") => {
+//     try {
+//       console.log("💬 CHAT CLICKED for:", memberName, "ID:", memberId);
+//       const currentUserId = getCurrentUserId();
+
+//       // Navigate to messages page with user info
+//       navigate(`/dashboard/messages`, {
+//         state: {
+//           selectedUser: {
+//             id: memberId,
+//             name: memberName,
+//             receiverId: memberId
+//           }
+//         }
+//       });
+
+//     } catch (error) {
+//       console.error("Error starting chat:", error);
+//       navigate(`/dashboard/messages?user=${memberId}`);
+//     }
 //   };
 
 //   // Helper function to format name
@@ -1507,17 +1700,6 @@ export default MemberPage;
 //     return member.address || "Location not specified";
 //   };
 
-//   // Get gender icon
-//   const getGenderIcon = (gender) => {
-//     const genderLower = gender?.toLowerCase();
-//     if (genderLower === 'male' || genderLower === 'man') {
-//       return '👨';
-//     } else if (genderLower === 'female' || genderLower === 'woman') {
-//       return '👩';
-//     }
-//     return '👤';
-//   };
-
 //   // Dummy data fallback
 //   const getDummyMembers = () => [
 //     {
@@ -1528,7 +1710,8 @@ export default MemberPage;
 //       gender: "Woman",
 //       city: "Delhi",
 //       profession: "Fashion Designer",
-//       image_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=face"
+//       image_url:
+//         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=face",
 //     },
 //     {
 //       id: 2,
@@ -1538,7 +1721,8 @@ export default MemberPage;
 //       gender: "Man",
 //       city: "Panaji",
 //       profession: "Software Engineer",
-//       image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face"
+//       image_url:
+//         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
 //     },
 //     {
 //       id: 3,
@@ -1548,7 +1732,8 @@ export default MemberPage;
 //       gender: "Woman",
 //       city: "Mumbai",
 //       profession: "Doctor",
-//       image_url: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face"
+//       image_url:
+//         "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
 //     },
 //     {
 //       id: 4,
@@ -1558,7 +1743,8 @@ export default MemberPage;
 //       gender: "Man",
 //       city: "Kolkata",
 //       profession: "Business Owner",
-//       image_url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face"
+//       image_url:
+//         "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
 //     },
 //   ];
 
@@ -1651,7 +1837,8 @@ export default MemberPage;
 //                     </div>
 //                   ) : (
 //                     <div>
-//                       Showing {filteredMembers.length} of {members.length} members
+//                       Showing {filteredMembers.length} of {members.length}{" "}
+//                       members
 //                       {searchTerm && (
 //                         <span className="ml-2 text-sm text-amber-600">
 //                           for "{searchTerm}"
@@ -1669,14 +1856,12 @@ export default MemberPage;
 //       {/* Members Grid */}
 //       <div className="container mx-auto px-4 py-12">
 //         {loading ? (
-//           // Loading state
 //           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 //             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
 //               <div
 //                 key={i}
 //                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-0 overflow-hidden animate-pulse"
 //               >
-//                 {/* Profile Image Skeleton */}
 //                 <div className="h-48 bg-gray-300"></div>
 //                 <div className="p-6">
 //                   <div className="h-6 bg-gray-300 rounded w-3/4 mb-4"></div>
@@ -1699,69 +1884,110 @@ export default MemberPage;
 //                   key={member.id || member.user_id}
 //                   className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100 hover:border-amber-100"
 //                 >
-//                   {/* Profile Image - Full Width */}
 //                   <div className="h-48 overflow-hidden bg-gray-100">
 //                     <img
 //                       src={
 //                         member.image_url && member.image_url !== "Not provided"
 //                           ? member.image_url
-//                           : `https://ui-avatars.com/api/?name=${
-//                               encodeURIComponent(formatName(member))
-//                             }&background=random&size=400`
+//                           : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+//                               formatName(member)
+//                             )}&background=random&size=400`
 //                       }
 //                       alt={formatName(member)}
 //                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
 //                       onError={(e) => {
-//                         e.target.src = `https://ui-avatars.com/api/?name=${
-//                           encodeURIComponent(formatName(member))
-//                         }&background=random&size=400`;
+//                         e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+//                           formatName(member)
+//                         )}&background=random&size=400`;
 //                       }}
 //                     />
 //                   </div>
 
-//                   {/* Member Info */}
 //                   <div className="p-6">
-//                     {/* Name - Full width single line */}
 //                     <h3 className="text-lg font-bold text-gray-800 mb-3 truncate">
 //                       {formatName(member)}
 //                     </h3>
 
-//                     {/* Profession with icon */}
 //                     <div className="flex items-center gap-2 text-gray-600 mb-2">
-//                       <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-//                           d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+//                       <svg
+//                         className="w-4 h-4 text-gray-500 flex-shrink-0"
+//                         fill="none"
+//                         stroke="currentColor"
+//                         viewBox="0 0 24 24"
+//                       >
+//                         <path
+//                           strokeLinecap="round"
+//                           strokeLinejoin="round"
+//                           strokeWidth={2}
+//                           d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+//                         />
 //                       </svg>
 //                       <span className="text-sm truncate">
 //                         {member.profession || "Profession not specified"}
 //                       </span>
 //                     </div>
 
-//                     {/* Location with icon */}
 //                     <div className="flex items-center gap-2 text-gray-500 text-sm mb-6">
-//                       <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-//                           d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-//                           d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+//                       <svg
+//                         className="w-4 h-4 text-gray-500 flex-shrink-0"
+//                         fill="none"
+//                         stroke="currentColor"
+//                         viewBox="0 0 24 24"
+//                       >
+//                         <path
+//                           strokeLinecap="round"
+//                           strokeLinejoin="round"
+//                           strokeWidth={2}
+//                           d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+//                         />
+//                         <path
+//                           strokeLinecap="round"
+//                           strokeLinejoin="round"
+//                           strokeWidth={2}
+//                           d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+//                         />
 //                       </svg>
 //                       <span className="truncate">{getDisplayCity(member)}</span>
 //                     </div>
 
-//                     {/* Action Buttons */}
 //                     <div className="flex gap-3">
 //                       <button
-//                         onClick={() => handleViewProfile(member.id || member.user_id)}
+//                         onClick={() => {
+//                           console.log("🟢 VIEW PROFILE BUTTON CLICKED");
+//                           console.log("Member ID:", member.id || member.user_id);
+//                           handleViewProfile(
+//                             member.id || member.user_id,
+//                             formatName(member)
+//                           );
+//                         }}
 //                         className="flex-1 bg-amber-500 text-white py-2.5 rounded-lg font-semibold hover:bg-amber-600 transition-all hover:-translate-y-0.5 active:translate-y-0"
 //                       >
 //                         View Profile
 //                       </button>
 
 //                       <button
-//                         onClick={() => handleSendMessage(member.id || member.user_id)}
-//                         className="flex-1 border border-amber-500 text-amber-600 py-2.5 rounded-lg font-semibold hover:bg-amber-50 transition-all hover:-translate-y-0.5 active:translate-y-0"
+//                         onClick={() =>
+//                           handleSendMessage(
+//                             member.id || member.user_id,
+//                             formatName(member)
+//                           )
+//                         }
+//                         className="flex-1 border border-amber-500 text-amber-600 py-2.5 rounded-lg font-semibold hover:bg-amber-50 transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
 //                       >
-//                         Message
+//                         <svg
+//                           className="w-4 h-4"
+//                           fill="none"
+//                           stroke="currentColor"
+//                           viewBox="0 0 24 24"
+//                         >
+//                           <path
+//                             strokeLinecap="round"
+//                             strokeLinejoin="round"
+//                             strokeWidth={2}
+//                             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+//                           />
+//                         </svg>
+//                         Chat
 //                       </button>
 //                     </div>
 //                   </div>
@@ -1769,7 +1995,6 @@ export default MemberPage;
 //               ))}
 //             </div>
 
-//             {/* Load More Button */}
 //             {hasMoreMembers() && (
 //               <div className="text-center mt-12">
 //                 <button
