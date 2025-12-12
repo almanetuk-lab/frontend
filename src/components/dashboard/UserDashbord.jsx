@@ -112,7 +112,9 @@ export default function UserDashboard() {
         <main className="flex-1 overflow-y-auto">
           <Routes>
             <Route index element={<DashboardHome profile={profile} />} />
-            <Route path="profile" element={<ProfilePage />} />
+            <Route path="profile/:userId?" element={<ProfilePage />} />
+            {/* <Route path="profile" element={<ProfilePage />} /> */}
+            {/* <Route path="profile/:userId" element={<ProfilePage />} /> */}
             <Route path="edit-profile" element={<EditProfilePage />} />
             <Route path="messages" element={<MessagesSection />} />
             <Route path="search" element={<AdvancedSearch />} />
