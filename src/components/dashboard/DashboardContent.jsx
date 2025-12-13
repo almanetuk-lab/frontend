@@ -5,7 +5,7 @@ import StatCard from "../comman/StatCard";
 import MatchCard from "../comman/MatchCard";
 import ActivityItem from "../comman/ActivityItem";
 import QuickAction from "../comman/QuickAction";
-import SuggestedMatches from "../MatchSystem/SuggetionMatches"; 
+import SuggestedMatches from "../MatchSystem/SuggetionMatches";
 import { chatApi } from "../services/chatApi";
 import { getSuggestedMatches } from "../services/chatApi";
 
@@ -170,8 +170,7 @@ export default function DashboardHome({ profile }) {
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-2 truncate">
                 Welcome back,{" "}
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  {/* {profile?.full_name?.split(' ')[0] || profile?.name?.split(' ')[0] || 'User'}! */}
+                <span className="text-[#FF66CC]">
                   {profile?.first_name ||
                     profile?.last_name?.split(" ")[0] ||
                     profile?.name?.split(" ")[0] ||
@@ -459,7 +458,7 @@ export default function DashboardHome({ profile }) {
                         <span className="hidden sm:inline">View Profile</span>
                         <span className="sm:hidden">View</span>
                       </button>
-                      
+
                       <button
                         onClick={() => navigate("/dashboard/edit-profile")}
                         className="px-3 py-1 sm:px-3 sm:py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-all duration-200 font-medium text-xs sm:text-sm border border-blue-300 flex items-center gap-1 hover:shadow-md whitespace-nowrap"
@@ -510,14 +509,14 @@ export default function DashboardHome({ profile }) {
           {/* Right Column */}
           <div className="space-y-4 sm:space-y-6">
             {/* ✅ Use SuggestedMatches Component */}
-            <SuggestedMatches 
+            <SuggestedMatches
               suggestedMatches={suggestedMatches}
               loading={loading}
               error={error}
               onRetry={handleRetry}
               onViewAll={() => navigate("/dashboard/matches")}
             />
-            
+
             {/* Quick Actions */}
             <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 text-white">
               <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
@@ -536,23 +535,3 @@ export default function DashboardHome({ profile }) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

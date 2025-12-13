@@ -85,7 +85,7 @@ export default function Sidebar({
       >
         <div className="flex-shrink-0 p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-800 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            MingleHub
+            Intentional  <span className="text-[#FF66CC]"> Connetions </span>
           </h2>
           <p className="text-sm text-gray-500 mt-1">Find Your Perfect Match</p>
         </div>
