@@ -4,7 +4,7 @@ import { getSuggestedMatches } from "../services/chatApi";
 
 const SuggestedMatches = () => {
   const navigate = useNavigate();
-  
+
   // State
   const [suggestedMatches, setSuggestedMatches] = useState([]);
   const [loading, setLoading] = useState(false); // Start with false
@@ -12,7 +12,7 @@ const SuggestedMatches = () => {
 
   // Fetch matches on component mount
   useEffect(() => {
-    console.log("✅ Component mounted");
+    console.log(" Component mounted");
     fetchMatches();
   }, []);
 
@@ -21,36 +21,112 @@ const SuggestedMatches = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       console.log("🔄 Fetching matches...");
-      
+
       // API call
       const matches = await getSuggestedMatches();
       console.log("📦 Matches received from API:", matches);
       console.log("📊 Type of matches:", typeof matches);
       console.log("🔢 Is array?", Array.isArray(matches));
       console.log("🔢 Length:", matches?.length || 0);
-      
+
       if (matches && Array.isArray(matches)) {
-        console.log("✅ Setting matches to state:", matches.length);
+        console.log(" Setting matches to state:", matches.length);
         setSuggestedMatches(matches);
       } else {
-        console.warn("⚠️ Matches is not an array:", matches);
+        console.warn(" Matches is not an array:", matches);
         setSuggestedMatches([]);
       }
-      
     } catch (err) {
-      console.error("❌ Error in fetchMatches:", err);
+      console.error(" Error in fetchMatches:", err);
       setError(err.message || "Failed to load matches.");
     } finally {
       setLoading(false);
     }
   };
 
+  //  FIXED: View Profile Function with proper data passing
+  const handleViewProfile = (user) => {
+    console.log(" View Profile clicked for user:", user);
+
+    try {
+      // Ensure user data exists
+      if (!user) {
+        console.error(" No user data available");
+        navigate(`/dashboard/profile/${user?.user_id || user?.id}`);
+        return;
+      }
+
+      const userId = user.user_id || user.id;
+      const userName =
+        user.full_name ||
+        `${user.first_name || ""} ${user.last_name || ""}`.trim();
+
+      console.log("📤 Sending user data to profile page:", {
+        userId,
+        userName,
+        userData: user,
+      });
+
+      //  Navigate with COMPLETE user data
+      navigate(`/dashboard/profile/${userId}`, {
+        state: {
+          // Complete user object
+          userProfile: user,
+          // Individual fields for easy access
+          profileData: {
+            id: user.id,
+            user_id: user.user_id,
+            full_name: user.full_name,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            gender: user.gender,
+            age: user.age,
+            dob: user.dob,
+            marital_status: user.marital_status,
+            profession: user.profession,
+            company: user.company,
+            education: user.education,
+            city: user.city,
+            state: user.state,
+            country: user.country,
+            address: user.address,
+            image_url: user.image_url,
+            about: user.about,
+            headline: user.headline,
+            hobbies: user.hobbies || [],
+            interests: user.interests || [],
+            skills: user.skills || [],
+            experience: user.experience,
+            match_score: user.match_score,
+            phone: user.phone,
+            email: user.email,
+            is_active: user.is_active,
+            is_submitted: user.is_submitted,
+            created_at: user.created_at,
+            updated_at: user.updated_at,
+          },
+          // Metadata
+          from: "suggested_matches",
+          timestamp: new Date().toISOString(),
+          memberId: userId,
+          name: userName,
+        },
+      });
+
+      console.log(" Navigation successful with data");
+    } catch (error) {
+      console.error("❌ Navigation error:", error);
+      // Fallback navigation without data
+      navigate(`/dashboard/profile/${user?.user_id || user?.id}`);
+    }
+  };
+
   // Helper function to get full name
   const getFullName = (user) => {
     if (!user) return "User";
-    
+
     // API se yeh fields aa rahi hain: first_name, last_name, full_name
     if (user.full_name) return user.full_name;
     if (user.first_name && user.last_name) {
@@ -58,29 +134,28 @@ const SuggestedMatches = () => {
     }
     if (user.first_name) return user.first_name;
     if (user.last_name) return user.last_name;
-    
-    return `User ${user.user_id || user.id || ''}`;
+
+    return `User ${user.user_id || user.id || ""}`;
   };
 
   // Helper function to get location (SIRF CITY)
   const getLocation = (user) => {
     if (!user) return "Location not set";
-    
+
     // SIRF CITY return karna hai
     if (user.city) return user.city;
-    
+
     return "Location not set";
   };
 
   // Helper function to get profession
   const getProfession = (user) => {
     if (!user) return "Profession not set";
-    
+
     if (user.profession) return user.profession;
-    
+
     return "Profession not set";
   };
-
 
   // Handle connect button click
   // const handleConnect = async (user) => {
@@ -108,7 +183,7 @@ const SuggestedMatches = () => {
 
   // Debug: Log when state changes
   useEffect(() => {
-    console.log("🔄 State updated - suggestedMatches:", suggestedMatches);
+    console.log(" State updated - suggestedMatches:", suggestedMatches);
   }, [suggestedMatches]);
 
   return (
@@ -128,15 +203,13 @@ const SuggestedMatches = () => {
             <h3 className="text-xl font-bold text-gray-800">
               Suggested Matches
             </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              People you might like
-            </p>
+            <p className="text-sm text-gray-500 mt-1">People you might like</p>
           </div>
           <div className="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium">
             {suggestedMatches.length} matches
           </div>
         </div>
-        
+
         {/* Loading State */}
         {loading ? (
           <div className="space-y-4">
@@ -179,33 +252,33 @@ const SuggestedMatches = () => {
             </button>
           </div>
         ) : (
-          // ✅ SHOW MATCHES (SIRF 3 FIELDS)
+          //  SHOW MATCHES (SIRF 3 FIELDS)
           <div className="space-y-3">
             {suggestedMatches.slice(0, 5).map((user, index) => {
               const fullName = getFullName(user);
               const city = getLocation(user); // SIRF CITY
               const profession = getProfession(user);
-              
-              console.log(`User ${index}:`, { 
-                fullName, 
-                city, 
+
+              console.log(`User ${index}:`, {
+                fullName,
+                city,
                 profession,
-                userData: user 
+                userData: user,
               });
-              
+
               return (
                 <div
                   key={user.id || index}
                   className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 border border-gray-100"
                 >
                   {/* Profile Image */}
-                  <div 
+                  <div
                     className="relative mr-4 cursor-pointer"
                     onClick={() => handleUserClick(user)}
                   >
                     {user.image_url ? (
-                      <img 
-                        src={user.image_url} 
+                      <img
+                        src={user.image_url}
                         alt={fullName}
                         className="w-12 h-12 rounded-full object-cover border-2 border-white"
                       />
@@ -215,42 +288,62 @@ const SuggestedMatches = () => {
                       </div>
                     )}
                   </div>
-                  
                   {/* User Info - SIRF 3 FIELDS */}
-                  <div 
+                  <div
                     className="flex-1 cursor-pointer"
                     onClick={() => handleUserClick(user)}
                   >
                     <h4 className="font-semibold text-gray-800 text-lg">
                       {fullName}
                     </h4>
-                    
-                    <p className="text-gray-600 font-medium">
-                      {profession}
-                    </p>
-                    
+
+                    <p className="text-gray-600 font-medium">{profession}</p>
+
                     <div className="flex items-center text-gray-500 text-sm mt-1">
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
                       <span>{city}</span>
                     </div>
                   </div>
-                  
+
                   {/* Connect Button */}
-                  <button 
+
+                  <button
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
-                    onClick={() => handleConnect(user)}
+                    onClick={() => handleViewProfile(user)}
                   >
-                  Message
+                    View Profile
                   </button>
+
+                  {/* <button 
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
+                    onClick={() => handleViewProfile(user)}
+                  >
+                  View Profile
+                  </button> */}
                 </div>
               );
             })}
           </div>
         )}
-        
+
         {/* View All Button */}
         {!loading && !error && suggestedMatches.length > 0 && (
           <button
@@ -260,15 +353,25 @@ const SuggestedMatches = () => {
             View All Matches ({suggestedMatches.length})
           </button>
         )}
-        
+
         {/* Refresh Button */}
         <div className="text-center mt-4">
           <button
             onClick={fetchMatches}
             className="text-sm text-gray-500 hover:text-gray-700 flex items-center justify-center mx-auto"
           >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <svg
+              className="w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
             Refresh
           </button>
@@ -279,15 +382,6 @@ const SuggestedMatches = () => {
 };
 
 export default SuggestedMatches;
-
-
-
-
-
-
-
-
-
 
 // import React, { useState, useEffect } from 'react';
 // import { getSuggestedMatches } from '../services/chatApi';
@@ -309,12 +403,12 @@ export default SuggestedMatches;
 //       setLoading(true);
 //       setError(null);
 //       const response = await getSuggestedMatches();
-      
+
 //       console.log("API Response:", response); // Debugging
-      
+
 //       // Handle different API response structures
 //       let matchesArray = [];
-      
+
 //       // Case 1: Direct array
 //       if (Array.isArray(response)) {
 //         matchesArray = response;
@@ -332,9 +426,9 @@ export default SuggestedMatches;
 //           matchesArray = [response];
 //         }
 //       }
-      
+
 //       console.log("Matches Array:", matchesArray); // Debugging
-      
+
 //       // Process each user to ensure correct data structure
 //       const processedMatches = matchesArray.map(user => {
 //         // Extract full name
@@ -348,16 +442,16 @@ export default SuggestedMatches;
 //         } else {
 //           fullName = `User ${user.id || user.user_id || 'Unknown'}`;
 //         }
-        
+
 //         // Extract profession
 //         const profession = user.profession || user.job_title || user.designation || user.occupation || 'Profession not set';
-        
+
 //         // Extract city
 //         const city = user.city || user.location || user.current_city || user.address?.city || 'City not specified';
-        
+
 //         // Extract profile photo
 //         const profilePhoto = user.profilePhoto || user.profile_pic || user.avatar || user.profile_image || user.image_url || null;
-        
+
 //         return {
 //           id: user.id || user.user_id || Math.random().toString(),
 //           full_name: fullName,
@@ -368,15 +462,15 @@ export default SuggestedMatches;
 //           ...user
 //         };
 //       });
-      
+
 //       // Take only first 5 users
 //       const limitedMatches = processedMatches.slice(0, 5);
 //       setSuggestedMatches(limitedMatches);
-      
+
 //     } catch (err) {
 //       console.error('Error fetching matches:', err);
 //       setError('Failed to load matches. Please try again.');
-      
+
 //       // Fallback dummy data for testing
 //       setSuggestedMatches([
 //         {
@@ -457,16 +551,16 @@ export default SuggestedMatches;
 //         // User list
 //         <div className="space-y-4">
 //           {suggestedMatches.map((user) => (
-//             <div 
-//               key={user.id} 
+//             <div
+//               key={user.id}
 //               className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
 //               onClick={() => navigate(`/profile/${user.id}`)}
 //             >
 //               {/* Profile Image or Avatar */}
 //               <div className="relative flex-shrink-0 mr-3">
 //                 {user.profilePhoto ? (
-//                   <img 
-//                     src={user.profilePhoto} 
+//                   <img
+//                     src={user.profilePhoto}
 //                     alt={user.full_name}
 //                     className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
 //                     onError={(e) => {
@@ -475,18 +569,18 @@ export default SuggestedMatches;
 //                     }}
 //                   />
 //                 ) : null}
-                
+
 //                 {/* Fallback Avatar - Always show but hide if image loads */}
-//                 <div 
+//                 <div
 //                   className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${user.profilePhoto ? 'hidden' : 'block'}`}
-//                   style={{ 
-//                     backgroundColor: `hsl(${user.id.charCodeAt(0) * 10}, 70%, 50%)` 
+//                   style={{
+//                     backgroundColor: `hsl(${user.id.charCodeAt(0) * 10}, 70%, 50%)`
 //                   }}
 //                 >
 //                   {user.full_name.charAt(0).toUpperCase()}
 //                 </div>
 //               </div>
-              
+
 //               {/* User Information */}
 //               <div className="flex-1 min-w-0">
 //                 <h4 className="font-semibold text-gray-800 truncate">
@@ -496,23 +590,23 @@ export default SuggestedMatches;
 //                   {user.profession}
 //                 </p>
 //                 <p className="text-xs text-gray-500 flex items-center mt-1">
-//                   <svg 
-//                     className="w-3 h-3 mr-1" 
-//                     fill="currentColor" 
+//                   <svg
+//                     className="w-3 h-3 mr-1"
+//                     fill="currentColor"
 //                     viewBox="0 0 20 20"
 //                   >
-//                     <path 
-//                       fillRule="evenodd" 
-//                       d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" 
-//                       clipRule="evenodd" 
+//                     <path
+//                       fillRule="evenodd"
+//                       d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+//                       clipRule="evenodd"
 //                     />
 //                   </svg>
 //                   {user.city}
 //                 </p>
 //               </div>
-              
+
 //               {/* Connect Button */}
-//               <button 
+//               <button
 //                 className="flex-shrink-0 ml-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-full transition-colors shadow-sm"
 //                 onClick={(e) => {
 //                   e.stopPropagation(); // Prevent navigating to profile
@@ -529,7 +623,7 @@ export default SuggestedMatches;
 
 //       {/* View All Button */}
 //       {suggestedMatches.length > 0 && (
-//         <button 
+//         <button
 //           onClick={() => navigate("/dashboard/matches")}
 //           className="w-full mt-4 p-3 text-center text-blue-600 font-medium border-t border-gray-200 pt-4 hover:bg-gray-50 rounded-b-lg transition-colors"
 //         >

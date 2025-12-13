@@ -92,18 +92,36 @@ deleteMessage: async (messageId) => {
 };
 
 export const getCurrentUserId = () => {
-  return localStorage.getItem('userId') || '82'; 
+  let user = localStorage.getItem('currentUser') || '10';
+  let userId = JSON.parse(user).user_id;
+  return userId;
 };
 
 export const getSuggestedMatches = async () => {
   try {
-    const userId = getCurrentUserId(); 
+    const userId = getCurrentUserId();
     const response = await api.get(`/api/my_matches/${userId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching suggested matches:', error);
-    throw error; 
+    throw error;
   }
 };
+
+
+// export const getCurrentUserId = () => {
+//   return localStorage.getItem('userId') || '82'; 
+// };
+
+// export const getSuggestedMatches = async () => {
+//   try {
+//     const userId = getCurrentUserId(); 
+//     const response = await api.get(`/api/my_matches/${userId}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error fetching suggested matches:', error);
+//     throw error; 
+//   }
+// };
 
 export default api;
