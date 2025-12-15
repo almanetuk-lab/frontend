@@ -25,7 +25,7 @@ export default function AdvancedSearch() {
     lon: "",
   });
 
-  /* ⭐ SHRADDHA NEW CODE START — improved geolocation handling (alert removed earlier, now clean console logging) */
+  /* improved geolocation handling (alert removed earlier, now clean console logging) */
   const getLiveLocation = () => {
     if (!navigator.geolocation) {
       alert("Your browser does not support location access.");
@@ -44,17 +44,15 @@ export default function AdvancedSearch() {
       { enableHighAccuracy: true, maximumAge: 60000, timeout: 10000 }
     );
   };
-  /* ⭐ SHRADDHA NEW CODE END */
 
-  /* ⭐ SHRADDHA NEW CODE START — auto-detect GPS when switching to Near Me */
+  /*  — auto-detect GPS when switching to Near Me */
   useEffect(() => {
     if (activeTab === "nearme" && !filters.lat && !filters.lon) {
       getLiveLocation();
     }
   }, [activeTab]);
-  /* ⭐ SHRADDHA NEW CODE END */
 
-  /* ⭐ SHRADDHA NEW CODE START — new tab change logic resets age/state and radius properly */
+  /*  — new tab change logic resets age/state and radius properly */
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
 
@@ -80,9 +78,9 @@ export default function AdvancedSearch() {
       }));
     }
   };
-  /* ⭐ SHRADDHA NEW CODE END */
+  
 
-  /* ⭐ SHRADDHA NEW CODE START — improved number normalization */
+  /*  — improved number normalization */
   const handleInputChange = (field, value) => {
     const numFields = ["min_age", "max_age", "radius", "lat", "lon"];
     if (numFields.includes(field)) {
@@ -92,7 +90,6 @@ export default function AdvancedSearch() {
     }
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
-  /* ⭐ SHRADDHA NEW CODE END */
 
   const performSearch = async () => {
     setLoading(true);
@@ -101,15 +98,15 @@ export default function AdvancedSearch() {
     try {
       let searchParams = {};
 
-      /* ⭐ SHRADDHA NEW CODE START — input cleaner (trim all text safely) */
+      /*input cleaner (trim all text safely) */
       const cleanValue = (val) => {
         if (val === undefined || val === null) return "";
         if (typeof val === "string") return val.trim();
         return val;
       };
-      /* ⭐ SHRADDHA NEW CODE END */
+    
 
-      /* ⭐ SHRADDHA NEW CODE START — updated BASIC search param mapping */
+      /*  — updated BASIC search param mapping */
       if (activeTab === "basic") {
         searchParams = { search_mode: "basic" };
 
@@ -122,9 +119,9 @@ export default function AdvancedSearch() {
         if (filters.city)
           searchParams.city = cleanValue(filters.city);
       }
-      /* ⭐ SHRADDHA NEW CODE END */
 
-      /* ⭐ SHRADDHA NEW CODE START — updated ADVANCED mode mapping */
+
+      /* — updated ADVANCED mode mapping */
       if (activeTab === "advanced") {
         searchParams = {
           search_mode: "advanced",
@@ -141,9 +138,8 @@ export default function AdvancedSearch() {
           max_age: filters.max_age,
         };
       }
-      /* ⭐ SHRADDHA NEW CODE END */
 
-      /* ⭐ SHRADDHA NEW CODE START — updated NEAR ME (city override + radius fallback) */
+      /* — updated NEAR ME (city override + radius fallback) */
       if (activeTab === "nearme") {
         searchParams = {
           search_mode: "nearme",
@@ -153,9 +149,8 @@ export default function AdvancedSearch() {
           city: cleanValue(filters.city),
         };
       }
-      /* ⭐ SHRADDHA NEW CODE END */
 
-      /* ⭐ SHRADDHA NEW CODE START — smart param cleaning (keeps lat/lon always) */
+      /*  smart param cleaning (keeps lat/lon always) */
       const cleanParams = Object.fromEntries(
         Object.entries(searchParams).filter(([key, value]) => {
           if (key === "lat" || key === "lon") return true;
@@ -172,7 +167,6 @@ export default function AdvancedSearch() {
           );
         })
       );
-      /* ⭐ SHRADDHA NEW CODE END */
 
       console.log("Shraddha Final Params:", cleanParams);
 
