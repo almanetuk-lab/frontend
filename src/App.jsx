@@ -46,6 +46,19 @@ import { useState } from "react";
 import AdminAddNewPlan from "./components/pages/AdminAddNewPlan";
 import BlogPage from "./components/pages/BlogPage";
 
+
+import AdminBlog from "./components/pages/AdminBlog";
+import CreateArticle from "./components/pages/CreateArticle";
+
+import ArticleDetails from "./components/pages/ArticleDetails";
+
+import EditArticle from "./components/pages/EditArticle";
+
+import {ToastContainer} from "react-toastify";
+//import api from "../api/axiosConfig";
+
+
+
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("accessToken");
@@ -116,6 +129,12 @@ export default function App() {
 
         <Route path="/linkedin-callback" element={<LinkedInCallback />} />
 
+   <Route path="/admin/blogs/create" element={<CreateArticle />} />
+<Route path="/admin/blogs/edit/:id" element={<EditArticle />} />
+<Route path="/blogs/:id" element={<ArticleDetails />} />
+
+
+
         {/* Public Routes WITH Header & Footer */}
         <Route
           path="/"
@@ -125,6 +144,8 @@ export default function App() {
             </MainLayout>
           }
         />
+        
+
 
         <Route
           path="/login"
