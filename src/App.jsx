@@ -113,8 +113,9 @@ export default function App() {
           }
         />
 
-
+          {/* lindin callbackek route  */}
         <Route path="/linkedin-callback" element={<LinkedInCallback />} />
+        {/* <Route path="/linkedin-callback" element={<LinkedinCallback />} /> */}
 
         {/* Public Routes WITH Header & Footer */}
         <Route

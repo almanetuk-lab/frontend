@@ -19,19 +19,25 @@ const LinkedInCallback = () => {
         try {
           console.log('📨 LinkedIn callback received with code:', code);
           
-          // Backend API call
-          const response = await fetch(`/api/auth/linkedin/callback?code=${code}`);
+          const response = await fetch(`http://localhost:3435/linkedin/callback?code=${code}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          
           const data = await response.json();
+          console.log('Backend response:', data);
           
           if (data.success) {
-            // Save tokens & user data
             localStorage.setItem("accessToken", data.token);
+            localStorage.setItem("refreshToken", data.refreshToken);
             localStorage.setItem("currentUser", JSON.stringify(data.user));
             
             console.log('✅ LinkedIn login successful');
             navigate('/dashboard');
           } else {
-            throw new Error(data.message);
+            throw new Error(data.message || 'Login failed');
           }
         } catch (error) {
           console.error('❌ LinkedIn callback error:', error);
@@ -47,14 +53,58 @@ const LinkedInCallback = () => {
   }, [code, error, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-100 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto"></div>
-        <p className="mt-4 text-amber-700">Completing LinkedIn login...</p>
-        <p className="mt-2 text-sm text-amber-600">Please wait while we authenticate you</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-gray-700">Completing LinkedIn login...</p>
+        <p className="mt-2 text-sm text-gray-500">Please wait while we authenticate you</p>
       </div>
     </div>
   );
 };
 
 export default LinkedInCallback;
+
+
+
+
+
+
+
+
+
+
+
+// import { useEffect } from "react";
+// import { useSearchParams, useNavigate } from "react-router-dom";
+
+// export default function LinkedInCallback() {
+//   const [params] = useSearchParams();
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     const code = params.get("code");
+
+//     if (!code) return navigate("/login");
+
+//     fetch(`http://localhost:3435/api/auth/linkedin/callback?code=${code}`)
+//       .then(res => res.json())
+//       .then(data => {
+//         localStorage.setItem("accessToken", data.token);
+//         localStorage.setItem("refreshToken", data.refreshToken);
+//         localStorage.setItem("user", JSON.stringify(data.user));
+//         navigate("/dashboard");
+//       });
+//   }, []);
+
+//   return <p>Logging in...</p>;
+// }
+
+
+
+
+
+
+
+
+
