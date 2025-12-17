@@ -6,6 +6,7 @@ import FeatureCard from "../home/FeaturesCards";
 import Spotlight from "../home/Spotlight";
 import CTA from "../home/CTA";
 import Heroo from "../home/Heroo";
+import BlogPage from "../pages/BlogPage"
 
 // Use local images from public/images folder
 const cards = [
@@ -68,6 +69,7 @@ export default function Home() {
 
         {/* Spotlight */}
         <Spotlight img="/images/main.jpg" />
+        <BlogPage/>
 
         {/* Call-to-Action */}
         <CTA />

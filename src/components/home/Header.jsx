@@ -325,6 +325,16 @@ function Header() {
                   </Link>
                 </li>
 
+                  {/* <li>
+                  <Link
+                    to="/Blog"
+                    className="block py-2 px-4 text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Blog
+                  </Link>
+                </li> */}
+
                 {isLoggedIn && (
                   <>
                     <li>
@@ -364,6 +374,15 @@ function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Contact Us
+                  </Link>
+                </li>
+                  <li>
+                  <Link
+                    to="/Blog"
+                    className="block py-2 px-4 text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Blog
                   </Link>
                 </li>
               </ul>
@@ -408,6 +427,7 @@ function Header() {
                   >
                     Admin Login
                   </Link>
+                  
                   <Link
                     to="/login"
                     className="block py-3 px-4 text-center text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg border border-[#8F8DA5] transition-colors"

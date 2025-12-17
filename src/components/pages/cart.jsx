@@ -28,45 +28,25 @@ export default function Cart() {
   };
 
   const handleRemove = async (id) => {
-  try {
-    // ✅ YEH 4 LINES ADD KARO - LocalStorage update ke liye (API se PEHLE)
-    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const updatedCart = existingCart.filter((item) => item.id !== id);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    try {
+      // ✅ YEH 4 LINES ADD KARO - LocalStorage update ke liye (API se PEHLE)
+      const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const updatedCart = existingCart.filter((item) => item.id !== id);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
 
-    // ✅ Cart count update ke liye
-    window.dispatchEvent(new Event("storage"));
-    window.dispatchEvent(new Event("cartUpdated"));
+      // ✅ Cart count update ke liye
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("cartUpdated"));
 
-    // ✅ YEH LINE PEHLE SE HAI - State update
-    setCartItems(cartItems.filter((item) => item.id !== id));
+      // ✅ YEH LINE PEHLE SE HAI - State update
+      setCartItems(cartItems.filter((item) => item.id !== id));
 
-    // ✅ YEH LINE PEHLE SE HAI - API call
-    await removeFromCart(id);
-
-  } catch (err) {
-    console.error("Error removing item:", err);
-  }
-};
-
-
-
-
-    // const handleRemove = async (id) => {
-    //   try {
-    //     await removeFromCart(id);
-    //     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    //     const updatedCart = existingCart.filter((item) => item.id !== id);
-    //     localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-    //     window.dispatchEvent(new Event("storage"));
-    //     window.dispatchEvent(new Event("cartUpdated"));
-
-    //     setCartItems(cartItems.filter((item) => item.id !== id));
-    //   } catch (err) {
-    //     console.error("Error removing item:", err);
-    //   }
-    // };
+      // ✅ YEH LINE PEHLE SE HAI - API call
+      await removeFromCart(id);
+    } catch (err) {
+      console.error("Error removing item:", err);
+    }
+  };
 
   const handleBuy = async (item) => {
     console.log("Buying plan:", item);

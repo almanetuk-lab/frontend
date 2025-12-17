@@ -11,21 +11,24 @@ const BlogPage = () => {
   const fetchBlogs = async () => {
     // Fetch blogs from API (placeholder logic)
     const blogsData = await getAll();
+    console.log("Full API response:", blogsData);
+    console.log("blogsData.data:", blogsData?.data);
+    console.log("blogsData.data.articles:", blogsData?.data?.articles);
     setBlogs(blogsData.data.articles);
   };
 
   const getBlogById = async (id) => {
-      const blog = await getOne(id);
-      console.log("blog is = ",blog);
-  }
+    const blog = await getOne(id);
+    console.log("blog is = ", blog);
+  };
 
   // Blog posts data
   const blogPosts = [
     {
       id: 1,
-      title: "Mingle Hub - Finding Your Perfect Match",
+      title: "Intentional Connect - Finding Your Perfect Match",
       excerpt:
-        "Discover how Mingle Hub uses advanced algorithms to connect like-minded individuals and create meaningful relationships.",
+        "Discover how Intentional Connect uses advanced algorithms to connect like-minded individuals and create meaningful relationships.",
       image:
         "https://images.unsplash.com/photo-1519143226970-1d2d783d1e5c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGRhdGluZ3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
       date: "Dec 15, 2024",
@@ -58,7 +61,7 @@ const BlogPage = () => {
       id: 4,
       title: "Safety First: Our Commitment to User Security",
       excerpt:
-        "How Mingle Hub ensures a safe and secure environment for all our users to connect and interact.",
+        "How Intentional Connect ensures a safe and secure environment for all our users to connect and interact.",
       image:
         "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2VjdXJpdHl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60",
       date: "Nov 28, 2024",
@@ -90,10 +93,10 @@ const BlogPage = () => {
   ];
 
   // About Mingle Hub section
-  const aboutMingleHub = {
-    title: "About Mingle Hub",
+  const aboutIntentionalConnect = {
+    title: "About Intentional Connect",
     description:
-      "Mingle Hub is a revolutionary dating and social connection platform designed to help people find meaningful relationships through advanced matching algorithms, secure communication channels, and a user-friendly interface.",
+      "Intentional Connect is a revolutionary dating and social connection platform designed to help people find meaningful relationships through advanced matching algorithms, secure communication channels, and a user-friendly interface.",
     features: [
       "Advanced AI-Powered Matching",
       "Secure Video & Audio Calls",
@@ -115,7 +118,7 @@ const BlogPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Hero Section - Clean Design */}
-      <section className="bg-white text-gray-800 py-16 border-b">
+      {/* <section className="bg-white text-gray-800 py-16 border-b">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
             Mingle Hub Blog
@@ -131,24 +134,23 @@ const BlogPage = () => {
             />
           </div>
         </div>
-      </section>
-
+      </section> */}
       {/* About Mingle Hub Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                {aboutMingleHub.title}
+                {aboutIntentionalConnect.title}
               </h2>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                {aboutMingleHub.description}
+                {aboutIntentionalConnect.description}
               </p>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-              {aboutMingleHub.stats.map((stat, index) => (
+              {aboutIntentionalConnect.stats.map((stat, index) => (
                 <div
                   key={index}
                   className="text-center p-6 bg-amber-50 rounded-lg border border-amber-100"
@@ -162,7 +164,7 @@ const BlogPage = () => {
             </div>
 
             {/* Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {aboutMingleHub.features.map((feature, index) => (
                 <div
                   key={index}
@@ -172,7 +174,7 @@ const BlogPage = () => {
                   <span className="text-gray-700 font-medium">{feature}</span>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
@@ -240,9 +242,11 @@ const BlogPage = () => {
                       </p>
 
                       {/* Read More Button - AMBER COLOR */}
-                      <button className="w-full py-3 bg-amber-500 text-white rounded-lg font-semibold
+                      <button
+                        className="w-full py-3 bg-amber-500 text-white rounded-lg font-semibold
                        hover:bg-amber-600 transition-all duration-300 transform hover:scale-105"
-                       onClick={() => getBlogById(post.id)}>
+                        onClick={() => getBlogById(post.id)}
+                      >
                         Read More
                       </button>
                     </div>
@@ -250,45 +254,6 @@ const BlogPage = () => {
                 ))
               : null}
           </div>
-        </div>
-      </section>
-
-      {/* Newsletter Section - Clean Design with Amber Button */}
-      <section className="py-16 bg-white border-t">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800">
-            Stay Updated with Mingle Hub
-          </h2>
-          <p className="text-xl mb-8 text-gray-600 max-w-2xl mx-auto">
-            Subscribe to our newsletter and never miss updates, tips, and
-            success stories.
-          </p>
-          <div className="max-w-md mx-auto flex gap-4">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-            />
-            <button className="px-6 py-3 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 transition-colors">
-              Subscribe
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA Section - Like in your image */}
-      <section className="py-16 bg-gradient-to-r from-amber-500 to-amber-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Join MingleHub?
-          </h2>
-          <p className="text-xl mb-8 opacity-95 max-w-2xl mx-auto">
-            Start connecting today with like-minded people and explore new
-            friendships!
-          </p>
-          <button className="px-8 py-4 bg-white text-amber-600 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg">
-            Join Free Today
-          </button>
         </div>
       </section>
     </div>

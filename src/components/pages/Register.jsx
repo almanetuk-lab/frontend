@@ -88,7 +88,7 @@ export default function Register() {
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
         <h2 className="text-3xl font-bold text-orange-700 mb-2">Register  ✨</h2>
         <p className="text-sm text-gray-600 mb-6">
-          Join MingleHub and start your journey today
+          Join Intentional Connections and start your journey today
         </p>
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -133,7 +133,19 @@ export default function Register() {
             />
           </div>
 
+         
           <div>
+            <label className="block text-sm text-gray-700">Profession</label>
+            <input
+              type="text"
+              name="profession"
+              placeholder="EX:Software Engineer"
+              value={form.profession}
+              onChange={handleChange}
+              className="block w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-orange-400 outline-none"
+            />
+          </div>
+           <div>
             <label className="block text-sm text-gray-700">Password</label>
             <input
               type="password"
@@ -146,20 +158,10 @@ export default function Register() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm text-gray-700">Profession</label>
-            <input
-              type="text"
-              name="profession"
-              placeholder=""
-              value={form.profession}
-              onChange={handleChange}
-              className="block w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-orange-400 outline-none"
-            />
-          </div>
 
           <button
             type="submit"
+        
             disabled={loading}
             className={`w-full py-2.5 mt-2 font-semibold text-white rounded-md shadow-md transition ${
               loading ? "bg-gray-400 cursor-not-allowed" : "bg-amber-600 hover:bg-amber-700"
