@@ -69,52 +69,33 @@ export default function UserPlans() {
     loadPlans();
   }, []);
 
-const addToCart = async (plan) => {
-  try {
+  const addToCart = async (plan) => {
+    try {
+      const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    
-    const existingItem = existingCart.find(item => item.id === plan.id);
-    
-    if (!existingItem) {
-      const cartItem = {
-        id: plan.id,
-        name: plan.name,
-        plan: plan,
-        price: plan.price,
-      };
-      existingCart.push(cartItem);
-      localStorage.setItem("cart", JSON.stringify(existingCart));
+      const existingItem = existingCart.find((item) => item.id === plan.id);
 
-      window.dispatchEvent(new Event("storage"));
-      window.dispatchEvent(new Event("cartUpdated"));
+      if (!existingItem) {
+        const cartItem = {
+          id: plan.id,
+          name: plan.name,
+          plan: plan,
+          price: plan.price,
+        };
+        existingCart.push(cartItem);
+        localStorage.setItem("cart", JSON.stringify(existingCart));
+
+        window.dispatchEvent(new Event("storage"));
+        window.dispatchEvent(new Event("cartUpdated"));
+      }
+
+      await addToCartAPI(plan.id, 1);
+
+      alert("Plan added to cart!");
+    } catch (err) {
+      console.log("Error adding to cart:", err.message);
     }
-
-    await addToCartAPI(plan.id, 1);
-
-    alert("Plan added to cart!");
-    
-  }
-   catch (err) {
-    console.log("Error adding to cart:", err.message);
-  }
-};
-
-
-
-
-//   main old code 
-
-//   const addToCart = async (plan) => {
-//       try {
-
-//           await addToCartAPI(plan.id, 1);
-
-//           alert("Plan added to cart!");
-//       } catch (err) {
-//           console.log("Error adding to cart:", err.message);
-//       }
-//   };
+  };
 
   const handleBuy = async (plan) => {
     console.log("Buying plan:", plan);
