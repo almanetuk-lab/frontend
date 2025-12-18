@@ -54,6 +54,8 @@ import ArticleDetails from "./components/pages/ArticleDetails";
 import EditArticle from "./components/pages/EditArticle";
 
 import { ToastContainer } from "react-toastify";
+// profile view recent activity
+import ProfileViews from "./components/pages/ProfileViews";
 //import api from "../api/axiosConfig";
 
 // Protected Route Component (For regular users)
@@ -317,6 +319,17 @@ export default function App() {
             <MainLayout>
               <UserProtectedRoute>
                 <MembersPage />
+              </UserProtectedRoute>
+            </MainLayout>
+          }
+        />
+
+          <Route
+          path="/profile-views"
+          element={
+            <MainLayout>
+              <UserProtectedRoute>
+                <ProfileViews />
               </UserProtectedRoute>
             </MainLayout>
           }
