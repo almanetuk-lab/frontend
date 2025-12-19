@@ -99,7 +99,7 @@ export default function UserDashboard() {
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition"
             >
-              <span className="text-xl">☰</span>
+              <span className="text-xl text-black">☰</span>
             </button>
             <h1 className="text-lg font-semibold text-gray-800 capitalize">
               {activeSection.replace("-", " ")}
