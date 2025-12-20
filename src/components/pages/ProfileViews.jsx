@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { recentApi } from "../services/chatApi";
+import profileViewApi from "../services/profileViewApi";
 
 const ProfileViews = () => {
   const location = useLocation();
@@ -39,7 +39,7 @@ const ProfileViews = () => {
     try {
       setLoading(true);
 
-      const dashboardData = await recentApi.getDashboardSummary(userId);
+      const dashboardData = await profileViewApi.getDashboardSummary(userId);
 
       setAllViewers(dashboardData.recent_viewers || []);
       setStats({
@@ -56,7 +56,7 @@ const ProfileViews = () => {
 
       // Fallback
       try {
-        const viewersResponse = await recentApi.getRecentViewers(userId);
+        const viewersResponse = profileViewApi.getRecentViewers(userId);
 
         if (viewersResponse.newViewers) {
           setAllViewers(viewersResponse.newViewers);

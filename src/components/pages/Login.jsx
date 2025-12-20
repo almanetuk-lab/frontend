@@ -26,9 +26,9 @@ export default function Login() {
       localStorage.setItem("accessToken", token);
       if (refresh) localStorage.setItem("refreshToken", refresh);
       
-      // ✅ FIXED: Save user data to localStorage for chat module
+      //  FIXED: Save user data to localStorage for chat module
       if (user) {
-        console.log("✅ Login successful, updating profile context");
+        console.log(" Login successful, updating profile context");
         updateProfile(user);
         
         //  YEH LINE ADD KI HAI - Chat module ke liye
@@ -41,7 +41,7 @@ export default function Login() {
         refreshProfile();
       }, 500);
 
-      alert("Login successful!");
+      // alert("Login successful!");
       navigate("/dashboard");
     } catch (err) {
       console.error("Login error:", err);
@@ -98,7 +98,7 @@ const handleLinkedInLogin = async () => {
 
 
 
-  // ✅ Agar user already logged in hai to directly dashboard redirect karo
+  //  Agar user already logged in hai to directly dashboard redirect karo
   React.useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
@@ -215,7 +215,7 @@ const handleLinkedInLogin = async () => {
   );
 }
 
-// ✅ Alag Logout Component for Header/Other pages
+//  Alag Logout Component for Header/Other pages
 export function LogoutButton() {
   const { clearProfile } = useUserProfile();
   const navigate = useNavigate();
@@ -226,7 +226,7 @@ export function LogoutButton() {
     // Clear authentication only, keep profile data
     clearProfile();
     
-    // ✅ FIXED: Also remove chat user data from localStorage
+    //  FIXED: Also remove chat user data from localStorage
     localStorage.removeItem("currentUser");
     
     alert("Logged out successfully!");

@@ -1,7 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useUserProfile } from "../context/UseProfileContext";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { adminAPI } from "../services/adminApi";
+import profileViewApi from "../services/profileViewApi";
+
+
+
+
 
 export default function ProfilePage() {
   const { profile: currentUserProfile } = useUserProfile();
@@ -11,45 +16,48 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
-  
-useEffect(() => {
-  console.log("=== PROFILE PAGE DEBUG ===");
-  
-  const checkCurrentUser = () => {
-    if (!userId) return true;
-    const myId = currentUserProfile?.id || currentUserProfile?.user_id;
-    // loose equality (==) use karein kyunki ek string ho sakta hai aur ek number
-    return myId == userId;
-  };
-  
-  const isOwnProfile = checkCurrentUser();
+  const hasTrackedRef = useRef(false);
+
+  useEffect(() => {
+  if (!currentUserProfile) return;
+
+  const myId = currentUserProfile?.id || currentUserProfile?.user_id;
+  const viewedId = userId; // URL se aa raha hai
+
+  // ---------- SELF PROFILE CHECK ----------
+  const isOwnProfile = !viewedId || myId == viewedId;
   setIsCurrentUser(isOwnProfile);
 
-  // --- TRACKING LOGIC ---
-  // Agar ye meri profile nahi hai, toh view record karo
-  if (!isOwnProfile && userId) {
-    const trackView = async () => {
-      try {
-        console.log("🚀 Recording NEW view for User:", userId);
-        const res = await recentApi.trackProfileView(userId);
-        console.log("✅ Tracking Response:", res); // Check karein message "Data inserted" aa raha hai?
-      } catch (err) {
-        console.error("❌ Tracking failed:", err);
-      }
-    };
-    trackView();
-  }
-  // ----------------------
+  // ---------- TRACK PROFILE VIEW (ONLY ONCE) ----------
+  if (
+    !isOwnProfile &&
+    viewedId &&
+    !hasTrackedRef.current
+  ) {
+    hasTrackedRef.current = true; // 🔒 LOCK
 
-  // Case 1: State se data load karna
+    (async () => {
+      try {
+        console.log("🚀 Tracking profile view:", viewedId);
+        await profileViewApi.trackProfileView(viewedId);
+        console.log("✅ Profile view tracked");
+      } catch (err) {
+        console.error("❌ Profile view tracking failed:", err);
+      }
+    })();
+  }
+
+  // ---------- DATA LOADING LOGIC (UNCHANGED) ----------
+
+  // CASE 1: Data already passed via state (Member / Matches / Profile list)
   if (location.state?.userProfile) {
     setDisplayProfile(location.state.userProfile);
     setLoading(false);
     return;
   }
-  
-  // Case 2: Apni profile (No ID in URL)
-  if (!userId) {
+
+  // CASE 2: Own profile
+  if (!viewedId) {
     if (currentUserProfile) {
       setDisplayProfile(currentUserProfile);
       setLoading(false);
@@ -59,44 +67,50 @@ useEffect(() => {
     return;
   }
 
-  // Case 3: Other user (Fetch from API)
-  fetchUserData(userId);
-  
+  // CASE 3: Other user (direct URL)
+  fetchUserData(viewedId);
+
 }, [userId, location.state, currentUserProfile]);
 
+  
 // useEffect(() => {
 //   console.log("=== PROFILE PAGE DEBUG ===");
-//   console.log("URL userId parameter:", userId);
-//   console.log("Location state:", location.state);
-//   console.log("Location keys:", Object.keys(location.state || {}));
   
-//   // Check if this is current user's profile
 //   const checkCurrentUser = () => {
-//     if (!userId) {
-//       return true;
-//     }
-    
-//     const currentUserId = currentUserProfile?.id || currentUserProfile?.user_id;
-//     return currentUserId == userId;
+//     if (!userId) return true;
+//     const myId = currentUserProfile?.id || currentUserProfile?.user_id;
+//     // loose equality (==) use karein kyunki ek string ho sakta hai aur ek number
+//     return myId == userId;
 //   };
   
 //   const isOwnProfile = checkCurrentUser();
 //   setIsCurrentUser(isOwnProfile);
-  
-//   //  CASE 1: ANY page से आया data (MemberPage, Profile Views, Matches)
+
+//   // --- TRACKING LOGIC ---
+//   // Agar ye meri profile nahi hai, toh view record karo
+//   if (!isOwnProfile && userId) {
+//     const trackView = async () => {
+//       try {
+//         console.log("🚀 Recording NEW view for User:", userId);
+//         const res = await recentApi.trackProfileView(userId);
+//         console.log("✅ Tracking Response:", res); // Check karein message "Data inserted" aa raha hai?
+//       } catch (err) {
+//         console.error("❌ Tracking failed:", err);
+//       }
+//     };
+//     trackView();
+//   }
+//   // ----------------------
+
+//   // Case 1: State se data load karna
 //   if (location.state?.userProfile) {
-//     console.log(" LOADING FROM STATE - userProfile found");
-//     console.log("From:", location.state?.from || "unknown");
-//     console.log("Profile user_id:", location.state.userProfile.user_id);
-    
 //     setDisplayProfile(location.state.userProfile);
 //     setLoading(false);
-//     return; //  IMPORTANT: Stop here
+//     return;
 //   }
   
-//   //  CASE 2: Current user profile (no userId in URL)
+//   // Case 2: Apni profile (No ID in URL)
 //   if (!userId) {
-//     console.log(" LOADING CURRENT USER PROFILE");
 //     if (currentUserProfile) {
 //       setDisplayProfile(currentUserProfile);
 //       setLoading(false);
@@ -105,57 +119,12 @@ useEffect(() => {
 //     }
 //     return;
 //   }
-  
-//   //  CASE 3: Other user profile (direct URL - fetch from API)
-//   console.log(" LOADING OTHER USER PROFILE FROM API");
+
+//   // Case 3: Other user (Fetch from API)
 //   fetchUserData(userId);
   
 // }, [userId, location.state, currentUserProfile]);
 
-
-  // useEffect(() => {
-  //   console.log("=== PROFILE PAGE LOADING ===");
-  //   console.log("URL userId parameter:", userId);
-  //   console.log("Current User Profile:", currentUserProfile?.email);
-    
-  //   // Check if this is current user's profile
-  //   const checkCurrentUser = () => {
-  //     if (!userId) {
-  //       // No userId in URL = current user profile
-  //       return true;
-  //     }
-      
-  //     const currentUserId = currentUserProfile?.id || currentUserProfile?.user_id;
-  //     return currentUserId == userId;
-  //   };
-    
-  //   const isOwnProfile = checkCurrentUser();
-  //   setIsCurrentUser(isOwnProfile);
-  //   console.log("Is current user?", isOwnProfile);
-    
-  //   // ✅ CASE 1: Current user profile (no userId in URL)
-  //   if (!userId) {
-  //     console.log("✅ LOADING CURRENT USER PROFILE");
-  //     if (currentUserProfile) {
-  //       setDisplayProfile(currentUserProfile);
-  //       setLoading(false);
-  //     } else {
-  //       // Fetch current user data
-  //       fetchCurrentUserData();
-  //     }
-  //   }
-  //   // ✅ CASE 2: Other user profile from MemberPage
-  //   else if (location.state?.userProfile) {
-  //     console.log("✅ LOADING OTHER USER PROFILE FROM MEMBER PAGE");
-  //     setDisplayProfile(location.state.userProfile);
-  //     setLoading(false);
-  //   }
-  //   // ✅ CASE 3: Other user profile (direct URL)
-  //   else {
-  //     console.log("✅ LOADING OTHER USER PROFILE FROM API");
-  //     fetchUserData(userId);
-  //   }
-  // }, [userId, location.state, currentUserProfile]);
 
   const fetchCurrentUserData = async () => {
     try {

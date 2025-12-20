@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSuggestedMatches } from "../services/chatApi";
+// import { chatApi } from "../services/chatApi";
+import ProfileViews from "../pages/ProfileViews";
+
 
 export default function MatchesPage() {
   const navigate = useNavigate();
@@ -237,7 +240,7 @@ export default function MatchesPage() {
   };
 
   //  FIXED: View Profile Function with proper data passing
-  const handleViewProfile = (user) => {
+  const handleViewProfile = async (user) => {  // ✅ async add kiya
     console.log("🎯 View Profile clicked for user:", user);
 
     try {
@@ -259,7 +262,19 @@ export default function MatchesPage() {
         userData: user,
       });
 
-      //  Navigate with COMPLETE user data
+      // // ✅ 1. FIRST: Track profile view API call - ADDED
+      // console.log('🚀 Calling profile view API for user ID:', userId);
+      // try {
+      //   // Import recentApi karna hoga agar nahi hai to top mein
+      //   // import { recentApi } from '../services/api'; 
+      //   const apiResponse = await ProfileViews.trackProfileView(userId);
+      //   console.log('✅ Profile view API success:', apiResponse);
+      // } catch (apiError) {
+      //   console.warn('⚠️ Profile view API failed, but continuing navigation:', apiError);
+      //   // API fail hone par bhi navigation continue rahega
+      // }
+
+      // ✅ 2. Navigate with COMPLETE user data
       navigate(`/dashboard/profile/${userId}`, {
         state: {
           // Complete user object
@@ -313,15 +328,88 @@ export default function MatchesPage() {
     }
   };
 
-  // const handleViewProfile = (userId) => {
-  //   console.log("View profile clicked for user:", userId);
-  //   navigate(`/profile/${userId}`);
+
+
+
+  //  FIXED: View Profile Function with proper data passing
+  // const handleViewProfile = (user) => {
+  //   console.log("🎯 View Profile clicked for user:", user);
+
+  //   try {
+  //     // Ensure user data exists
+  //     if (!user) {
+  //       console.error("❌ No user data available");
+  //       navigate(`/dashboard/profile/${user?.user_id || user?.id}`);
+  //       return;
+  //     }
+
+  //     const userId = user.user_id || user.id;
+  //     const userName =
+  //       user.full_name ||
+  //       `${user.first_name || ""} ${user.last_name || ""}`.trim();
+
+  //     console.log("📤 Sending user data to profile page:", {
+  //       userId,
+  //       userName,
+  //       userData: user,
+  //     });
+
+  
+
+  //     //  Navigate with COMPLETE user data
+  //     navigate(`/dashboard/profile/${userId}`, {
+  //       state: {
+  //         // Complete user object
+  //         userProfile: user,
+  //         // Individual fields for easy access
+  //         profileData: {
+  //           id: user.id,
+  //           user_id: user.user_id,
+  //           full_name: user.full_name,
+  //           first_name: user.first_name,
+  //           last_name: user.last_name,
+  //           gender: user.gender,
+  //           age: user.age,
+  //           dob: user.dob,
+  //           marital_status: user.marital_status,
+  //           profession: user.profession,
+  //           company: user.company,
+  //           education: user.education,
+  //           city: user.city,
+  //           state: user.state,
+  //           country: user.country,
+  //           address: user.address,
+  //           image_url: user.image_url,
+  //           about: user.about,
+  //           headline: user.headline,
+  //           hobbies: user.hobbies || [],
+  //           interests: user.interests || [],
+  //           skills: user.skills || [],
+  //           experience: user.experience,
+  //           match_score: user.match_score,
+  //           phone: user.phone,
+  //           email: user.email,
+  //           is_active: user.is_active,
+  //           is_submitted: user.is_submitted,
+  //           created_at: user.created_at,
+  //           updated_at: user.updated_at,
+  //         },
+  //         // Metadata
+  //         from: "suggested_matches",
+  //         timestamp: new Date().toISOString(),
+  //         memberId: userId,
+  //         name: userName,
+  //       },
+  //     });
+
+  //     console.log("Navigation successful with data");
+  //   } catch (error) {
+  //     console.error("❌ Navigation error:", error);
+  //     // Fallback navigation without data
+  //     navigate(`/dashboard/profile/${user?.user_id || user?.id}`);
+  //   }
   // };
 
-  // const handleSendMessage = (userId) => {
-  //   console.log("Send message clicked for user:", userId);
-  //   navigate(`/chat/${userId}`);
-  // };
 
   //  **API DATA से Stats calculation - FIXED**
   const totalMatches = matches.length;
