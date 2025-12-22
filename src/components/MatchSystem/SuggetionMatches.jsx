@@ -157,16 +157,6 @@ const SuggestedMatches = () => {
     return "Profession not set";
   };
 
-  // Handle connect button click
-  // const handleConnect = async (user) => {
-  //   try {
-  //     console.log("Connecting with:", user.full_name);
-  //     // Your connection logic here
-  //     alert(`Connected with ${getFullName(user)}`);
-  //   } catch (err) {
-  //     console.error("Connection failed:", err);
-  //   }
-  // };
 
   // Handle view all
   const handleViewAll = () => {
@@ -189,14 +179,7 @@ const SuggestedMatches = () => {
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
-        {/* Debug Info */}
-        {/* <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-xs">
-          <div className="font-semibold mb-1">Debug Info: ik</div>
-          <div>Loading: {loading ? "Yes" : "No"}</div>
-          <div>Error: {error || "None"}</div>
-          <div>Matches in state: {suggestedMatches.length}</div>
-          <div>First match: {suggestedMatches[0] ? getFullName(suggestedMatches[0]) : "None"}</div>
-        </div> */}
+   
 
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -205,9 +188,9 @@ const SuggestedMatches = () => {
             </h3>
             <p className="text-sm text-gray-500 mt-1">People you might like</p>
           </div>
-          <div className="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium">
+          {/* <div className="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium">
             {suggestedMatches.length} matches
-          </div>
+          </div> */}
         </div>
 
         {/* Loading State */}
