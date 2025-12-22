@@ -44,13 +44,56 @@ const profileViewApi = {
     }
   },
 
-  //  DASHBOARD SUMMARY
+  // profileViewApi.js me yeh function add/update karein:
 
+// // CORRECT unread messages API
+// getUnreadMessagesCount: async (userId, profileId = null) => {
+//   try {
+//     // Agar profileId nahi hai toh default lelo
+//     const actualProfileId = profileId || userId; // Ya logic ke hisaab se
+    
+//     const response = await api.get(
+//       `/api/view/${userId}/${actualProfileId}/unreadMessages`
+//     );
+    
+//     console.log("📩 Unread messages API response:", response.data);
+//     return response.data?.unreadCount || 0;
+//   } catch (error) {
+//     console.error("❌ Error fetching unread messages count:", error);
+//     return 0;
+//   }
+// },
+
+// getUnreadMessagesCount: async (userId) => {
+//   try {
+//     const response = await api.get(`/api/view/${userId}/unreadMessages`); // Single parameter
+//     return response.data?.unreadCount || 0;
+//   } catch (error) {
+//     console.error("❌ Error:", error);
+//     return 0;
+//   }
+// },
+
+//   //  GET UNREAD MESSAGES COUNT
+// getUnreadMessagesCount: async (userId) => {
+//   try {
+//     const response = await api.get(
+//       `/api/view/${userId}/unreadMessages`
+//     );
+//     return response.data?.unreadCount || 0;
+//   } catch (error) {
+//     console.error("❌ Error fetching unread messages count:", error);
+//     return 0;
+//   }
+// },
+
+  //  DASHBOARD SUMMARY
   getDashboardSummary: async (userId) => {
     try {
       const [viewersData, profileData] = await Promise.all([
         profileViewApi.getRecentViewers(userId),
         profileViewApi.getUserProfile(userId),
+      // profileViewApi.getUnreadMessagesCount(userId, userId)
       ]);
 
       const today = new Date().toDateString();
@@ -73,7 +116,7 @@ const profileViewApi = {
 
         matches_count: 10,
         connections_count: 0,
-        messages_count: 12,
+        messages_count:0,
       };
     } catch (error) {
       console.error("❌ Dashboard summary error:", error);
@@ -82,9 +125,13 @@ const profileViewApi = {
         recent_viewers: [],
         today_viewers: 0,
         user_profile: {},
+      //  messages_count: 0,
       };
     }
   },
 };
+
+
+
 
 export default profileViewApi;

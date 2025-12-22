@@ -26,7 +26,20 @@ export default function DashboardHome({ profile }) {
   const [totalViewers, setTotalViewers] = useState(0);
   const [matchesCount, setMatchesCount] = useState(24);
   const [connectionsCount, setConnectionsCount] = useState(56);
-  const [messagesCount, setMessagesCount] = useState(12);
+  const [messagesCount, setMessagesCount] = useState();
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+
+  // // Alag se function banayein messages count fetch karne ke liye
+  // const fetchUnreadMessages = async () => {
+  //   try {
+  //     const count = await profileViewApi.getUnreadMessagesCount(userId, userId);
+  //     setUnreadMessagesCount(count);
+  //     console.log("📩 Unread messages count:", count);
+  //   } catch (error) {
+  //     console.error("Failed to fetch unread messages:", error);
+  //     setUnreadMessagesCount(0);
+  //   }
+  // };
 
   // Get user ID
   const getUserId = () => {
@@ -50,7 +63,7 @@ export default function DashboardHome({ profile }) {
     try {
       setLoading(true);
       const dashboardSummary = await profileViewApi.getDashboardSummary(userId);
-
+      // profileViewApi.getUnreadMessagesCount(userId),
       setProfileViews(dashboardSummary.profile_views || 0);
       setRecentViewers(dashboardSummary.recent_viewers || []);
       setTotalViewers(dashboardSummary.today_viewers || 0);
@@ -108,9 +121,13 @@ export default function DashboardHome({ profile }) {
   useEffect(() => {
     if (userId && userId !== "null") {
       fetchDashboardData();
+      // fetchUnreadMessages();
 
       // Refresh every 30 seconds
-      const interval = setInterval(fetchDashboardData, 30000);
+      const interval = setInterval(() => {
+        fetchDashboardData();
+        // fetchUnreadMessages();
+      }, 30000);
       return () => clearInterval(interval);
     }
   }, [userId]);
@@ -575,9 +592,7 @@ export default function DashboardHome({ profile }) {
                     trend="+12%"
                   />
                 </div>
-                <div 
-                 onClick={() => navigate("/dashboard/matches")}>
-                
+                <div onClick={() => navigate("/dashboard/matches")}>
                   <StatCard
                     label="Matches"
                     value={loading ? "..." : matchesCount.toString()}
@@ -591,13 +606,21 @@ export default function DashboardHome({ profile }) {
                     trend="+8%"
                   />
                 </div>
-                <div>
+                {/* <StatCard
+                  label="Messages"
+                  value={loading ? "..." :UnreadMessagesCount.toString()}
+                  trend="+3%"
+                  onClick={() => navigate("/dashboard/messages")} // Optional: Click pe messages page pe jaaye
+                /> */}
+                
+                 <div>
                   <StatCard
                     label="Messages"
                     value={loading ? "..." : messagesCount.toString()}
                     trend="+3%"
                   />
-                </div>
+                </div> 
+
               </div>
             </div>
 
@@ -616,7 +639,9 @@ export default function DashboardHome({ profile }) {
                     icon="👀"
                     text={`Your profile was viewed by ${
                       loading ? "..." : profileViews
-                    } ${profileViews === 1 ? "person" : "people"} in Last 90 Days`}
+                    } ${
+                      profileViews === 1 ? "person" : "people"
+                    } in Last 90 Days`}
                     time={
                       loading
                         ? "Loading..."

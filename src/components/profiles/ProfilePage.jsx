@@ -6,8 +6,6 @@ import profileViewApi from "../services/profileViewApi";
 
 
 
-
-
 export default function ProfilePage() {
   const { profile: currentUserProfile } = useUserProfile();
   const [displayProfile, setDisplayProfile] = useState(null);
