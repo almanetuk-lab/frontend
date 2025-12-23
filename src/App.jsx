@@ -58,6 +58,9 @@ import { ToastContainer } from "react-toastify";
 import ProfileViews from "./components/pages/ProfileViews";
 //import api from "../api/axiosConfig";
 
+// import About from './componets/pages/AboutPage.jsx';
+import About from "./components/pages/AboutPage";
+
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("accessToken");
@@ -261,12 +264,24 @@ export default function App() {
           path="/contact"
           element={
             <MainLayout>
-              <UserProtectedRoute>
+              {/* <UserProtectedRoute> */}
                 <Contact />
-              </UserProtectedRoute>
+              {/* </UserProtectedRoute> */}
             </MainLayout>
           }
         />
+
+            <Route
+          path="/about"
+          element={
+            <MainLayout>
+              {/* <UserProtectedRoute> */}
+                <About/>
+              {/* </UserProtectedRoute> */}
+            </MainLayout>
+          }
+        />
+        
 
         <Route
           path="/blog"

@@ -79,6 +79,13 @@ export const adminAPI = {
   markNotificationAsRead: (notificationId) => 
     api.put(`/api/notifications/read/${notificationId}`),
 
+
+  getMemberApproval: () =>
+  api.get('/api/settings/get-member-approval'),
+
+// 🔥 UPDATE MEMBER APPROVAL SETTING
+updateMemberApproval: (data) =>
+  api.put('/api/settings/update-member-approval', data),
 };
 
 export default api;
