@@ -5,7 +5,7 @@ import AOS from "aos";
 import { FaLinkedin, FaApple, FaGoogle } from "react-icons/fa";
 
 export default function Heroo() {
-  const heroImage = "/images/ok.jpg";
+  const heroImage = "/images/0.jpg.jpg";
 
   useEffect(() => {
     AOS.init({ duration: 1000, once: true });
