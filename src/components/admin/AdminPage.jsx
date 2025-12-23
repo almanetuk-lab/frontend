@@ -14,6 +14,10 @@ const AdminDashboard = () => {
   const [plans, setPlans] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false); // New state for mobile sidebar
 
+  // for admin usestate// 
+const [memberApproval, setMemberApproval] = useState(0);
+const [settingsLoading, setSettingsLoading] = useState(false);
+
   //We are getting Admin details from Localstorage :-
   let [loggedInUser, setLoggedInUser] = useState({});
 
@@ -22,6 +26,44 @@ const AdminDashboard = () => {
     currUser = JSON.parse(currUser);
     setLoggedInUser(currUser);
   }, []);
+
+  // autoapprove setting fetching here...
+  useEffect(() => {
+  if (activeSection === "settings") {
+    fetchMemberApproval();
+  }
+}, [activeSection]);
+
+
+  // Member_approval function end here ---- 
+
+  // 🔥 FETCH CURRENT SETTING
+const fetchMemberApproval = async () => {
+  try {
+    const response = await adminAPI.getMemberApproval(); // GET API
+    setMemberApproval(response.data.member_approval);
+  } catch (error) {
+    console.error("Failed to fetch setting", error);
+  }
+};
+
+
+//  UPDATE SETTING (ON / OFF)
+const updateMemberApproval = async (value) => {
+  try {
+    setSettingsLoading(true);
+    setMemberApproval(value); // optimistic UI
+
+    await adminAPI.updateMemberApproval({
+      member_approval: value, // 1 or 0
+    });
+  } catch (error) {
+    console.error("Failed to update setting", error);
+    alert("Failed to update setting");
+  } finally {
+    setSettingsLoading(false);
+  }
+};
 
   const fetchUsers = async () => {
     try {
@@ -98,6 +140,8 @@ const AdminDashboard = () => {
       setUserDetailsLoading(false);
     }
   };
+
+
 
   // Filter users based on status
   const filteredUsers = usersData.filter((user) => {
@@ -821,12 +865,55 @@ const AdminDashboard = () => {
               <h3 className="text-lg font-semibold text-gray-700 mb-3 sm:mb-4">
                 System Settings
               </h3>
-              <p className="text-gray-600 text-sm sm:text-base">
+              {/* <p className="text-gray-600 text-sm sm:text-base">
                 Settings content will be displayed here.
-              </p>
+              </p> */}
+              {/* start code for button */}
+               {/* 🔥 MEMBER APPROVAL TOGGLE */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium text-gray-700">
+              Member Approval
+            </p>
+            <p className="text-sm text-gray-500">
+              Enable or disable manual member approval
+            </p>
+          </div>
+
+          {/* 🔥 TOGGLE BUTTON */}
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={memberApproval === 1}
+              onChange={(e) =>
+                updateMemberApproval(e.target.checked ? 1 : 0)
+              }
+              disabled={settingsLoading}
+            />
+            <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 
+              after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+              after:bg-white after:rounded-full after:h-5 after:w-5 
+              after:transition-all peer-checked:after:translate-x-full">
             </div>
+          </label>
+        </div>
+
+        {/* 🔥 LOADING TEXT */}
+        {settingsLoading && (
+          <p className="text-sm text-gray-400 mt-2">
+            Updating setting...
+          </p>
+        )}
+  {/* end code of button     */}
+            </div>
+
           </div>
         );
+
+        //     </div>
+        //   </div>
+        // );
 
       case "logs":
         return (
