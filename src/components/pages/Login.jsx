@@ -228,7 +228,7 @@ export function LogoutButton() {
     
     //  FIXED: Also remove chat user data from localStorage
     localStorage.removeItem("currentUser");
-    
+  localStorage.removeItem("cart"); //ik add to cart remove to localstorage    
     alert("Logged out successfully!");
     navigate("/login");
     

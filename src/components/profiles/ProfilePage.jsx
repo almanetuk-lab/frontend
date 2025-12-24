@@ -4,12 +4,10 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { adminAPI } from "../services/adminApi";
 import profileViewApi from "../services/profileViewApi";
 
-
-
 export default function ProfilePage() {
   const { profile: currentUserProfile } = useUserProfile();
   const [displayProfile, setDisplayProfile] = useState(null);
-  const { userId } = useParams(); 
+  const { userId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -17,118 +15,60 @@ export default function ProfilePage() {
   const hasTrackedRef = useRef(false);
 
   useEffect(() => {
-  if (!currentUserProfile) return;
+    if (!currentUserProfile) return;
 
-  const myId = currentUserProfile?.id || currentUserProfile?.user_id;
-  const viewedId = userId; // URL se aa raha hai
+    const myId = currentUserProfile?.id || currentUserProfile?.user_id;
+    const viewedId = userId; 
 
-  // ---------- SELF PROFILE CHECK ----------
-  const isOwnProfile = !viewedId || myId == viewedId;
-  setIsCurrentUser(isOwnProfile);
+    // ---------- SELF PROFILE CHECK ----------
+    const isOwnProfile = !viewedId || myId == viewedId;
+    setIsCurrentUser(isOwnProfile);
 
-  // ---------- TRACK PROFILE VIEW (ONLY ONCE) ----------
-  if (
-    !isOwnProfile &&
-    viewedId &&
-    !hasTrackedRef.current
-  ) {
-    hasTrackedRef.current = true; // 🔒 LOCK
+    // ---------- TRACK PROFILE VIEW (ONLY ONCE) ----------
+    if (!isOwnProfile && viewedId && !hasTrackedRef.current) {
+      hasTrackedRef.current = true; // 🔒 LOCK
 
-    (async () => {
-      try {
-        console.log("🚀 Tracking profile view:", viewedId);
-        await profileViewApi.trackProfileView(viewedId);
-        console.log("✅ Profile view tracked");
-      } catch (err) {
-        console.error("❌ Profile view tracking failed:", err);
-      }
-    })();
-  }
-
-  // ---------- DATA LOADING LOGIC (UNCHANGED) ----------
-
-  // CASE 1: Data already passed via state (Member / Matches / Profile list)
-  if (location.state?.userProfile) {
-    setDisplayProfile(location.state.userProfile);
-    setLoading(false);
-    return;
-  }
-
-  // CASE 2: Own profile
-  if (!viewedId) {
-    if (currentUserProfile) {
-      setDisplayProfile(currentUserProfile);
-      setLoading(false);
-    } else {
-      fetchCurrentUserData();
+      (async () => {
+        try {
+          console.log("🚀 Tracking profile view:", viewedId);
+          await profileViewApi.trackProfileView(viewedId);
+          console.log("✅ Profile view tracked");
+        } catch (err) {
+          console.error("❌ Profile view tracking failed:", err);
+        }
+      })();
     }
-    return;
-  }
 
-  // CASE 3: Other user (direct URL)
-  fetchUserData(viewedId);
+    // ---------- DATA LOADING LOGIC (UNCHANGED) ----------
 
-}, [userId, location.state, currentUserProfile]);
+    // CASE 1: Data already passed via state (Member / Matches / Profile list)
+    if (location.state?.userProfile) {
+      setDisplayProfile(location.state.userProfile);
+      setLoading(false);
+      return;
+    }
 
-  
-// useEffect(() => {
-//   console.log("=== PROFILE PAGE DEBUG ===");
-  
-//   const checkCurrentUser = () => {
-//     if (!userId) return true;
-//     const myId = currentUserProfile?.id || currentUserProfile?.user_id;
-//     // loose equality (==) use karein kyunki ek string ho sakta hai aur ek number
-//     return myId == userId;
-//   };
-  
-//   const isOwnProfile = checkCurrentUser();
-//   setIsCurrentUser(isOwnProfile);
+    // CASE 2: Own profile
+    if (!viewedId) {
+      if (currentUserProfile) {
+        setDisplayProfile(currentUserProfile);
+        setLoading(false);
+      } else {
+        fetchCurrentUserData();
+      }
+      return;
+    }
 
-//   // --- TRACKING LOGIC ---
-//   // Agar ye meri profile nahi hai, toh view record karo
-//   if (!isOwnProfile && userId) {
-//     const trackView = async () => {
-//       try {
-//         console.log("🚀 Recording NEW view for User:", userId);
-//         const res = await recentApi.trackProfileView(userId);
-//         console.log("✅ Tracking Response:", res); // Check karein message "Data inserted" aa raha hai?
-//       } catch (err) {
-//         console.error("❌ Tracking failed:", err);
-//       }
-//     };
-//     trackView();
-//   }
-//   // ----------------------
-
-//   // Case 1: State se data load karna
-//   if (location.state?.userProfile) {
-//     setDisplayProfile(location.state.userProfile);
-//     setLoading(false);
-//     return;
-//   }
-  
-//   // Case 2: Apni profile (No ID in URL)
-//   if (!userId) {
-//     if (currentUserProfile) {
-//       setDisplayProfile(currentUserProfile);
-//       setLoading(false);
-//     } else {
-//       fetchCurrentUserData();
-//     }
-//     return;
-//   }
-
-//   // Case 3: Other user (Fetch from API)
-//   fetchUserData(userId);
-  
-// }, [userId, location.state, currentUserProfile]);
-
+    // CASE 3: Other user (direct URL)
+    fetchUserData(viewedId);
+  }, [userId, location.state, currentUserProfile]);
 
   const fetchCurrentUserData = async () => {
     try {
       setLoading(true);
       // Fetch current user data from API
-      const currentUserId = currentUserProfile?.id || currentUserProfile?.user_id;
+      const currentUserId =
+        currentUserProfile?.id || currentUserProfile?.user_id;
       if (currentUserId) {
         const response = await adminAPI.getUserDetails(currentUserId);
         if (response.data) {
@@ -151,7 +91,7 @@ export default function ProfilePage() {
     try {
       setLoading(true);
       const response = await adminAPI.getUserDetails(id);
-      
+
       if (response.data) {
         setDisplayProfile(response.data);
       } else {
@@ -166,7 +106,7 @@ export default function ProfilePage() {
       setDisplayProfile({
         user_id: id,
         name: `User ${id}`,
-        error: "Could not load profile"
+        error: "Could not load profile",
       });
     } finally {
       setLoading(false);
@@ -208,9 +148,9 @@ export default function ProfilePage() {
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString("en-IN", {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
+        day: "numeric",
+        month: "long",
+        year: "numeric",
       });
     } catch (error) {
       return dateString || "";
@@ -229,15 +169,15 @@ export default function ProfilePage() {
   // ✅ FIXED: Get display value
   const getDisplayValue = (value) => {
     if (!hasValue(value)) return null;
-    
+
     if (Array.isArray(value)) {
       return value.join(", ");
     }
-    
+
     if (typeof value === "object") {
       return JSON.stringify(value);
     }
-    
+
     return value;
   };
 
@@ -251,8 +191,8 @@ export default function ProfilePage() {
               {isCurrentUser ? "My Profile" : "User Profile"}
             </h1>
             <div className="flex items-center gap-2 mt-1">
-              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
-                User ID: {displayProfile.user_id || displayProfile.id || "N/A"}
+              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-0 py-0 rounded">
+                {/* User ID: {displayProfile.user_id || displayProfile.id || "N/A"} */}
               </span>
               {location.state?.from === "member_page" && (
                 <span className="bg-amber-100 text-amber-800 text-xs font-medium px-2 py-1 rounded">
@@ -260,9 +200,7 @@ export default function ProfilePage() {
                 </span>
               )}
               {isCurrentUser && (
-                <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">
-                  Your Profile
-                </span>
+                <span className="bg-green-100 text-green-800 text-xs font-medium px-0 py-0 rounded"></span>
               )}
             </div>
           </div>
@@ -274,7 +212,7 @@ export default function ProfilePage() {
             >
               Go Back
             </button>
-            
+
             {isCurrentUser && (
               <button
                 onClick={() => navigate("/edit-profile")}
@@ -283,7 +221,7 @@ export default function ProfilePage() {
                 Edit Profile
               </button>
             )}
-            
+
             <button
               onClick={() => navigate("/dashboard")}
               className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition text-sm"
@@ -315,13 +253,18 @@ export default function ProfilePage() {
 
           <div className="text-center md:text-left flex-1">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-              {getDisplayValue(displayProfile.first_name) || getDisplayValue(displayProfile.last_name)
-                ? `${displayProfile.first_name || ""} ${displayProfile.last_name || ""}`.trim()
+              {getDisplayValue(displayProfile.first_name) ||
+              getDisplayValue(displayProfile.last_name)
+                ? `${displayProfile.first_name || ""} ${
+                    displayProfile.last_name || ""
+                  }`.trim()
                 : displayProfile.name || "User"}
             </h1>
 
             <p className="text-lg md:text-xl text-gray-600 mt-2">
-              {displayProfile.headline || displayProfile.profession || "No Profession"}
+              {displayProfile.headline ||
+                displayProfile.profession ||
+                "No Profession"}
             </p>
 
             <div className="flex flex-wrap gap-2 mt-3 justify-center md:justify-start">
@@ -330,19 +273,19 @@ export default function ProfilePage() {
                   📍 {displayProfile.city}
                 </span>
               )}
-              
+  
               {displayProfile.age && (
                 <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                  🎂 {displayProfile.age} years
+                   {displayProfile.age} Age
                 </span>
               )}
-              
+
               {displayProfile.gender && (
                 <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
                   {displayProfile.gender}
                 </span>
               )}
-              
+
               {displayProfile.marital_status && (
                 <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
                   {displayProfile.marital_status}
@@ -359,14 +302,14 @@ export default function ProfilePage() {
             <Section title="Personal Information">
               <InfoItem label="First Name" value={displayProfile.first_name} />
               <InfoItem label="Last Name" value={displayProfile.last_name} />
-              
+
               {/* ✅ FIXED: Email Field */}
-              <InfoItem 
-                label="Email" 
-                value={displayProfile.email} 
+              <InfoItem
+                label="Email"
+                value={displayProfile.email}
                 type="email"
               />
-              
+
               <InfoItem label="Phone" value={displayProfile.phone} />
               <InfoItem
                 label="Date of Birth"
@@ -414,7 +357,7 @@ export default function ProfilePage() {
                 value={
                   Array.isArray(displayProfile.skills)
                     ? displayProfile.skills.join(", ")
-                    : typeof displayProfile.skills === 'object'
+                    : typeof displayProfile.skills === "object"
                     ? Object.keys(displayProfile.skills || {}).join(", ")
                     : displayProfile.skills
                 }
@@ -462,7 +405,7 @@ function InfoItem({ label, value, full = false, type = "text" }) {
     <div className={full ? "col-span-2" : ""}>
       <p className="text-sm font-medium text-gray-500 mb-1">{label}</p>
       {type === "email" ? (
-        <a 
+        <a
           href={`mailto:${displayValue}`}
           className="text-blue-600 hover:text-blue-800 hover:underline"
         >
@@ -488,6 +431,32 @@ function Section({ title, children }) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -551,7 +520,7 @@ function Section({ title, children }) {
 //     try {
 //       setLoading(true);
 //       const response = await adminAPI.getUserDetails(id);
-      
+
 //       if (response.data) {
 //         setDisplayProfile(response.data);
 //       } else {
@@ -653,7 +622,7 @@ function Section({ title, children }) {
 //             >
 //               Go Back
 //             </button>
-            
+
 //             {isCurrentUser && (
 //               <button
 //                 onClick={() => navigate("/edit-profile")}
@@ -662,7 +631,7 @@ function Section({ title, children }) {
 //                 Edit Profile
 //               </button>
 //             )}
-            
+
 //             <button
 //               onClick={() => navigate("/dashboard")}
 //               className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition text-sm"
@@ -709,19 +678,19 @@ function Section({ title, children }) {
 //                   📍 {displayProfile.city}
 //                 </span>
 //               )}
-              
+
 //               {displayProfile.age && (
 //                 <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
 //                   🎂 {displayProfile.age} years
 //                 </span>
 //               )}
-              
+
 //               {displayProfile.gender && (
 //                 <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
 //                   {displayProfile.gender}
 //                 </span>
 //               )}
-              
+
 //               {displayProfile.marital_status && (
 //                 <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
 //                   {displayProfile.marital_status}
@@ -849,128 +818,3 @@ function Section({ title, children }) {
 //     </div>
 //   );
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
