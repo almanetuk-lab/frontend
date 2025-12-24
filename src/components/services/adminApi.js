@@ -88,4 +88,6 @@ updateMemberApproval: (data) =>
   api.put('/api/settings/update-member-approval', data),
 };
 
+
+
 export default api;
