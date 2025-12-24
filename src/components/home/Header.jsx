@@ -57,29 +57,60 @@ function Header() {
   }, []);
 
   useEffect(() => {
-    const updateCartCount = () => {
-      try {
-        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-        setCartCount(cart.length);
-      } catch (error) {
-        console.error("Error updating cart count:", error);
-        setCartCount(0);
-      }
-    };
+  // Function to get cart count
+  const getCartCount = () => {
+    try {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      return cart.length;
+    } catch {
+      return 0;
+    }
+  };
+  
+  // Update cart count
+  const updateCartCount = () => {
+    const count = getCartCount();
+    setCartCount(count);
+    console.log("🛒 Cart count:", count);
+  };
+  
+  // Initial update
+  updateCartCount();
+  
+  // Listen for cart updates
+  window.addEventListener("cartUpdated", updateCartCount);
+  
+  // Cleanup
+  return () => {
+    window.removeEventListener("cartUpdated", updateCartCount);
+  };
+}, []);
 
-    updateCartCount();
-    window.addEventListener("storage", updateCartCount);
-    window.addEventListener("cartUpdated", updateCartCount);
-    window.addEventListener("load", updateCartCount);
-    window.addEventListener("focus", updateCartCount);
 
-    return () => {
-      window.removeEventListener("storage", updateCartCount);
-      window.removeEventListener("cartUpdated", updateCartCount);
-      window.removeEventListener("load", updateCartCount);
-      window.removeEventListener("focus", updateCartCount);
-    };
-  }, []);
+  // useEffect(() => {
+  //   const updateCartCount = () => {
+  //     try {
+  //       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  //       setCartCount(cart.length);
+  //     } catch (error) {
+  //       console.error("Error updating cart count:", error);
+  //       setCartCount(0);
+  //     }
+  //   };
+
+  //   updateCartCount();
+  //   window.addEventListener("storage", updateCartCount);
+  //   window.addEventListener("cartUpdated", updateCartCount);
+  //   window.addEventListener("load", updateCartCount);
+  //   window.addEventListener("focus", updateCartCount);
+
+  //   return () => {
+  //     window.removeEventListener("storage", updateCartCount);
+  //     window.removeEventListener("cartUpdated", updateCartCount);
+  //     window.removeEventListener("load", updateCartCount);
+  //     window.removeEventListener("focus", updateCartCount);
+  //   };
+  // }, []);
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">

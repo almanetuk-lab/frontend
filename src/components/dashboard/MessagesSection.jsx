@@ -654,7 +654,7 @@ export default function MessagesSection() {
     <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Messages</h2>
 
-      {/* Status - Hidden on mobile */}
+      {/* Status - Hidden on mobile /}
       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg hidden sm:block">
         <p className="text-blue-800 text-sm">
           <strong>User:</strong> {currentUser?.full_name} (ID: {currentUserId})
@@ -674,7 +674,7 @@ export default function MessagesSection() {
           <strong> Messages:</strong> {messages.length} |
           <strong> Reactions:</strong> {reactions.length}
         </p>
-      </div>
+      </div>/* }
 
       {/* ✅ RESPONSIVE CHAT CONTAINER */}
       <div className="bg-white rounded-2xl shadow-lg h-[70vh] sm:h-[600px] flex flex-col md:flex-row border border-gray-200 relative">
