@@ -29,21 +29,21 @@ export default function Cart() {
 
 // const handleRemove = async (id) => {
 //   try {
-//     console.log("🔄 Removing item ID:", id);
-//     console.log("🔄 Removing item ID type:", typeof id);
+//     console.log(" Removing item ID:", id);
+//     console.log(" Removing item ID type:", typeof id);
     
 //     //  1. Pehle curent car ke liye hai 
 //     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
-//     console.log("📦 BEFORE - Cart items:", existingCart);
-//     console.log("📦 BEFORE - Cart items IDs:", existingCart.map(item => item.id));
+//     console.log(" BEFORE - Cart items:", existingCart);
+//     console.log(" BEFORE - Cart items IDs:", existingCart.map(item => item.id));
     
 //     //  2. Filter kar rha hai 
 //     const updatedCart = existingCart.filter((item) => {
-//       console.log(`🔍 Comparing: item.id=${item.id} (${typeof item.id}) vs id=${id} (${typeof id})`);
+//       console.log(`omparing: item.id=${item.id} (${typeof item.id}) vs id=${id} (${typeof id})`);
 //       return item.id != id; // Double equals se compare karo (string vs number)
 //     });
     
-//     console.log("📦 AFTER - Updated cart:", updatedCart);
+//     console.log(" AFTER - Updated cart:", updatedCart);
     
 //     // 3. LocalStorage update
 //     localStorage.setItem("cart", JSON.stringify(updatedCart));
@@ -101,19 +101,19 @@ const handleRemove = async (id) => {
 
   // const handleRemove = async (id) => {
   //   try {
-  //     // ✅ YEH 4 LINES ADD KARO - LocalStorage update ke liye (API se PEHLE)
+  //     //  YEH 4 LINES ADD KARO - LocalStorage update ke liye (API se PEHLE)
   //     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
   //     const updatedCart = existingCart.filter((item) => item.id !== id);
   //     localStorage.setItem("cart", JSON.stringify(updatedCart));
 
-  //     // ✅ Cart count update ke liye
+  //     //  Cart count update ke liye
   //     window.dispatchEvent(new Event("storage"));
   //     window.dispatchEvent(new Event("cartUpdated"));
 
-  //     // ✅ YEH LINE PEHLE SE HAI - State update
+  //     //  YEH LINE PEHLE SE HAI - State update
   //     setCartItems(cartItems.filter((item) => item.id !== id));
 
-  //     // ✅ YEH LINE PEHLE SE HAI - API call
+  //     //  YEH LINE PEHLE SE HAI - API call
   //     await removeFromCart(id);
   //   } catch (err) {
   //     console.error("Error removing item:", err);
