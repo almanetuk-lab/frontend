@@ -30,6 +30,12 @@ export default function CreateArticle({ user }) {
     } finally { setLoading(false); }
   };
 
+  
+   const handleBack = () => {
+    // navigate("/admin-dashboard");
+    navigate(-1);
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white p-4 rounded shadow mb-4">
@@ -42,6 +48,12 @@ export default function CreateArticle({ user }) {
         <TiptapEditor content={contentHtml} onChange={setContentHtml} />
         <div className="mt-3 flex gap-3">
           <button onClick={handleSave} disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded">{loading ? "Saving..." : "Publish"}</button>
+              <button 
+    onClick={handleBack}
+    className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded"
+  >
+    Back  
+  </button>
         </div>
       </div>
     </div>
