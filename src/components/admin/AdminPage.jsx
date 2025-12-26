@@ -1055,7 +1055,7 @@ const updateMemberApproval = async (value) => {
                 onClick={() => {
                   localStorage.removeItem("adminToken");
                   localStorage.removeItem("adminData");
-                  window.location.href = "/admin-login";
+                  window.location.href = "/#/";
                 }}
                 className="bg-red-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-red-700 transition-colors text-sm sm:text-base"
               >

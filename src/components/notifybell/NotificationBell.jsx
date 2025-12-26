@@ -34,7 +34,7 @@ const NotificationBell = () => {
     }
   };
 
-  // ✅ FETCH MATCHES COUNT API
+  //  FETCH MATCHES COUNT API se aarha hai yha per
   const fetchMatchesCount = async () => {
     const userId = getUserId();
     if (!userId) return;
@@ -50,85 +50,100 @@ const NotificationBell = () => {
     }
   };
 
-  // ✅ IMPROVED: NOTIFICATION CLICK HANDLER - EXACTLY LIKE MEMBERPAGE
+  //  IMPROVED: NOTIFICATION CLICK HANDLER - EXACTLY LIKE MEMBERPAGE
   const handleNotificationClick = (notification) => {
-    console.log("📩 Notification clicked:", notification);
-    
+    console.log(" Notification clicked:", notification);
+
     // Mark as read
     markAsRead(notification.id);
-    
-    // ✅ DEBUG: Show all notification fields
-    console.log("📋 Notification object keys:", Object.keys(notification));
-    
+
+    //  DEBUG: Show all notification fields
+    console.log(" Notification object keys:", Object.keys(notification));
+
     // Extract sender information - Try multiple possible fields
     // Method 1: Check metadata field (most likely contains sender info)
     let senderId = null;
     let senderName = "User";
-    
+
     if (notification.metadata) {
       try {
-        const metadata = typeof notification.metadata === 'string' 
-          ? JSON.parse(notification.metadata) 
-          : notification.metadata;
-        
-        console.log("🔍 Metadata parsed:", metadata);
-        
-        senderId = metadata.sender_id || metadata.user_id || metadata.from_user_id;
-        senderName = metadata.sender_name || metadata.sender_username || 
-                    metadata.name || senderName;
-                    
-        console.log("✅ Extracted from metadata - Sender ID:", senderId, "Name:", senderName);
+        const metadata =
+          typeof notification.metadata === "string"
+            ? JSON.parse(notification.metadata)
+            : notification.metadata;
+
+        console.log(" Metadata parsed:", metadata);
+
+        senderId =
+          metadata.sender_id || metadata.user_id || metadata.from_user_id;
+        senderName =
+          metadata.sender_name ||
+          metadata.sender_username ||
+          metadata.name ||
+          senderName;
+
+        console.log(
+          " Extracted from metadata - Sender ID:",
+          senderId,
+          "Name:",
+          senderName
+        );
       } catch (error) {
-        console.error("❌ Error parsing metadata:", error);
+        console.error(" Error parsing metadata:", error);
       }
     }
-    
+
     // Method 2: Try direct fields
     if (!senderId) {
       // Check all possible fields for sender ID
-      const possibleIdFields = ['sender_id', 'from_user_id', 'related_user_id', 'user_id'];
+      const possibleIdFields = [
+        "sender_id",
+        "from_user_id",
+        "related_user_id",
+        "user_id",
+      ];
       for (const field of possibleIdFields) {
         if (notification[field]) {
           senderId = notification[field];
-          console.log(`✅ Found sender ID in ${field}:`, senderId);
+          console.log(`Found sender ID in ${field}:`, senderId);
           break;
         }
       }
     }
-    
+
     // Method 3: Extract from message content (fallback)
     if (!senderName || senderName === "User") {
-      const message = notification.message || notification.content || '';
-      if (message.includes('sent you a new message')) {
+      const message = notification.message || notification.content || "";
+      if (message.includes("sent you a new message")) {
         const nameMatch = message.match(/^(.*?)\s+sent you a new message/);
         if (nameMatch) {
           senderName = nameMatch[1];
-          console.log("✅ Extracted name from message:", senderName);
+          console.log(" Extracted name from message:", senderName);
         }
       }
     }
-    
-    console.log("🎯 Final extracted - Sender ID:", senderId, "Name:", senderName);
-    
+
+    console.log("Final extracted - Sender ID:", senderId, "Name:", senderName);
+
     if (senderId) {
-      // ✅ EXACTLY LIKE MEMBERPAGE - Use same navigation pattern
-      navigate(`/dashboard/messages`, {  // ✅ Same route as MemberPage
+      // - Use same navigation pattern
+      navigate(`/dashboard/messages`, {
         state: {
           selectedUser: {
-            id: senderId,           // ✅ Same as MemberPage
-            name: senderName,       // ✅ Same as MemberPage
-            receiverId: senderId    // ✅ Same as MemberPage
+            id: senderId,
+            name: senderName,
+            receiverId: senderId,
           },
-          from: 'notification',
-          notification_id: notification.id
-        }
+          from: "notification",
+          notification_id: notification.id,
+        },
       });
     } else {
-      console.warn("⚠️ No sender ID found, opening general messages");
+      console.warn(" No sender ID found, opening general messages");
       // Open general messages page
       navigate(`/dashboard/messages`);
     }
-    
+
     // Close dropdown
     setShowDropdown(false);
   };
@@ -152,9 +167,12 @@ const NotificationBell = () => {
       console.log("🔔 New notification received:", notification);
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
-      
+
       // Refresh matches count for new message/match notifications
-      if (notification.type === 'message' || notification.type === 'new_match') {
+      if (
+        notification.type === "message" ||
+        notification.type === "new_match"
+      ) {
         fetchMatchesCount();
       }
     });
@@ -164,7 +182,7 @@ const NotificationBell = () => {
     };
   }, [profile]);
 
-  // ✅ FETCH NOTIFICATIONS & MATCHES COUNT
+  //  FETCH NOTIFICATIONS & MATCHES COUNT
   const fetchNotifications = async () => {
     const userId = getUserId();
 
@@ -179,7 +197,7 @@ const NotificationBell = () => {
 
       const [notificationsResponse] = await Promise.all([
         chatApi.getUserNotifications(userId),
-        fetchMatchesCount()
+        fetchMatchesCount(),
       ]);
 
       console.log("Notifications data received:", notificationsResponse.data);
@@ -191,7 +209,6 @@ const NotificationBell = () => {
         (notif) => !notif.is_read
       ).length;
       setUnreadCount(unread);
-      
     } catch (error) {
       console.error("Error fetching notifications:", error);
       setNotifications([]);
@@ -200,7 +217,7 @@ const NotificationBell = () => {
     }
   };
 
-  // ✅ MARK AS READ
+  //  MARK AS READ
   const markAsRead = async (notificationId) => {
     try {
       const response = await chatApi.markChatAsRead(notificationId);
@@ -219,7 +236,7 @@ const NotificationBell = () => {
     }
   };
 
-  // ✅ MARK ALL AS READ
+  //  MARK ALL AS READ
   const markAllAsRead = async () => {
     try {
       const unreadNotifications = notifications.filter(
@@ -241,7 +258,7 @@ const NotificationBell = () => {
     }
   };
 
-  // ✅ TOGGLE DROPDOWN
+  //  TOGGLE DROPDOWN
   const toggleDropdown = () => {
     if (!showDropdown) {
       fetchNotifications();
@@ -266,32 +283,32 @@ const NotificationBell = () => {
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return "Just now";
-    
+
     try {
       const date = new Date(dateString);
       const now = new Date();
       const diffMs = now - date;
       const diffMins = Math.floor(diffMs / 60000);
-      
+
       if (diffMins < 1) return "Just now";
       if (diffMins < 60) return `${diffMins}m ago`;
       if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-      
+
       return date.toLocaleDateString("en-IN", {
         day: "numeric",
-        month: "short"
+        month: "short",
       });
     } catch (error) {
       return dateString;
     }
   };
 
-  // ✅ INITIAL LOAD - FETCH MATCHES COUNT
+  //  INITIAL LOAD - FETCH MATCHES COUNT
   useEffect(() => {
     fetchMatchesCount();
   }, [profile]);
 
-  // ✅ TOTAL UNREAD COUNT (Messages + Matches)
+  //  TOTAL UNREAD COUNT (Messages + Matches)
   const totalUnreadCount = unreadCount + (matchesCount > 0 ? matchesCount : 0);
 
   return (
@@ -304,7 +321,7 @@ const NotificationBell = () => {
       >
         <FaBell className="w-5 h-5 text-gray-600 hover:text-amber-600 transition-colors" />
 
-        {/* ✅ UNREAD BADGE */}
+        {/* UNREAD BADGE */}
         {totalUnreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
             {totalUnreadCount > 9 ? "9+" : totalUnreadCount}
@@ -330,8 +347,8 @@ const NotificationBell = () => {
                 </button>
               )}
             </div>
-            
-            {/* ✅ MATCHES COUNT BADGE */}
+
+            {/*  MATCHES COUNT BADGE */}
             {matchesCount > 0 && (
               <div className="mb-2 p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
                 <div className="flex items-center justify-between">
@@ -343,7 +360,7 @@ const NotificationBell = () => {
                   </div>
                   <button
                     onClick={() => {
-                      navigate('/dashboard/matches');
+                      navigate("/dashboard/matches");
                       setShowDropdown(false);
                     }}
                     className="text-xs text-green-600 hover:text-green-800 font-medium"
@@ -360,7 +377,9 @@ const NotificationBell = () => {
             {loading ? (
               <div className="p-8 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 mx-auto"></div>
-                <p className="text-gray-500 mt-3 text-sm">Loading notifications...</p>
+                <p className="text-gray-500 mt-3 text-sm">
+                  Loading notifications...
+                </p>
               </div>
             ) : notifications.length === 0 ? (
               <div className="p-8 text-center">
@@ -378,7 +397,9 @@ const NotificationBell = () => {
                   />
                 </svg>
                 <p className="text-gray-500 text-sm">No notifications yet</p>
-                <p className="text-gray-400 text-xs mt-1">We'll notify you when something arrives</p>
+                <p className="text-gray-400 text-xs mt-1">
+                  We'll notify you when something arrives
+                </p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
@@ -392,47 +413,88 @@ const NotificationBell = () => {
                   >
                     <div className="flex items-start gap-3">
                       {/* Notification Icon */}
-                      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                        notification.type === 'message' ? 'bg-blue-100 text-blue-600' :
-                        notification.type === 'new_match' ? 'bg-green-100 text-green-600' :
-                        'bg-amber-100 text-amber-600'
-                      }`}>
-                        {notification.type === 'message' ? (
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      <div
+                        className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                          notification.type === "message"
+                            ? "bg-blue-100 text-blue-600"
+                            : notification.type === "new_match"
+                            ? "bg-green-100 text-green-600"
+                            : "bg-amber-100 text-amber-600"
+                        }`}
+                      >
+                        {notification.type === "message" ? (
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                            />
                           </svg>
-                        ) : notification.type === 'new_match' ? (
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                        ) : notification.type === "new_match" ? (
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                            />
                           </svg>
                         ) : (
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
                           </svg>
                         )}
                       </div>
-                      
+
                       {/* Notification Content */}
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-gray-800 text-sm mb-1 truncate">
-                          {notification.title || 
-                           (notification.type === 'message' ? 'New Message' : 
-                            notification.type === 'new_match' ? 'New Match' : 'Notification')}
+                          {notification.title ||
+                            (notification.type === "message"
+                              ? "New Message"
+                              : notification.type === "new_match"
+                              ? "New Match"
+                              : "Notification")}
                         </h4>
                         <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                          {notification.content || notification.message || "No content"}
+                          {notification.content ||
+                            notification.message ||
+                            "No content"}
                         </p>
-                        
+
                         {/* Show sender if available */}
-                        {(notification.sender_name || notification.sender_username) && (
+                        {(notification.sender_name ||
+                          notification.sender_username) && (
                           <div className="flex items-center text-xs text-gray-500 mb-1">
                             <span className="mr-1">From:</span>
                             <span className="font-medium text-amber-600">
-                              {notification.sender_name || notification.sender_username}
+                              {notification.sender_name ||
+                                notification.sender_username}
                             </span>
                           </div>
                         )}
-                        
+
                         {/* Time */}
                         <p className="text-xs text-gray-400">
                           {formatDate(notification.created_at)}
@@ -457,21 +519,41 @@ const NotificationBell = () => {
                 onClick={fetchNotifications}
                 className="text-sm text-gray-600 hover:text-amber-600 font-medium py-1.5 px-3 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
                 </svg>
                 Refresh
               </button>
-              
+
               <button
                 onClick={() => {
-                  navigate('/dashboard/messages');  // ✅ Same as MemberPage
+                  navigate("/dashboard/messages");
                   setShowDropdown(false);
                 }}
                 className="text-sm bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded-lg transition-all hover:-translate-y-0.5 flex items-center gap-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
                 </svg>
                 View All Messages
               </button>
@@ -484,10 +566,6 @@ const NotificationBell = () => {
 };
 
 export default NotificationBell;
-
-
-
-
 
 // import React, { useState, useEffect, useRef } from "react";
 // import { chatApi } from "../services/chatApi"; // ChatApi import karo

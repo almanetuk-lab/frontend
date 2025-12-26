@@ -63,7 +63,7 @@ const handleLogout = () => {
     
   } catch (error) {
     console.error('Logout error:', error);
-    window.location.href = '/';
+    window.location.href = '/#/';
   }
 };
 
