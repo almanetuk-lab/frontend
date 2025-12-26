@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -6,6 +7,8 @@ export default function PaymentSuccess() {
   const [params] = useSearchParams();
   const sessionId = params.get("session_id");
   const [open, setOpen] = useState(true);
+
+  
 
   if (!open) return null;
 
@@ -38,7 +41,7 @@ export default function PaymentSuccess() {
 
         {/* close button */}
         <button
-          onClick={() => { setOpen(false); window.location.href = "/dashboard"; }}
+          onClick={() => { setOpen(false); window.location.href = "/#/dashboard"; }}
           className="mt-4 px-6 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-gray-200"
         >
           OK

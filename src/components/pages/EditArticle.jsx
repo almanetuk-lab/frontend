@@ -44,6 +44,13 @@ export default function EditArticle({ user }) {
     finally { setLoading(false); }
   };
 
+   const handleBack = () => {
+    // Admin dashboard पर वापस जाएँ
+    // navigate("/admin-dashboard");
+    // या फिर पिछले पेज पर जाने के लिए:
+    navigate(-1);
+  };
+
   if (!article) return <div className="text-center py-10">Loading…</div>;
 
   console.log("Content HTML:", contentHtml);
@@ -59,6 +66,12 @@ export default function EditArticle({ user }) {
         <TiptapEditor content={contentHtml} onChange={setContentHtml} />
         <div className="mt-3 flex gap-3">
           <button onClick={handleUpdate} disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded">{loading ? "Saving..." : "Save changes"}</button>
+           <button 
+    onClick={handleBack}
+    className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded"
+  >
+    Back  
+  </button>
         </div>
       </div>
     </div>
