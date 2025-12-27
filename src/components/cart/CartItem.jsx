@@ -25,6 +25,9 @@ export default function CartItem({ item, handleRemove /* OLD: , handleBuy */ }) 
 
       const response = await fetch(
         "https://backend-q0wc.onrender.com/payments/create-checkout-session",
+      
+      // const response = await fetch(
+      //   `${VITE_API_BASE_URL}/payments/create-checkout-session`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

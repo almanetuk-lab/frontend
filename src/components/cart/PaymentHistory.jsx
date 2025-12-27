@@ -6,6 +6,23 @@ export default function PaymentHistory({ onClose }) {
 
   const modalRef = useRef(null); // ⭐ Reference for outside click detection
 
+
+  // useEffect(() => {
+  //   const fetchHistory = async () => {
+  //     try {
+  //       const user_id = localStorage.getItem("user_id");
+  //       const res = await fetch(`${VITE_API_BASE_URL}/payments/${user_id}`);
+  //       const data = await res.json();
+  //       setHistory(data);
+  //     } catch (err) {
+  //       console.error("Error loading history:", err);
+  //     }
+  //   };
+
+  //   fetchHistory();
+  // }, []);
+
+
   useEffect(() => {
     const fetchHistory = async () => {
       try {
