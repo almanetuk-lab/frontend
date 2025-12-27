@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { chatApi } from "../services/chatApi";
 import io from "socket.io-client";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://backend-q0wc.onrender.com";
@@ -31,14 +31,17 @@ export default function MessagesSection() {
   const fileInputRef = useRef();
   const messagesEndRef = useRef();
   const [socketConnected, setSocketConnected] = useState(false);
-    const location = useLocation();
+  const location = useLocation();
 
   useEffect(() => {
     if (location.state?.selectedUser) {
-      console.log("📍 User received from location state:", location.state.selectedUser);
+      console.log(
+        "📍 User received from location state:",
+        location.state.selectedUser
+      );
       const userFromState = location.state.selectedUser;
       setSelectedUser(userFromState);
-      
+
       // Auto-select and load messages for this user
       if (userFromState.id && currentUserId) {
         console.log("🔄 Auto-loading messages for user:", userFromState.name);
@@ -53,8 +56,7 @@ export default function MessagesSection() {
     }
   }, [location.state, currentUserId]);
 
-  
-  // ✅ Fetch recent chats
+  //  Fetch recent chats
   const fetchRecentChats = async () => {
     try {
       setRecentChatsLoading(true);
@@ -67,7 +69,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ Handle recent chat selection
+  //  Handle recent chat selection
   const handleRecentChatSelect = (chat) => {
     const user = {
       id: chat.user_id,
@@ -78,14 +80,14 @@ export default function MessagesSection() {
     setShowSidebar(false);
   };
 
-  // ✅ RECENT CHATS USE EFFECT
+  //  RECENT CHATS USE EFFECT
   useEffect(() => {
     if (currentUserId) {
       fetchRecentChats();
     }
   }, [currentUserId]);
 
-  // ✅ Click outside to close reaction picker and delete option
+  //  Click outside to close reaction picker and delete option
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -108,7 +110,7 @@ export default function MessagesSection() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [showReactionPicker, showDeleteOption]);
 
-  // ✅ Get current user once
+  //  Get current user once
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem("currentUser");
@@ -118,7 +120,7 @@ export default function MessagesSection() {
         if (userId) {
           setCurrentUser(userData);
           setCurrentUserId(userId);
-          console.log("✅ User ID Set:", userId);
+          console.log(" User ID Set:", userId);
         }
       }
     } catch (err) {
@@ -126,7 +128,7 @@ export default function MessagesSection() {
     }
   }, []);
 
-  // ✅ Image Modal Effects
+  //  Image Modal Effects
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") {
@@ -147,7 +149,7 @@ export default function MessagesSection() {
     };
   }, [showImageModal]);
 
-  // ✅ SOCKET WITH REACTION HANDLING
+  //  SOCKET WITH REACTION HANDLING
   useEffect(() => {
     if (!currentUserId) return;
 
@@ -166,7 +168,7 @@ export default function MessagesSection() {
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("✅ Socket connected");
+      console.log(" Socket connected");
       setSocketConnected(true);
       socket.emit("join", { userId: currentUserId });
     });
@@ -176,9 +178,9 @@ export default function MessagesSection() {
       setSocketConnected(false);
     });
 
-    // ✅ HANDLE NEW REACTIONS VIA SOCKET
+    //  HANDLE NEW REACTIONS VIA SOCKET
     socket.on("new_reaction", (reactionData) => {
-      console.log("🎭 New reaction received via socket:", reactionData);
+      console.log(" New reaction received via socket:", reactionData);
       if (reactionData && selectedUser) {
         setReactions((prev) => {
           const exists = prev.some(
@@ -200,7 +202,7 @@ export default function MessagesSection() {
       }
     });
 
-    // ✅ Handle incoming messages
+    //  Handle incoming messages
     const handleIncomingMessage = (message) => {
       console.log("📩 Socket message received:", message);
       fetchRecentChats();
@@ -237,14 +239,14 @@ export default function MessagesSection() {
     };
   }, [currentUserId, selectedUser]);
 
-  // ✅ Auto-scroll
+  //  Auto-scroll
   useEffect(() => {
     if (messagesEndRef.current && messages.length > 0) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  // ✅ Search users
+  //  Search users
   const searchUsers = useCallback(
     async (query) => {
       if (!query.trim() || !currentUserId) return;
@@ -269,7 +271,7 @@ export default function MessagesSection() {
     [currentUserId]
   );
 
-  // ✅ LOAD MESSAGES
+  //  LOAD MESSAGES
   const loadMessages = async (otherUserId) => {
     if (!currentUserId) return;
     try {
@@ -299,7 +301,7 @@ export default function MessagesSection() {
         )
         .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
-      console.log(`✅ Loaded ${conversationMessages.length} messages`);
+      console.log(` Loaded ${conversationMessages.length} messages`);
       setMessages(conversationMessages);
     } catch (err) {
       console.error("❌ Load messages error:", err);
@@ -309,15 +311,15 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ LOAD REACTIONS PROPERLY
+  //  LOAD REACTIONS PROPERLY
   const loadReactions = async (userId) => {
     if (!currentUserId || !userId) return;
     try {
       console.log(
-        `🎭 Loading reactions for users: ${currentUserId} and ${userId}`
+        ` Loading reactions for users: ${currentUserId} and ${userId}`
       );
       const res = await chatApi.getReactions(currentUserId, userId);
-      console.log("🎭 Reactions loaded from API:", res.data);
+      console.log(" Reactions loaded from API:", res.data);
 
       let reactionsData = [];
       if (Array.isArray(res.data)) {
@@ -336,7 +338,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ SELECT USER - WITH MOBILE SUPPORT
+  //  SELECT USER - WITH MOBILE SUPPORT
   const handleUserSelect = async (user) => {
     if (!currentUserId) return;
 
@@ -357,16 +359,14 @@ export default function MessagesSection() {
     await loadReactions(user.id);
   };
 
-  // ✅ DELETE MESSAGE FUNCTION
+  //  DELETE MESSAGE FUNCTION
   const handleDeleteMessage = async (messageId) => {
     if (!messageId || !currentUserId) {
       console.error("❌ Cannot delete: missing message ID or user ID");
       return;
     }
 
-    const confirmDelete = window.confirm(
-      "You want to Delete this messagee"
-    );
+    const confirmDelete = window.confirm("You want to Delete this messagee");
     if (!confirmDelete) {
       setShowDeleteOption(null);
       return;
@@ -398,7 +398,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ SEND MESSAGE
+  //  SEND MESSAGE
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedUser || !currentUserId) return;
 
@@ -426,7 +426,7 @@ export default function MessagesSection() {
         attachment_url: null,
       });
 
-      console.log("✅ Message sent successfully");
+      console.log(" Message sent successfully");
       fetchRecentChats();
 
       setTimeout(() => {
@@ -454,7 +454,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ ADD REACTION - PROPER REAL-TIME HANDLING
+  //  ADD REACTION - PROPER REAL-TIME HANDLING
   const addReaction = async (messageId, emoji) => {
     if (!currentUserId || !messageId) {
       console.error("❌ Cannot add reaction: missing user ID or message ID");
@@ -472,7 +472,7 @@ export default function MessagesSection() {
         emoji: emoji,
       });
 
-      console.log("✅ Reaction sent successfully:", response.data);
+      console.log(" Reaction sent successfully:", response.data);
 
       if (selectedUser) {
         setTimeout(() => {
@@ -491,7 +491,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ GET REACTIONS FOR MESSAGE - SIMPLE AND WORKING
+  //  GET REACTIONS FOR MESSAGE - SIMPLE AND WORKING
   const getMessageReactions = (messageId) => {
     if (!messageId) return [];
 
@@ -504,14 +504,14 @@ export default function MessagesSection() {
     return messageReactions;
   };
 
-  // ✅ RECONNECT SOCKET
+  //  RECONNECT SOCKET
   const reconnectSocket = () => {
     if (socketRef.current) {
       socketRef.current.connect();
     }
   };
 
-  // ✅ FILE UPLOAD
+  //  FILE UPLOAD
   const handleFileUpload = async (file) => {
     if (!selectedUser || !currentUserId) return;
 
@@ -550,7 +550,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ FILE INPUT
+  // ✅FILE INPUT
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
     if (file && selectedUser && currentUserId) {
@@ -653,28 +653,6 @@ export default function MessagesSection() {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Messages</h2>
-
-      {/* Status - Hidden on mobile /}
-      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg hidden sm:block">
-        <p className="text-blue-800 text-sm">
-          <strong>User:</strong> {currentUser?.full_name} (ID: {currentUserId})
-          |<strong> Socket:</strong>
-          <span className={socketConnected ? "text-green-600" : "text-red-600"}>
-            {socketConnected ? " 🟢 Connected" : " 🔴 Disconnected"}
-          </span>
-          {!socketConnected && (
-            <button
-              onClick={reconnectSocket}
-              className="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
-            >
-              Reconnect
-            </button>
-          )}{" "}
-          |<strong> Chatting with:</strong> {selectedUser?.name || "None"} |
-          <strong> Messages:</strong> {messages.length} |
-          <strong> Reactions:</strong> {reactions.length}
-        </p>
-      </div>/* }
 
       {/* ✅ RESPONSIVE CHAT CONTAINER */}
       <div className="bg-white rounded-2xl shadow-lg h-[70vh] sm:h-[600px] flex flex-col md:flex-row border border-gray-200 relative">

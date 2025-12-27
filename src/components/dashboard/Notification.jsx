@@ -1,7 +1,7 @@
 // components/NotificationBell.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { adminAPI } from '../services/adminApi';
-import io from 'socket.io-client';
+import React, { useState, useEffect, useRef } from "react";
+import { adminAPI } from "../services/adminApi";
+import io from "socket.io-client";
 
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);
@@ -12,18 +12,18 @@ const Notification = () => {
 
   // Socket.IO connection
   useEffect(() => {
-    const socket = io('https://backend-q0wc.onrender.com');
-    
+    const socket = io("https://backend-q0wc.onrender.com");
+
     // Register user for real-time notifications
-    const userId = localStorage.getItem('userId'); // Adjust based on your auth
+    const userId = localStorage.getItem("userId"); // Adjust based on your auth
     if (userId) {
-      socket.emit('register_user', userId);
+      socket.emit("register_user", userId);
     }
 
     // Listen for new notifications
-    socket.on('new_notification', (notification) => {
-      setNotifications(prev => [notification, ...prev]);
-      setUnreadCount(prev => prev + 1);
+    socket.on("new_notification", (notification) => {
+      setNotifications((prev) => [notification, ...prev]);
+      setUnreadCount((prev) => prev + 1);
     });
 
     return () => {
@@ -35,15 +35,15 @@ const Notification = () => {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const userId = localStorage.getItem('userId'); // Adjust based on your auth
+      const userId = localStorage.getItem("userId"); // Adjust based on your auth
       const response = await adminAPI.getUserNotifications(userId);
       setNotifications(response.data);
-      
+
       // Calculate unread count
-      const unread = response.data.filter(notif => !notif.is_read).length;
+      const unread = response.data.filter((notif) => !notif.is_read).length;
       setUnreadCount(unread);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error("Error fetching notifications:", error);
     } finally {
       setLoading(false);
     }
@@ -53,34 +53,36 @@ const Notification = () => {
   const markAsRead = async (notificationId) => {
     try {
       await adminAPI.markNotificationAsRead(notificationId);
-      
+
       // Update local state
-      setNotifications(prev => 
-        prev.map(notif => 
+      setNotifications((prev) =>
+        prev.map((notif) =>
           notif.id === notificationId ? { ...notif, is_read: true } : notif
         )
       );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error("Error marking notification as read:", error);
     }
   };
 
   // Mark all as read
   const markAllAsRead = async () => {
     try {
-      const unreadNotifications = notifications.filter(notif => !notif.is_read);
-      
+      const unreadNotifications = notifications.filter(
+        (notif) => !notif.is_read
+      );
+
       for (const notif of unreadNotifications) {
         await adminAPI.markNotificationAsRead(notif.id);
       }
-      
-      setNotifications(prev => 
-        prev.map(notif => ({ ...notif, is_read: true }))
+
+      setNotifications((prev) =>
+        prev.map((notif) => ({ ...notif, is_read: true }))
       );
       setUnreadCount(0);
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      console.error("Error marking all as read:", error);
     }
   };
 
@@ -100,19 +102,19 @@ const Notification = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   // Format date
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -124,24 +126,24 @@ const Notification = () => {
         className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors"
       >
         {/* Bell Icon */}
-        <svg 
-          className="w-6 h-6" 
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M15 17h5l-5 5v-5zM10.24 8.56a5.97 5.97 0 01-3.79 1.44 5.97 5.97 0 01-3.79-1.44M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 17h5l-5 5v-5zM10.24 8.56a5.97 5.97 0 01-3.79 1.44 5.97 5.97 0 01-3.79-1.44M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
 
         {/* Notification Badge */}
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
@@ -152,7 +154,9 @@ const Notification = () => {
           {/* Header */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Notifications
+              </h3>
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
@@ -173,17 +177,17 @@ const Notification = () => {
               </div>
             ) : notifications.length === 0 ? (
               <div className="p-6 text-center">
-                <svg 
-                  className="w-12 h-12 text-gray-300 mx-auto mb-3" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-12 h-12 text-gray-300 mx-auto mb-3"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={1} 
-                    d="M15 17h5l-5 5v-5zM10.24 8.56a5.97 5.97 0 01-3.79 1.44 5.97 5.97 0 01-3.79-1.44M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M15 17h5l-5 5v-5zM10.24 8.56a5.97 5.97 0 01-3.79 1.44 5.97 5.97 0 01-3.79-1.44M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
                 <p className="text-gray-500">No notifications yet</p>
@@ -194,7 +198,7 @@ const Notification = () => {
                   <div
                     key={notification.id}
                     className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                      !notification.is_read ? 'bg-blue-50' : ''
+                      !notification.is_read ? "bg-blue-50" : ""
                     }`}
                     onClick={() => markAsRead(notification.id)}
                   >
@@ -210,7 +214,7 @@ const Notification = () => {
                           {formatDate(notification.created_at)}
                         </p>
                       </div>
-                      
+
                       {/* Unread indicator */}
                       {!notification.is_read && (
                         <div className="w-2 h-2 bg-blue-500 rounded-full ml-2 mt-1"></div>
@@ -228,7 +232,7 @@ const Notification = () => {
               onClick={fetchNotifications}
               className="w-full text-center text-sm text-blue-600 hover:text-blue-800 font-medium py-2"
             >
-              View All Notifications
+              View All msg
             </button>
           </div>
         </div>
