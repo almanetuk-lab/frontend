@@ -98,17 +98,20 @@ export const UserProfileProvider = ({ children }) => {
           age: userProfile.age || "",
           profession: userProfile.profession || "",
           company: userProfile.company || "",
+            position: userProfile.position || "",  // ✅ ADD THIS
+  company_type: userProfile.company_type || "", // ✅ ADD THIS
           experience: userProfile.experience || "",
           education: userProfile.education || "",
           headline: userProfile.headline || "",
           about: userProfile.about || "",
           skills: Array.isArray(userProfile.skills) ? userProfile.skills : (userProfile.skills || []),
+          hobbies: Array.isArray(userProfile.hobbies) ? userProfile.hobbies : (userProfile.hobbies || []),
           interests: Array.isArray(userProfile.interests) ? userProfile.interests : (userProfile.interests || []),
           id: userProfile.id || null,
 
-          // shraddha (new code start)
+        
           user_id: userProfile.user_id || null, // required fix for payment
-          // shraddha (new code end)
+         
 
           is_submitted: userProfile.is_submitted || false,
           profile_picture_url: userProfile.profile_picture_url || "",
@@ -120,10 +123,8 @@ export const UserProfileProvider = ({ children }) => {
         console.log("✅ Setting FRESH profile:", completeProfile);
         setProfile(completeProfile);
 
-        // shraddha (new code start)
         // ⭐ IMPORTANT: Save user_id for payment operations ⭐
         localStorage.setItem("user_id", completeProfile.user_id);
-        // shraddha (new code end)
 
         localStorage.setItem("userProfile", JSON.stringify(completeProfile));
       } else {
