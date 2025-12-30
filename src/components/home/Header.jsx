@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
 import NotificationBell from "../notifybell/NotificationBell";
-import logo from "../../assets/logo.png";
+import logoo from "../../assets/logoo.png";
 import { FaLinkedin, FaFacebook, FaTwitter } from "react-icons/fa";
 
 // Main Header Component
@@ -116,22 +116,17 @@ function Header() {
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Main Header Row */}
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-0">
           
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="inline-block">
               {/* Logo Image (Aapke original ke according) */}
               <img 
-                src={logo} 
+                src={logoo} 
                 alt="Logo"
-                className="h-12 w-auto object-contain"
+                className="h-20 w-30"
               />
-              {/* OR Text logo:
-              <div className="text-2xl font-bold text-[#4D6D9E] tracking-wider">
-                LOGO
-              </div>
-              */}
             </Link>
           </div>
 
@@ -257,7 +252,7 @@ function Header() {
                 {/* Logout Button - Original preserved */}
                 <button
                   onClick={handleLogout}
-                  className="bg-[#FF66CC] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#ff4dc2] transition-all duration-200"
+                  className="bg-[#727bf1] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#041cfa] transition-all duration-200"
                 >
                   Logout
                 </button>
@@ -281,7 +276,7 @@ function Header() {
 
                 <Link
                   to="/register"
-                  className="bg-[#FF66CC] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#ff4dc2] transition-all duration-200"
+                  className="bg-[#727bf1] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#041cfa] transition-all duration-200"
                 >
                   Register Free
                 </Link>
