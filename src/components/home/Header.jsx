@@ -252,7 +252,7 @@ function Header() {
                 {/* Logout Button - Original preserved */}
                 <button
                   onClick={handleLogout}
-                  className="bg-[#FF66CC] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#ff4dc2] transition-all duration-200"
+                  className="bg-[#727bf1] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#041cfa] transition-all duration-200"
                 >
                   Logout
                 </button>
