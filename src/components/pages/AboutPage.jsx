@@ -46,7 +46,7 @@ const img1 ="./images/1.jpg";
           {/* Right Side - Image */}
           <div className="rounded-2xl overflow-hidden shadow-xl">
             <img 
-              src="/images/0.jpg.jpg"
+              src="/images/five.jpg"
             // src={img1}
               alt="Professional life demands"
               className="w-full h-[400px] object-cover"
@@ -65,7 +65,7 @@ const img1 ="./images/1.jpg";
             <div className="order-2 md:order-1">
               <div className="rounded-xl overflow-hidden shadow-lg">
                 <img 
-                  src="/images/7.jpg.jpg" 
+                  src="/images/eight.jpg" 
                   alt="Calm and deliberate connection"
                   className="w-full h-[350px] object-cover"
                 />
@@ -112,7 +112,7 @@ const img1 ="./images/1.jpg";
               {/* Image from PDF */}
               <div className="mt-8 rounded-xl overflow-hidden">
                 <img 
-                  src="/images/12.jpg.jpg"
+                  src="/images/three.jpg"
                   alt="Meaningful connections"
                   className="w-full h-[300px] object-cover"
                 />
