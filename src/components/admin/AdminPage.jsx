@@ -14,9 +14,9 @@ const AdminDashboard = () => {
   const [plans, setPlans] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false); // New state for mobile sidebar
 
-  // for admin usestate// 
-const [memberApproval, setMemberApproval] = useState(0);
-const [settingsLoading, setSettingsLoading] = useState(false);
+  // for admin usestate//
+  const [memberApproval, setMemberApproval] = useState(0);
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
   //We are getting Admin details from Localstorage :-
   let [loggedInUser, setLoggedInUser] = useState({});
@@ -29,41 +29,39 @@ const [settingsLoading, setSettingsLoading] = useState(false);
 
   // autoapprove setting fetching here...
   useEffect(() => {
-  if (activeSection === "settings") {
-    fetchMemberApproval();
-  }
-}, [activeSection]);
+    if (activeSection === "settings") {
+      fetchMemberApproval();
+    }
+  }, [activeSection]);
 
-
-  // Member_approval function end here ---- 
+  // Member_approval function end here ----
 
   // 🔥 FETCH CURRENT SETTING
-const fetchMemberApproval = async () => {
-  try {
-    const response = await adminAPI.getMemberApproval(); // GET API
-    setMemberApproval(response.data.member_approval);
-  } catch (error) {
-    console.error("Failed to fetch setting", error);
-  }
-};
+  const fetchMemberApproval = async () => {
+    try {
+      const response = await adminAPI.getMemberApproval(); // GET API
+      setMemberApproval(response.data.member_approval);
+    } catch (error) {
+      console.error("Failed to fetch setting", error);
+    }
+  };
 
+  //  UPDATE SETTING (ON / OFF)
+  const updateMemberApproval = async (value) => {
+    try {
+      setSettingsLoading(true);
+      setMemberApproval(value); // optimistic UI
 
-//  UPDATE SETTING (ON / OFF)
-const updateMemberApproval = async (value) => {
-  try {
-    setSettingsLoading(true);
-    setMemberApproval(value); // optimistic UI
-
-    await adminAPI.updateMemberApproval({
-      member_approval: value, // 1 or 0
-    });
-  } catch (error) {
-    console.error("Failed to update setting", error);
-    alert("Failed to update setting");
-  } finally {
-    setSettingsLoading(false);
-  }
-};
+      await adminAPI.updateMemberApproval({
+        member_approval: value, // 1 or 0
+      });
+    } catch (error) {
+      console.error("Failed to update setting", error);
+      alert("Failed to update setting");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -140,8 +138,6 @@ const updateMemberApproval = async (value) => {
       setUserDetailsLoading(false);
     }
   };
-
-
 
   // Filter users based on status
   const filteredUsers = usersData.filter((user) => {
@@ -401,6 +397,14 @@ const updateMemberApproval = async (value) => {
                   value: selectedUser.company || "Not specified",
                 },
                 {
+                  label: "Position",
+                  value: selectedUser.position || "Not specified", // ✅ NEW FIELD
+                },
+                {
+                  label: "Company Type",
+                  value: selectedUser.company_type || "Not specified", // ✅ NEW FIELD
+                },
+                {
                   label: "Experience",
                   value: selectedUser.experience
                     ? `${selectedUser.experience} year(s)`
@@ -449,6 +453,18 @@ const updateMemberApproval = async (value) => {
                 {
                   label: "Address",
                   value: selectedUser.address || "Not specified",
+                },
+                {
+                  label: "Country",
+                  value: selectedUser.country || "Not specified",
+                },
+                {
+                  label: "State",
+                  value: selectedUser.state || "Not specified",
+                },
+                {
+                  label: "Pincode",
+                  value: selectedUser.pincode || "Not specified",
                 },
               ].map((field, index) => (
                 <div key={index}>
@@ -527,6 +543,37 @@ const updateMemberApproval = async (value) => {
                     {selectedUser.about || "No description provided"}
                   </p>
                 </div>
+              </div>
+              {/* Hobbies - ✅ NEW FIELD */}
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  Hobbies
+                </label>
+                <div className="p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[80px]">
+                  {selectedUser.hobbies && selectedUser.hobbies.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {Array.isArray(selectedUser.hobbies) ? (
+                        selectedUser.hobbies.map((hobby, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded"
+                          >
+                            {hobby}
+                          </span>
+                        ))
+                      ) : (
+                        <p className="text-gray-900 text-sm sm:text-base">
+                          {selectedUser.hobbies}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm sm:text-base">
+                      Not specified
+                    </p>
+                  )}
+                </div>
+                {/* {/* </div> */}
               </div>
 
               {/* Account Information */}
@@ -869,51 +916,49 @@ const updateMemberApproval = async (value) => {
                 Settings content will be displayed here.
               </p> */}
               {/* start code for button */}
-               {/* 🔥 MEMBER APPROVAL TOGGLE */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium text-gray-700">
-              Member Approval
-            </p>
-            <p className="text-sm text-gray-500">
-              Enable or disable manual member approval
-            </p>
-          </div>
+              {/* 🔥 MEMBER APPROVAL TOGGLE */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-700">Member Approval</p>
+                  <p className="text-sm text-gray-500">
+                    Enable or disable manual member approval
+                  </p>
+                </div>
 
-          {/* 🔥 TOGGLE BUTTON */}
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={memberApproval === 1}
-              onChange={(e) =>
-                updateMemberApproval(e.target.checked ? 1 : 0)
-              }
-              disabled={settingsLoading}
-            />
-            <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 
+                {/* 🔥 TOGGLE BUTTON */}
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={memberApproval === 1}
+                    onChange={(e) =>
+                      updateMemberApproval(e.target.checked ? 1 : 0)
+                    }
+                    disabled={settingsLoading}
+                  />
+                  <div
+                    className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 
               after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
               after:bg-white after:rounded-full after:h-5 after:w-5 
-              after:transition-all peer-checked:after:translate-x-full">
-            </div>
-          </label>
-        </div>
+              after:transition-all peer-checked:after:translate-x-full"
+                  ></div>
+                </label>
+              </div>
 
-        {/* 🔥 LOADING TEXT */}
-        {settingsLoading && (
-          <p className="text-sm text-gray-400 mt-2">
-            Updating setting...
-          </p>
-        )}
-  {/* end code of button     */}
+              {/* 🔥 LOADING TEXT */}
+              {settingsLoading && (
+                <p className="text-sm text-gray-400 mt-2">
+                  Updating setting...
+                </p>
+              )}
+              {/* end code of button     */}
             </div>
-
           </div>
         );
 
-        //     </div>
-        //   </div>
-        // );
+      //     </div>
+      //   </div>
+      // );
 
       case "logs":
         return (
@@ -945,9 +990,9 @@ const updateMemberApproval = async (value) => {
       case "blogs":
         return (
           <div className="p-4 sm:p-6">
-                {loggedInUser &&<AdminBlog user={loggedInUser} />}
-            </div>
-         );
+            {loggedInUser && <AdminBlog user={loggedInUser} />}
+          </div>
+        );
 
       default:
         return (
@@ -1072,6 +1117,3 @@ const updateMemberApproval = async (value) => {
 };
 
 export default AdminDashboard;
-
-
-

@@ -335,6 +335,17 @@ export default function ProfilePage() {
               <InfoItem label="Headline" value={displayProfile.headline} />
               <InfoItem label="Profession" value={displayProfile.profession} />
               <InfoItem label="Company" value={displayProfile.company} />
+                {/* Position */}
+  <InfoItem 
+    label="Position" 
+    value={displayProfile.position} 
+  />
+   {/* Company Type */}
+  <InfoItem 
+    label="Company Type" 
+    value={displayProfile.company_type} 
+  />
+ 
               <InfoItem
                 label="Experience"
                 value={
@@ -349,7 +360,17 @@ export default function ProfilePage() {
             {/* About & Skills */}
             <Section title="About Me">
               <InfoItem label="About" value={displayProfile.about} full />
+               {/* Hobbies */}
+  <InfoItem 
+    label="Hobbies" 
+    value={
+      Array.isArray(displayProfile.hobbies) 
+        ? displayProfile.hobbies.join(", ")
+        : displayProfile.hobbies
+    } 
+  />
             </Section>
+            
 
             <Section title="Skills & Interests">
               <InfoItem

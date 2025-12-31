@@ -172,6 +172,9 @@ export default function EditProfilePage() {
     skills: "",
     interests: "",
     headline: "",
+    position: "", // ✅ ADD THIS
+    hobbies: "", // ✅ ADD THIS
+    company_type: "", // Add this
   });
 
   const [loading, setLoading] = useState(false);
@@ -245,6 +248,9 @@ export default function EditProfilePage() {
         skills: formatArrayField(profile.skills),
         interests: formatArrayField(profile.interests),
         headline: formatField(profile.headline),
+        position: formatField(profile.position) || "", // ✅ ADD THIS
+        hobbies: formatArrayField(profile.hobbies) || "", // ✅ ADD THIS
+        company_type: formatField(profile.company_type) || "", // ✅ ADD THIS
       });
 
       // ✅ Set current profile image preview
@@ -434,9 +440,11 @@ export default function EditProfilePage() {
         // Professional Information
         profession: formData.profession?.trim() || null,
         company: formData.company?.trim() || null,
+        company_type: formData.company_type?.trim() || null, // ✅ ADD THIS
         experience: formData.experience ? parseInt(formData.experience) : null,
         education: formData.education?.trim() || null,
         headline: formData.headline?.trim() || null,
+        position: formData.position?.trim() || null, // ✅ ADD THIS
 
         // Additional Information
         about: formData.about?.trim() || null,
@@ -451,6 +459,13 @@ export default function EditProfilePage() {
               .split(",")
               .map((interest) => interest.trim())
               .filter((interest) => interest !== "")
+          : [],
+
+        hobbies: formData.hobbies // ✅ ADD THIS
+          ? formData.hobbies
+              .split(",")
+              .map((hobby) => hobby.trim())
+              .filter((hobby) => hobby !== "")
           : [],
       };
 
@@ -494,12 +509,15 @@ export default function EditProfilePage() {
         age: payload.age || "",
         profession: payload.profession || "",
         company: payload.company || "",
+        company_type: payload.company_type || "", // ✅ ADD THIS
         experience: payload.experience || "",
         education: payload.education || "",
         headline: payload.headline || "",
+        position: payload.position || "", // add this new
         about: payload.about || "",
         skills: payload.skills || [],
         interests: payload.interests || [],
+        hobbies: payload.hobbies || [], // ✅ ADD THIS
       };
 
       console.log("🔄 Updating context with:", updatedProfile);
@@ -830,6 +848,35 @@ export default function EditProfilePage() {
                 onChange={handleChange}
                 placeholder="Google Inc."
               />
+              {/* Position */}
+              <FormField
+                label="Position"
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
+                placeholder="Software Engineer"
+              />
+
+              {/* Company Type - Dropdown */}
+              <div className="flex flex-col">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Company Type
+                </label>
+                <select
+                  name="company_type"
+                  value={formData.company_type}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select Type</option>
+                  <option value="MNC">MNC</option>
+                  <option value="Startup">Startup</option>
+                  <option value="SME">SME</option>
+                  <option value="Government">Government</option>
+                  <option value="NGO">NGO</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
               <FormField
                 label="Experience (years)"
                 name="experience"
@@ -857,6 +904,16 @@ export default function EditProfilePage() {
               onChange={handleChange}
               rows={4}
               placeholder="Tell us about yourself, your background, and your interests..."
+            />
+
+            {/* Hobbies */}
+            <FormField
+              label="Hobbies (comma separated)"
+              name="hobbies"
+              value={formData.hobbies}
+              onChange={handleChange}
+              placeholder="Reading, Traveling, Sports"
+              helpText="Enter hobbies separated by commas"
             />
           </Section>
 

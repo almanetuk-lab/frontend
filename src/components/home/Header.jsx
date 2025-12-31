@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
 import NotificationBell from "../notifybell/NotificationBell";
-import logo from "../../assets/logo.png";
+import logoo from "../../assets/logoo.png";
+import bglogo from "../../assets/bglogo.png";
 import { FaLinkedin, FaFacebook, FaTwitter } from "react-icons/fa";
 
 // Main Header Component
@@ -57,35 +58,34 @@ function Header() {
   }, []);
 
   useEffect(() => {
-  // Function to get cart count
-  const getCartCount = () => {
-    try {
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      return cart.length;
-    } catch {
-      return 0;
-    }
-  };
-  
-  // Update cart count
-  const updateCartCount = () => {
-    const count = getCartCount();
-    setCartCount(count);
-    console.log("🛒 Cart count:", count);
-  };
-  
-  // Initial update
-  updateCartCount();
-  
-  // Listen for cart updates
-  window.addEventListener("cartUpdated", updateCartCount);
-  
-  // Cleanup
-  return () => {
-    window.removeEventListener("cartUpdated", updateCartCount);
-  };
-}, []);
+    // Function to get cart count
+    const getCartCount = () => {
+      try {
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        return cart.length;
+      } catch {
+        return 0;
+      }
+    };
 
+    // Update cart count
+    const updateCartCount = () => {
+      const count = getCartCount();
+      setCartCount(count);
+      console.log("🛒 Cart count:", count);
+    };
+
+    // Initial update
+    updateCartCount();
+
+    // Listen for cart updates
+    window.addEventListener("cartUpdated", updateCartCount);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("cartUpdated", updateCartCount);
+    };
+  }, []);
 
   // useEffect(() => {
   //   const updateCartCount = () => {
@@ -116,22 +116,15 @@ function Header() {
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Main Header Row */}
-        <div className="flex justify-between items-center py-4">
-          
+        <div className="flex justify-between items-center py-0">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="inline-block">
-              {/* Logo Image (Aapke original ke according) */}
-              <img 
-                src={logo} 
+              <img
+                src={bglogo}
                 alt="Logo"
-                className="h-12 w-auto object-contain"
+                className="h-20 w-auto object-contain"
               />
-              {/* OR Text logo:
-              <div className="text-2xl font-bold text-[#4D6D9E] tracking-wider">
-                LOGO
-              </div>
-              */}
             </Link>
           </div>
 
@@ -204,7 +197,7 @@ function Header() {
                   Blogs
                 </Link>
               </li>
-{/* 
+              {/* 
               {/* Social Links /}
               <li className="flex items-center gap-4 ml-4">
                 <a 
@@ -257,7 +250,7 @@ function Header() {
                 {/* Logout Button - Original preserved */}
                 <button
                   onClick={handleLogout}
-                  className="bg-[#FF66CC] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#ff4dc2] transition-all duration-200"
+                  className="bg-[#727bf1] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#041cfa] transition-all duration-200"
                 >
                   Logout
                 </button>
@@ -281,7 +274,7 @@ function Header() {
 
                 <Link
                   to="/register"
-                  className="bg-[#FF66CC] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#ff4dc2] transition-all duration-200"
+                  className="bg-[#727bf1] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#041cfa] transition-all duration-200"
                 >
                   Register Free
                 </Link>
@@ -383,7 +376,7 @@ function Header() {
                     Home
                   </Link>
                 </li>
-                
+
                 {/* ADDED: About Us Link in Mobile */}
                 <li>
                   <Link
@@ -437,7 +430,7 @@ function Header() {
                     Contact Us
                   </Link>
                 </li>
-                
+
                 <li>
                   <Link
                     to="/blog"
@@ -452,22 +445,22 @@ function Header() {
 
             {/* Social Links in Mobile Menu */}
             <div className="flex justify-center gap-4 mb-6">
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-500 hover:text-[#4D6D9E] transition-colors"
                 aria-label="LinkedIn"
               >
                 <FaLinkedin size={20} />
               </a>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-500 hover:text-[#4D6D9E] transition-colors"
                 aria-label="Facebook"
               >
                 <FaFacebook size={20} />
               </a>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="text-gray-500 hover:text-[#4D6D9E] transition-colors"
                 aria-label="Twitter"
               >
@@ -507,7 +500,7 @@ function Header() {
                   >
                     Admin Login
                   </Link>
-                  
+
                   <Link
                     to="/login"
                     className="block py-3 px-4 text-center text-gray-700 hover:text-[#4D6D9E] hover:bg-gray-50 rounded-lg border border-gray-300 transition-colors font-medium"
@@ -515,7 +508,7 @@ function Header() {
                   >
                     Login
                   </Link>
-                  
+
                   <Link
                     to="/register"
                     className="block py-3 px-4 text-center bg-[#FF66CC] text-white rounded-lg font-semibold hover:bg-[#ff4dc2] transition-colors"
@@ -534,6 +527,68 @@ function Header() {
 }
 
 export default Header;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -674,8 +729,8 @@ export default Header;
 //           {/* Logo */}
 //           <div className="flex items-center">
 //             <Link to="/" className="inline-block">
-//                <img 
-//         src={logo} 
+//                <img
+//         src={logo}
 //         alt="Logo"
 //    className="h-14 sm:h-16 w-auto object-contain"
 //       />
@@ -1005,7 +1060,7 @@ export default Header;
 //                   >
 //                     Admin Login
 //                   </Link>
-                  
+
 //                   <Link
 //                     to="/login"
 //                     className="block py-3 px-4 text-center text-[#F5F5F5] hover:text-[#FF66CC] hover:bg-[#8F8DA5] rounded-lg border border-[#8F8DA5] transition-colors"
@@ -1031,14 +1086,3 @@ export default Header;
 // }
 
 // export default Header;
-
-
-
-
-
-
-
-
-
-
-
