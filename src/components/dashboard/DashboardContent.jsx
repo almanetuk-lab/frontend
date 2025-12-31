@@ -545,7 +545,7 @@ export default function DashboardHome({ profile }) {
                   <StatCard
                     label="Profile Views"
                     value={loading ? "..." : profileViews.toString()}
-                    trend="+12%"
+                    // trend="+12%"
                   />
                 </div>
                 <div onClick={() => navigate("/dashboard/matches")}>
@@ -553,21 +553,21 @@ export default function DashboardHome({ profile }) {
                     label="Matches"
                     // value={loading ? "..." : matchesCount.toString()}
                     value={loading ? "..." : (matchesCount || 155).toString()}
-                    trend="+5%"
+                    // trend="+5%"
                   />
                 </div>
                 <div>
                   <StatCard
                     label="Connections"
                     value={loading ? "..." : connectionsCount.toString()}
-                    trend="+8%"
+                    // trend="+8%"
                   />
                 </div>
                 <div onClick={() => navigate("/dashboard/messages")}>
                   <StatCard
                     label="Messages"
                     value={loading ? "..." : messagesCount.toString()}
-                    trend="+3%"
+                    // trend="+3%"
                   />
                 </div>
               </div>

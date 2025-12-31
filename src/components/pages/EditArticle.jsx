@@ -53,7 +53,7 @@ export default function EditArticle({ user }) {
 
   if (!article) return <div className="text-center py-10">Loading…</div>;
 
-  console.log("Content HTML:", contentHtml);
+  //console.log("Content HTML:", contentHtml);
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white p-4 rounded shadow mb-4">

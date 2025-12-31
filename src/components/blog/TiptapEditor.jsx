@@ -9,9 +9,10 @@ import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import { Extension } from "@tiptap/core";
 
-/* 🔹 Custom Font Size */
+/* 🔹 Custom Font Size Extension */
 const FontSize = Extension.create({
   name: "fontSize",
+
   addGlobalAttributes() {
     return [
       {
@@ -19,7 +20,13 @@ const FontSize = Extension.create({
         attributes: {
           fontSize: {
             default: null,
-            parseHTML: (element) => element.style.fontSize,
+            parseHTML: (element) => {
+              const parent = element.parentElement?.tagName?.toLowerCase();
+              if (["h1", "h2", "h3", "ul", "ol", "li"].includes(parent)) {
+                return null;
+              }
+              return element.style.fontSize;
+            },
             renderHTML: (attributes) => {
               if (!attributes.fontSize) return {};
               return { style: `font-size: ${attributes.fontSize}` };
@@ -29,12 +36,14 @@ const FontSize = Extension.create({
       },
     ];
   },
+
   addCommands() {
     return {
       setFontSize:
         (size) =>
         ({ chain }) =>
           chain().setMark("textStyle", { fontSize: size }).run(),
+
       unsetFontSize:
         () =>
         ({ chain }) =>
@@ -50,10 +59,16 @@ export default function TiptapEditor({ content = "", onChange }) {
       TextStyle,
       Color,
       FontSize,
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
+      Underline,
       Image,
+      TextAlign.configure({
+        types: ["heading", "paragraph","listItem"],
+      }),
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        linkOnPaste: true,
+      }),
     ],
     content,
     onUpdate({ editor }) {
@@ -61,7 +76,7 @@ export default function TiptapEditor({ content = "", onChange }) {
     },
   });
 
- useEffect(() => {
+  useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content || "", false);
     }
@@ -75,97 +90,132 @@ export default function TiptapEditor({ content = "", onChange }) {
       <div className="flex flex-wrap gap-2 p-2 border-b bg-gray-100">
         {/* Headings */}
         <button
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 1 }).run()
-          }
+          type="button"
           className="btn"
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .unsetFontSize()
+              .toggleHeading({ level: 1 })
+              .run()
+          }
         >
           H1
         </button>
+
         <button
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
+          type="button"
           className="btn"
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .unsetFontSize()
+              .toggleHeading({ level: 2 })
+              .run()
+          }
         >
           H2
         </button>
+
         <button
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 3 }).run()
-          }
+          type="button"
           className="btn"
+          onClick={() =>
+            editor
+              .chain()
+              .focus()
+              .unsetFontSize()
+              .toggleHeading({ level: 3 })
+              .run()
+          }
         >
           H3
         </button>
 
         {/* Text Styles */}
         <button
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().toggleBold().run()}
         >
           B
         </button>
+
         <button
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
         >
           I
         </button>
+
         <button
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
         >
           U
         </button>
 
         {/* Alignment */}
         <button
-          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
         >
           ⬅
         </button>
+
         <button
-          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
         >
           ⬆
         </button>
+
         <button
-          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
         >
           ➡
         </button>
+
         <button
-          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
         >
           ☰
         </button>
 
         {/* Lists */}
         <button
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
           • List
         </button>
+
         <button
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
           1. List
         </button>
 
         {/* Font Size */}
         <select
+          className="border px-2"
+          defaultValue=""
           onChange={(e) =>
             editor.chain().focus().setFontSize(e.target.value).run()
           }
-          className="border px-2"
-          defaultValue=""
         >
           <option value="" disabled>
             Font
@@ -187,8 +237,10 @@ export default function TiptapEditor({ content = "", onChange }) {
 
         {/* Link */}
         <button
+          type="button"
+          className="btn"
           onClick={() => {
-            const url = prompt("Enter link");
+            const url = prompt("Enter URL");
             if (!url) return;
             editor
               .chain()
@@ -197,41 +249,45 @@ export default function TiptapEditor({ content = "", onChange }) {
               .setLink({ href: url })
               .run();
           }}
-          className="btn"
         >
           🔗
         </button>
 
         {/* Image */}
         <button
+          type="button"
+          className="btn"
           onClick={() => {
             const url = prompt("Image URL");
             if (url) editor.chain().focus().setImage({ src: url }).run();
           }}
-          className="btn"
         >
           🖼️
         </button>
 
         {/* Undo / Redo */}
         <button
-          onClick={() => editor.chain().focus().undo().run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().undo().run()}
         >
           ↩
         </button>
+
         <button
-          onClick={() => editor.chain().focus().redo().run()}
+          type="button"
           className="btn"
+          onClick={() => editor.chain().focus().redo().run()}
         >
           ↪
         </button>
       </div>
 
       {/* 🔹 EDITOR */}
+      {/* changes */}
       <EditorContent
         editor={editor}
-        className="editor min-h-[300px] p-4 focus:outline-none"
+        className="editor-content min-h-[300px] p-4 focus:outline-none"
       />
     </div>
   );
