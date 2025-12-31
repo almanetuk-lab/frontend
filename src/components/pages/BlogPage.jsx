@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAll, getOne } from "../services/blogAPI";
-
+import { getPlainText } from "../blog/contentUtilis";
 const BlogPage = () => {
   const [blogs, setBlogs] = useState([]);
 
@@ -237,9 +237,15 @@ const BlogPage = () => {
                       </h3>
 
                       {/* Excerpt */}
-                      <p className="text-gray-600 mb-4 line-clamp-3">
+                      {/* <p className="text-gray-600 mb-4 line-clamp-3">
                         {post.content}
-                      </p>
+                      </p> */}
+
+                       {/* kashish new code  */}
+                      <div className="text-gray-600 mb-4 line-clamp-3">
+                        {getPlainText(post.content)}
+                      </div>
+                           {/* code end */}
 
                       {/* Read More Button - AMBER COLOR */}
                       <button
