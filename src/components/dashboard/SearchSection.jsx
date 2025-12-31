@@ -270,11 +270,11 @@ useEffect(() => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Search by name, profession, skills, or interests
+                      Search by Name
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Doctor, JavaScript, Traveling, Mumbai..."
+                      placeholder="e.g. Yeshwant Maheshram "
                       value={filters.basicSearch}
                       onChange={(e) =>
                         handleInputChange("basicSearch", e.target.value)
@@ -290,7 +290,7 @@ useEffect(() => {
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. Developer, Doctor"
+                        placeholder="e.g. Developer,Teacher"
                         value={filters.profession}
                         onChange={(e) =>
                           handleInputChange("profession", e.target.value)
@@ -305,7 +305,7 @@ useEffect(() => {
                       </label>
                       <input
                         type="text"
-                        placeholder="Enter city"
+                        placeholder="e.g. Indore, Mumbai"
                         value={filters.city}
                         onChange={(e) => handleInputChange("city", e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -574,7 +574,7 @@ useEffect(() => {
                     </div>
                   </div>
                 </div>
-              </form>
+              </form> 
             )}
           </div>
 
@@ -718,9 +718,32 @@ useEffect(() => {
 
 
 
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // // src/components/chatsystem/AdvancedSearch.jsx
 // import React, { useEffect, useState } from "react";
 // import { adminAPI } from "../services/adminApi";
+// import api from "../services/api";
 // export default function AdvancedSearch() {
 //   const [activeTab, setActiveTab] = useState("basic");
 //   const [loading, setLoading] = useState(false);
@@ -743,7 +766,11 @@ useEffect(() => {
 //     lat: "",
 //     lon: "",
 //   });
-
+//   const [plan, setPlan] = useState({
+//     loading: true,
+//     active: false,
+//     daysLeft: 0,
+//   });
 //   /* improved geolocation handling (alert removed earlier, now clean console logging) */
 //   const getLiveLocation = () => {
 //     if (!navigator.geolocation) {
@@ -755,7 +782,11 @@ useEffect(() => {
 //       (pos) => {
 //         handleInputChange("lat", pos.coords.latitude);
 //         handleInputChange("lon", pos.coords.longitude);
-//         console.log("GPS location fetched:", pos.coords.latitude, pos.coords.longitude);
+//         console.log(
+//           "GPS location fetched:",
+//           pos.coords.latitude,
+//           pos.coords.longitude
+//         );
 //       },
 //       () => {
 //         alert("Location permission denied. Please allow location access.");
@@ -764,14 +795,32 @@ useEffect(() => {
 //     );
 //   };
 
-//   /*  — auto-detect GPS when switching to Near Me */
+//   useEffect(() => {
+//     const fetchPlanStatus = async () => {
+//       try {
+//         const res = await api.get("api/me/plan-status");
+//         setPlan({
+//           loading: false,
+//           active: res.data?.active,
+//           daysLeft: res.data?.days_left,
+//         });
+//       } catch (err) {
+//         setPlan({
+//           loading: false,
+//           active: false,
+//           daysLeft: 0,
+//         });
+//       }
+//     };
+
+//     fetchPlanStatus();
+//   }, []);
 //   useEffect(() => {
 //     if (activeTab === "nearme" && !filters.lat && !filters.lon) {
 //       getLiveLocation();
 //     }
 //   }, [activeTab]);
 
-//   /*  — new tab change logic resets age/state and radius properly */
 //   const handleTabChange = (tabId) => {
 //     setActiveTab(tabId);
 
@@ -797,11 +846,16 @@ useEffect(() => {
 //       }));
 //     }
 //   };
-  
 
-//   /*  — improved number normalization */
 //   const handleInputChange = (field, value) => {
-//     const numFields = ["min_age", "max_age", "radius", "lat", "lon"];
+//     const numFields = [
+//       "min_age",
+//       "max_age",
+//       "radius",
+//       "lat",
+//       "lon",
+//       "distance",
+//     ];
 //     if (numFields.includes(field)) {
 //       const normalized = value === "" || value === null ? "" : Number(value);
 //       setFilters((prev) => ({ ...prev, [field]: normalized }));
@@ -811,19 +865,24 @@ useEffect(() => {
 //   };
 
 //   const performSearch = async () => {
+//     if (activeTab === "advanced" && !plan.active) {
+//       alert(
+//         "Your subscription has expired. Please upgrade to use Advanced Search."
+//       );
+//       return;
+//     }
+
 //     setLoading(true);
 //     setSearchResults([]);
 
 //     try {
 //       let searchParams = {};
 
-//       /*input cleaner (trim all text safely) */
 //       const cleanValue = (val) => {
 //         if (val === undefined || val === null) return "";
 //         if (typeof val === "string") return val.trim();
 //         return val;
 //       };
-    
 
 //       /*  — updated BASIC search param mapping */
 //       if (activeTab === "basic") {
@@ -835,10 +894,8 @@ useEffect(() => {
 //         if (filters.profession)
 //           searchParams.profession = cleanValue(filters.profession);
 
-//         if (filters.city)
-//           searchParams.city = cleanValue(filters.city);
+//         if (filters.city) searchParams.city = cleanValue(filters.city);
 //       }
-
 
 //       /* — updated ADVANCED mode mapping */
 //       if (activeTab === "advanced") {
@@ -911,6 +968,21 @@ useEffect(() => {
 //           <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
 //             Find Your Match
 //           </h2>
+//           {!plan.loading && (
+//             <div
+//               className={`mb-4 p-3 rounded text-center text-sm ${
+//                 plan.active
+//                   ? "bg-green-50 text-green-700 border border-green-200"
+//                   : "bg-red-50 text-red-700 border border-red-200"
+//               }`}
+//             >
+//               {plan.active ? (
+//                 <> Plan active — {plan.daysLeft} days left</>
+//               ) : (
+//                 <>❌ No active subscription</>
+//               )}
+//             </div>
+//           )}
 
 //           {/* Tabs Navigation */}
 //           <div className="flex border-b border-gray-200 mb-6">
@@ -943,17 +1015,19 @@ useEffect(() => {
 //                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
 //                     Quick Search
 //                   </h3>
-//                   <p className="text-gray-600">Find matches with simple keywords</p>
+//                   <p className="text-gray-600">
+//                     Find matches with simple keywords
+//                   </p>
 //                 </div>
 
 //                 <div className="space-y-4">
 //                   <div>
 //                     <label className="block text-sm font-medium text-gray-700 mb-2">
-//                       Search by name, profession, skills, or interests
+//                       Search by Name
 //                     </label>
 //                     <input
 //                       type="text"
-//                       placeholder="e.g. Doctor, JavaScript, Traveling, Mumbai..."
+//                       placeholder="e.g. Yeshwant Maheshram "
 //                       value={filters.basicSearch}
 //                       onChange={(e) =>
 //                         handleInputChange("basicSearch", e.target.value)
@@ -969,7 +1043,7 @@ useEffect(() => {
 //                       </label>
 //                       <input
 //                         type="text"
-//                         placeholder="e.g. Developer, Doctor"
+//                         placeholder="e.g. Developer,Teacher"
 //                         value={filters.profession}
 //                         onChange={(e) =>
 //                           handleInputChange("profession", e.target.value)
@@ -984,9 +1058,11 @@ useEffect(() => {
 //                       </label>
 //                       <input
 //                         type="text"
-//                         placeholder="Enter city"
+//                         placeholder="e.g. Indore, Mumbai"
 //                         value={filters.city}
-//                         onChange={(e) => handleInputChange("city", e.target.value)}
+//                         onChange={(e) =>
+//                           handleInputChange("city", e.target.value)
+//                         }
 //                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                       />
 //                     </div>
@@ -1002,7 +1078,9 @@ useEffect(() => {
 //                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
 //                     Advanced Search
 //                   </h3>
-//                   <p className="text-gray-600">Filter matches with detailed criteria</p>
+//                   <p className="text-gray-600">
+//                     Filter matches with detailed criteria
+//                   </p>
 //                 </div>
 
 //                 {/* Personal Information Section */}
@@ -1050,7 +1128,10 @@ useEffect(() => {
 //                       <button
 //                         type="button"
 //                         onClick={() =>
-//                           handleInputChange("gender", filters.gender === "Male" ? "" : "Male")
+//                           handleInputChange(
+//                             "gender",
+//                             filters.gender === "Male" ? "" : "Male"
+//                           )
 //                         }
 //                         className={`px-6 py-2 border rounded-md transition-colors ${
 //                           filters.gender === "Male"
@@ -1063,7 +1144,10 @@ useEffect(() => {
 //                       <button
 //                         type="button"
 //                         onClick={() =>
-//                           handleInputChange("gender", filters.gender === "Female" ? "" : "Female")
+//                           handleInputChange(
+//                             "gender",
+//                             filters.gender === "Female" ? "" : "Female"
+//                           )
 //                         }
 //                         className={`px-6 py-2 border rounded-md transition-colors ${
 //                           filters.gender === "Female"
@@ -1082,7 +1166,9 @@ useEffect(() => {
 //                     </label>
 //                     <select
 //                       value={filters.marital_status}
-//                       onChange={(e) => handleInputChange("marital_status", e.target.value)}
+//                       onChange={(e) =>
+//                         handleInputChange("marital_status", e.target.value)
+//                       }
 //                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                     >
 //                       <option value="">Any Status</option>
@@ -1101,7 +1187,9 @@ useEffect(() => {
 //                         type="number"
 //                         placeholder="18"
 //                         value={filters.min_age}
-//                         onChange={(e) => handleInputChange("min_age", e.target.value)}
+//                         onChange={(e) =>
+//                           handleInputChange("min_age", e.target.value)
+//                         }
 //                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                       />
 //                     </div>
@@ -1113,7 +1201,9 @@ useEffect(() => {
 //                         type="number"
 //                         placeholder="60"
 //                         value={filters.max_age}
-//                         onChange={(e) => handleInputChange("max_age", e.target.value)}
+//                         onChange={(e) =>
+//                           handleInputChange("max_age", e.target.value)
+//                         }
 //                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                       />
 //                     </div>
@@ -1135,7 +1225,9 @@ useEffect(() => {
 //                         type="text"
 //                         placeholder="e.g. Software Developer"
 //                         value={filters.profession}
-//                         onChange={(e) => handleInputChange("profession", e.target.value)}
+//                         onChange={(e) =>
+//                           handleInputChange("profession", e.target.value)
+//                         }
 //                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                       />
 //                     </div>
@@ -1148,7 +1240,9 @@ useEffect(() => {
 //                         type="text"
 //                         placeholder="e.g. JavaScript, React, Node.js"
 //                         value={filters.skills}
-//                         onChange={(e) => handleInputChange("skills", e.target.value)}
+//                         onChange={(e) =>
+//                           handleInputChange("skills", e.target.value)
+//                         }
 //                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                       />
 //                     </div>
@@ -1161,7 +1255,9 @@ useEffect(() => {
 //                         type="text"
 //                         placeholder="e.g. Traveling, Music, Sports"
 //                         value={filters.interests}
-//                         onChange={(e) => handleInputChange("interests", e.target.value)}
+//                         onChange={(e) =>
+//                           handleInputChange("interests", e.target.value)
+//                         }
 //                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                       />
 //                     </div>
@@ -1170,27 +1266,37 @@ useEffect(() => {
 
 //                 {/* Location Information */}
 //                 <div className="bg-white border border-gray-200 rounded-lg p-6">
-//                   <h4 className="text-lg font-semibold text-gray-800 mb-4">Location</h4>
+//                   <h4 className="text-lg font-semibold text-gray-800 mb-4">
+//                     Location
+//                   </h4>
 
 //                   <div className="grid grid-cols-2 gap-4">
 //                     <div>
-//                       <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+//                       <label className="block text-sm font-medium text-gray-700 mb-2">
+//                         City
+//                       </label>
 //                       <input
 //                         type="text"
 //                         placeholder="City"
 //                         value={filters.city}
-//                         onChange={(e) => handleInputChange("city", e.target.value)}
+//                         onChange={(e) =>
+//                           handleInputChange("city", e.target.value)
+//                         }
 //                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                       />
 //                     </div>
 
 //                     <div>
-//                       <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+//                       <label className="block text-sm font-medium text-gray-700 mb-2">
+//                         State
+//                       </label>
 //                       <input
 //                         type="text"
 //                         placeholder="State"
 //                         value={filters.state}
-//                         onChange={(e) => handleInputChange("state", e.target.value)}
+//                         onChange={(e) =>
+//                           handleInputChange("state", e.target.value)
+//                         }
 //                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                       />
 //                     </div>
@@ -1198,15 +1304,17 @@ useEffect(() => {
 //                 </div>
 //               </form>
 //             )}
-
-//             {/* Near Me Tab */}
 //             {activeTab === "nearme" && (
 //               <form onSubmit={handleSearch} className="space-y-6">
 //                 <div className="text-center mb-6">
-//                   <h3 className="text-xl font-semibold text-gray-800 mb-2">Find Nearby Matches</h3>
-//                   <p className="text-gray-600">Connect with people in your area</p>
-//                 </div>
-
+//                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
+//                     Find Nearby Matches
+//                   </h3>
+//                   <p className="text-gray-600">
+//                     Connect with people in your area
+//                   </p>
+//                 </div>{" "}
+//                 old code
 //                 <div className="bg-white border border-gray-200 rounded-lg p-6">
 //                   <div className="space-y-6">
 //                     <div>
@@ -1218,7 +1326,9 @@ useEffect(() => {
 //                         min="1"
 //                         max="50"
 //                         value={filters.distance}
-//                         onChange={(e) => handleInputChange("distance", e.target.value)}
+//                         onChange={(e) =>
+//                           handleInputChange("distance", e.target.value)
+//                         }
 //                         className="w-full"
 //                         disabled={!filters.lat || !filters.lon}
 //                       />
@@ -1231,22 +1341,30 @@ useEffect(() => {
 
 //                     <div className="grid grid-cols-2 gap-4">
 //                       <div>
-//                         <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+//                         <label className="block text-sm font-medium text-gray-700 mb-2">
+//                           City
+//                         </label>
 //                         <input
 //                           type="text"
 //                           placeholder="Enter city"
 //                           value={filters.city}
-//                           onChange={(e) => handleInputChange("city", e.target.value)}
+//                           onChange={(e) =>
+//                             handleInputChange("city", e.target.value)
+//                           }
 //                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                         />
 //                       </div>
 //                       <div>
-//                         <label className="block text-sm font-medium text-gray-700 mb-2">Radius (km)</label>
+//                         <label className="block text-sm font-medium text-gray-700 mb-2">
+//                           Radius (km)
+//                         </label>
 //                         <input
 //                           type="number"
 //                           placeholder="Search radius"
 //                           value={filters.radius}
-//                           onChange={(e) => handleInputChange("radius", e.target.value)}
+//                           onChange={(e) =>
+//                             handleInputChange("radius", e.target.value)
+//                           }
 //                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 //                         />
 //                       </div>
@@ -1270,7 +1388,11 @@ useEffect(() => {
 //               {loading
 //                 ? "🔍 Searching..."
 //                 : `🔍 Search ${
-//                     activeTab === "basic" ? "Matches" : activeTab === "advanced" ? "Advanced" : "Nearby"
+//                     activeTab === "basic"
+//                       ? "Matches"
+//                       : activeTab === "advanced"
+//                       ? "Advanced"
+//                       : "Nearby"
 //                   }`}
 //             </button>
 //           </div>
@@ -1296,7 +1418,9 @@ useEffect(() => {
 //                         <p className="text-gray-600 text-sm">
 //                           {profile.profession} • {profile.city}
 //                         </p>
-//                         <p className="text-gray-500 text-sm mt-1">{profile.about}</p>
+//                         <p className="text-gray-500 text-sm mt-1">
+//                           {profile.about}
+//                         </p>
 //                       </div>
 //                       <div className="text-right text-sm text-gray-500">
 //                         <p>{profile.age} years</p>
@@ -1310,19 +1434,12 @@ useEffect(() => {
 //           )}
 
 //           {!loading && searchResults.length === 0 && (
-//             <div className="text-center py-8 text-gray-500">No results found. Try adjusting your search criteria.</div>
+//             <div className="text-center py-8 text-gray-500">
+//               No results found. Try adjusting your search criteria.
+//             </div>
 //           )}
 //         </div>
 //       </div>
 //     </div>
 //   );
 // }
-
-
-
-
-
-
-
-
-
