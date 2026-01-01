@@ -60,6 +60,14 @@ import ProfileViews from "./components/pages/ProfileViews";
 
 // import About from './componets/pages/AboutPage.jsx';
 import About from "./components/pages/AboutPage";
+import FallbackPage from "./components/pages/FallbackPage";
+import FacebookPage from "./components/social/FacebookPage";
+import LinkedInPage from "./components/social/LinkedinPage";
+import TwitterPage from "./components/social/TwitterPage";
+
+// import TwitterPage from "./components/SocialPages/TwitterPage";
+// import FacebookPage from "./components/SocialPages/FacebookPage";
+// import LinkedInPage from "./components/SocialPages/LinkedInPage";
 
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
@@ -265,23 +273,22 @@ export default function App() {
           element={
             <MainLayout>
               {/* <UserProtectedRoute> */}
-                <Contact />
+              <Contact />
               {/* </UserProtectedRoute> */}
             </MainLayout>
           }
         />
 
-            <Route
+        <Route
           path="/about"
           element={
             <MainLayout>
               {/* <UserProtectedRoute> */}
-                <About/>
+              <About />
               {/* </UserProtectedRoute> */}
             </MainLayout>
           }
         />
-        
 
         <Route
           path="/blog"
@@ -339,13 +346,45 @@ export default function App() {
           }
         />
 
-          <Route
+        <Route
           path="/profile-views"
           element={
             <MainLayout>
               <UserProtectedRoute>
                 <ProfileViews />
               </UserProtectedRoute>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/coming-soon"
+          element={
+            <MainLayout>
+              <FallbackPage />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/twitter"
+          element={
+            <MainLayout>
+              <TwitterPage />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/facebook"
+          element={
+            <MainLayout>
+              <FacebookPage/>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/linkedin"
+          element={
+            <MainLayout>
+              <LinkedInPage />
             </MainLayout>
           }
         />

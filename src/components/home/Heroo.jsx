@@ -1,11 +1,11 @@
-
 // src/components/Hero.jsx (Optimized for Mobile & Desktop)
 import React, { useEffect } from "react";
 import AOS from "aos";
 import { FaLinkedin, FaApple, FaGoogle } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function Heroo() {
-  const bannerImage = "/images/4.jpg.jpg"; 
+  const bannerImage = "/images/4.jpg.jpg";
 
   useEffect(() => {
     AOS.init({ duration: 1000, once: true });
@@ -13,12 +13,12 @@ export default function Heroo() {
 
   return (
     <section className="relative w-full min-h-[800px] md:min-h-[750px] lg:min-h-[750px] rounded-3xl overflow-hidden shadow-lg bg-gradient-to-r from-[#F8F9FA] to-[#E3F2FD]">
-      
       {/* Container with flex layout */}
       <div className="relative z-10 h-full flex flex-col lg:flex-row">
-        
         {/* MOBILE: Image First (LG se pehle) */}
-        <div className="lg:hidden h-[350px] md:h-[400px] w-full"> {/* Increased height */}
+        <div className="lg:hidden h-[350px] md:h-[400px] w-full">
+          {" "}
+          {/* Increased height */}
           <div className="relative h-full w-full">
             <img
               src={bannerImage}
@@ -31,8 +31,9 @@ export default function Heroo() {
         </div>
 
         {/* LEFT SIDE: Content (50%) */}
-        <div className="lg:w-1/2 h-full flex flex-col justify-center px-4 sm:px-6 md:px-10 lg:px-16 py-8 md:py-12 lg:pt-0"> {/* Reduced padding */}
-          
+        <div className="lg:w-1/2 h-full flex flex-col justify-center px-4 sm:px-6 md:px-10 lg:px-16 py-8 md:py-12 lg:pt-0">
+          {" "}
+          {/* Reduced padding */}
           {/* Main Content */}
           <div className="max-w-2xl mx-auto w-full">
             {/* Main Headline - Smaller fonts */}
@@ -49,7 +50,8 @@ export default function Heroo() {
               data-aos-delay="100"
               className="text-base sm:text-lg md:text-xl text-[#546E7A] mb-6 md:mb-8 max-w-xl"
             >
-              A platform designed around real-life compatibility, not endless swiping or surface-level attraction.
+              A platform designed around real-life compatibility, not endless
+              swiping or surface-level attraction.
             </p>
 
             {/* Description - Smaller */}
@@ -58,29 +60,45 @@ export default function Heroo() {
               data-aos-delay="200"
               className="text-sm sm:text-base text-[#546E7A] mb-8 md:mb-10 max-w-xl"
             >
-              Built for adults who value ambition, personal balance and meaningful connection and want the freedom to explore openly and decide for themselves.
+              Built for adults who value ambition, personal balance and
+              meaningful connection and want the freedom to explore openly and
+              decide for themselves.
             </p>
 
             {/* Waitlist Section */}
-            <div data-aos="fade-up" data-aos-delay="300" className="mb-8 md:mb-10">
-              <h3 className="text-[#2C3E50] text-base md:text-lg mb-4 md:mb-6 font-medium">
-                Join the waitlist
-              </h3>
-              
+            <div
+              data-aos="fade-up"
+              data-aos-delay="300"
+              className="mb-8 md:mb-10"
+            >
               {/* Social Login Buttons - Better mobile */}
               <div className="flex flex-col sm:flex-row gap-3 mb-4 md:mb-6">
-                <button className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-[#0077B5] text-white rounded-lg font-medium hover:opacity-90 transition shadow-sm hover:shadow-md w-full sm:w-auto text-sm md:text-base">
+                <Link
+                  to="/linkedin"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-[#0077B5] text-white rounded-lg font-medium hover:opacity-90 transition shadow-sm hover:shadow-md w-full sm:w-auto text-sm md:text-base"
+                  onClick={() => window.scrollTo(0, 0)}
+                >
                   <FaLinkedin size={16} className="md:size-[18px]" />
                   <span>LinkedIn</span>
-                </button>
-                <button className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-[#000000] text-white rounded-lg font-medium hover:opacity-90 transition shadow-sm hover:shadow-md w-full sm:w-auto text-sm md:text-base">
+                </Link>
+
+                <Link
+                  to="/Coming-soon"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-[#000000] text-white rounded-lg font-medium hover:opacity-90 transition shadow-sm hover:shadow-md w-full sm:w-auto text-sm md:text-base"
+                  onClick={() => window.scrollTo(0, 0)}
+                >
                   <FaApple size={16} className="md:size-[18px]" />
                   <span>Apple</span>
-                </button>
-                <button className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-white text-gray-800 rounded-lg font-medium hover:bg-gray-50 transition shadow-sm hover:shadow-md border border-gray-300 w-full sm:w-auto text-sm md:text-base">
+                </Link>
+
+                <Link
+                  to="/coming-soon"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-white text-gray-800 rounded-lg font-medium hover:bg-gray-50 transition shadow-sm hover:shadow-md border border-gray-300 w-full sm:w-auto text-sm md:text-base"
+                  onClick={() => window.scrollTo(0, 0)}
+                >
                   <FaGoogle size={16} className="md:size-[18px]" />
                   <span>Google</span>
-                </button>
+                </Link>
               </div>
 
               {/* OR Divider */}
@@ -98,9 +116,14 @@ export default function Heroo() {
                     placeholder="Enter your email"
                     className="flex-grow px-3 py-2.5 md:px-4 md:py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#4D6D9E] focus:border-transparent shadow-sm text-sm md:text-base"
                   />
-                  <button className="px-4 py-2.5 md:px-6 md:py-3 bg-[#4D6D9E] text-white font-semibold rounded-lg hover:bg-[#3A5A8F] transition shadow-sm hover:shadow-md whitespace-nowrap text-sm md:text-base">
+
+                  <Link
+                    onClick={() => window.scrollTo(0, 0)}
+                    to="/register"
+                    className="px-4 py-2.5 md:px-6 md:py-3 bg-[#4D6D9E] text-white font-semibold rounded-lg hover:bg-[#3A5A8F] transition shadow-sm hover:shadow-md whitespace-nowrap text-sm md:text-base inline-block text-center"
+                  >
                     Join Waitlist
-                  </button>
+                  </Link>
                 </div>
                 <p className="text-xs text-gray-500 mt-2 md:mt-3">
                   We'll notify you when we launch. No spam, ever.
@@ -108,17 +131,6 @@ export default function Heroo() {
               </div>
             </div>
           </div>
-
-          {/* BOTTOM: Private by design text - Smaller */}
-          {/* <div 
-            data-aos="fade-up"
-            data-aos-delay="400"
-            className="pt-4 md:pt-6 mt-4 md:mt-6 border-t border-gray-200"
-          >
-            <p className="text-base md:text-lg lg:text-xl font-medium text-[#4D6D9E]">
-              Private by design. Built for clarity, not chaos
-            </p>
-          </div> */}
         </div>
 
         {/* DESKTOP: Image Right Side (50%) - Increased height */}
@@ -138,221 +150,6 @@ export default function Heroo() {
   );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // // src/components/Hero.jsx (Light Theme with Banner Image)
 // import React, { useEffect } from "react";
 // import AOS from "aos";
@@ -360,7 +157,7 @@ export default function Heroo() {
 
 // export default function Heroo() {
 //   // Banner image - aap apni images/banner.png use kar sakte hain
-//   const bannerImage = "/images/7.jpg.jpg"; 
+//   const bannerImage = "/images/7.jpg.jpg";
 
 //   useEffect(() => {
 //     AOS.init({ duration: 1000, once: true });
@@ -368,7 +165,7 @@ export default function Heroo() {
 
 //   return (
 //     <section className="relative w-full min-h-[700px] md:min-h-[750px] lg:min-h-[800px] rounded-3xl overflow-hidden shadow-lg">
-      
+
 //       {/* Banner Background Image */}
 //       <div className="absolute inset-0 w-full h-full">
 //         <img
@@ -377,7 +174,7 @@ export default function Heroo() {
 //           className="w-full h-full object-cover object-left-top md:object-center-top"
 //           style={{ objectPosition: "70% center" }} // Image thoda right side mein
 //         />
-        
+
 //         {/* Overlay gradient for better text readability */}
 //         <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-transparent"></div>
 //         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
@@ -385,7 +182,7 @@ export default function Heroo() {
 
 //       {/* Content Container - Light Theme */}
 //       <div className="relative z-10 flex flex-col justify-between h-full px-6 md:px-12 lg:px-20 py-12">
-        
+
 //         {/* CENTER: Main Content */}
 //         <div className="max-w-3xl mt-12">
 //           {/* Main Headline */}
@@ -419,7 +216,7 @@ export default function Heroo() {
 //             <h3 className="text-white text-xl mb-6 font-medium drop-shadow">
 //               Join the waitlist
 //             </h3>
-            
+
 //             {/* Social Login Buttons - Light Theme */}
 //             <div className="flex flex-wrap gap-4 mb-6">
 //               <button className="flex items-center gap-3 px-6 py-3 bg-[#0077B5] text-white rounded-xl font-medium hover:opacity-90 transition shadow-lg hover:shadow-xl">
@@ -463,7 +260,7 @@ export default function Heroo() {
 //         </div>
 
 //         {/* BOTTOM: Private by design text */}
-//         <div 
+//         <div
 //           data-aos="fade-up"
 //           data-aos-delay="600"
 //           className="text-center pt-8 mt-8 border-t border-white/30"
@@ -476,299 +273,6 @@ export default function Heroo() {
 //     </section>
 //   );
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // // src/components/Hero.jsx (Light Theme)
 // import React, { useEffect } from "react";
@@ -784,7 +288,7 @@ export default function Heroo() {
 
 //   return (
 //     <section className="relative w-full min-h-[700px] md:min-h-[750px] lg:min-h-[800px] rounded-3xl overflow-hidden shadow-lg bg-gradient-to-br from-[#E3F2FD] via-[#F8F9FA] to-[#FFEBEE]">
-      
+
 //       {/* Background pattern (optional) */}
 //       <div className="absolute inset-0 opacity-10">
 //         <div className="absolute top-10 right-10 w-64 h-64 rounded-full bg-[#4D6D9E]/10 blur-3xl"></div>
@@ -793,7 +297,7 @@ export default function Heroo() {
 
 //       {/* Content Container - Light Theme */}
 //       <div className="relative z-10 flex flex-col justify-between h-full px-6 md:px-12 lg:px-20 py-12">
-        
+
 //         {/* TOP: Logo
 //         <div data-aos="fade-down" className="flex justify-start">
 //           <div className="text-3xl font-bold text-[#4D6D9E] tracking-wider">
@@ -834,7 +338,7 @@ export default function Heroo() {
 //             <h3 className="text-[#2C3E50] text-xl mb-6 font-medium">
 //               Join the waitlist
 //             </h3>
-            
+
 //             {/* Social Login Buttons - Light Theme */}
 //             <div className="flex flex-wrap gap-4 mb-6">
 //               <button className="flex items-center gap-3 px-6 py-3 bg-[#0077B5] text-white rounded-xl font-medium hover:opacity-90 transition shadow-sm">
@@ -878,7 +382,7 @@ export default function Heroo() {
 //         </div>
 
 //         {/* BOTTOM: Private by design text */}
-//         <div 
+//         <div
 //           data-aos="fade-up"
 //           data-aos-delay="600"
 //           className="text-center pt-8 mt-8 border-t border-gray-200"
@@ -897,35 +401,12 @@ export default function Heroo() {
 //   );
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // // src/components/Hero.jsx
 // import React, { useEffect } from "react";
 // import AOS from "aos";
 
 // export default function Heroo() {
-//   const heroImage = "/images/ok.jpg"; 
+//   const heroImage = "/images/ok.jpg";
 
 //   useEffect(() => {
 //     AOS.init({ duration: 1000, once: true });
@@ -1019,27 +500,3 @@ export default function Heroo() {
 //     </section>
 //   );
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
