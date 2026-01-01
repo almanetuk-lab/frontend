@@ -1,6 +1,6 @@
 // src/components/dashboard/DashboardHome.jsx
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import StatCard from "../comman/StatCard";
 import ActivityItem from "../comman/ActivityItem";
 import QuickAction from "../comman/QuickAction";
@@ -643,8 +643,12 @@ export default function DashboardHome({ profile }) {
                 <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
                   Quick Actions
                 </h3>
-                <div className="space-y-2 sm:space-y-3">
+                <div
+                 className="space-y-2 sm:space-y-3">
+                  <Link rel="stylesheet" href="/coming-soon" >
                   <QuickAction icon="⚡" label="Boost Profile" />
+
+                  </Link>
                   <QuickAction icon="⭐" label="Go Premium" />
                   <QuickAction icon="🔔" label="Notifications" />
                   <QuickAction icon="🛡️" label="Privacy Settings" />

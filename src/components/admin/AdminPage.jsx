@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { adminAPI } from "../services/adminApi";
 import AdminPlans from "./AdminAllPlan.jsx";
 import AdminBlog from "../pages/AdminBlog.jsx";
+import AdminFooter from "./AdminFooter.jsx";
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [userStatusFilter, setUserStatusFilter] = useState("all");
@@ -1111,6 +1112,8 @@ const AdminDashboard = () => {
         </header>
 
         {renderContent()}
+
+        <AdminFooter/>
       </div>
     </div>
   );
