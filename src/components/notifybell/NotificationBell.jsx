@@ -1,16 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState, useEffect, useRef } from "react";
 import { chatApi } from "../services/chatApi";
 import { useUserProfile } from "../context/UseProfileContext";
@@ -62,6 +50,7 @@ const NotificationBell = () => {
       setMatchesCount(0);
     }
   };
+
 
   //  IMPROVED: NOTIFICATION CLICK HANDLER - EXACTLY LIKE MEMBERPAGE
   const handleNotificationClick = (notification) => {
@@ -579,6 +568,33 @@ const NotificationBell = () => {
 };
 
 export default NotificationBell;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
