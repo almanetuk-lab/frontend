@@ -3,8 +3,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
 import NotificationBell from "../notifybell/NotificationBell";
-import logoo from "../../assets/logoo.png";
-import bglogo from "../../assets/bglogo.png";
+// import logoo from "../../assets/logoo.png";
+
+import bglogo from "../../assets/alternate.png";
 import { FaLinkedin, FaFacebook, FaTwitter } from "react-icons/fa";
 
 // Main Header Component
@@ -116,14 +117,14 @@ function Header() {
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Main Header Row */}
-        <div className="flex justify-between items-center py-0">
+        <div className="flex justify-between items-center py-5">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="inline-block">
+            <Link to="/" className="">
               <img
                 src={bglogo}
                 alt="Logo"
-                className="h-20 w-auto object-contain"
+                className="h-5 object-contain"
               />
             </Link>
           </div>
