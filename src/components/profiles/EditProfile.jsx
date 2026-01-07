@@ -2,12 +2,363 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
 import { updateUserProfile } from "../services/api";
-import { uploadImage, saveProfileImage } from "../services/api";
 import axios from "axios";
 
+// ================== ENUM HELPERS ==================
+const mapToDBEnum = (field, value) => {
+  if (!value || value === "") return null;
+
+  const MAP = {
+    // Education
+    education: {
+      HIGH_SCHOOL: "High School",
+      BACHELORS: "Bachelors Degree",
+      MASTERS: "Masters Degree",
+      PHD: "Doctorate",
+      OTHER: "Other",
+      "No Formal Education": "No Formal Education",
+      "Currently Studying": "Currently Studying",
+      "High School": "High School",
+      "Vocational / Trade School": "Vocational / Trade School",
+      "Associate Degree": "Associate Degree",
+      "Bachelors Degree": "Bachelors Degree",
+      "Masters Degree": "Masters Degree",
+      Doctorate: "Doctorate",
+    },
+
+    // Gender
+    gender: {
+      Male: "Male",
+      Female: "Female",
+      "Non-Binary": "NON-BINARY",
+      Other: "OTHER",
+      "Prefer not to say": "PREFER_NOT_TO_SAY",
+    },
+
+    // Marital Status
+    marital_status: {
+      Single: "Single",
+      Married: "Married",
+      Divorced: "Divorced",
+      Widowed: "Widowed",
+      Other: "Other",
+      Separated: "Separated",
+    },
+
+    // Professional Identity
+    professional_identity: {
+      STUDENT: "Student",
+      PROFESSIONAL: "Corporate Professional",
+      ENTREPRENEUR: "Entrepreneur",
+      FREELANCER: "Freelancer",
+      OTHER: "Other",
+      "Corporate Professional": "Corporate Professional",
+      Entrepreneur: "Entrepreneur",
+      "Startup Founder": "Startup Founder",
+      Freelancer: "Freelancer",
+      Consultant: "Consultant",
+      Trader: "Trader",
+      Investor: "Investor",
+      "Family Business Owner": "Family Business Owner",
+      "Small Business Owner": "Small Business Owner",
+      "Creative Professional": "Creative Professional",
+      "Healthcare Professional": "Healthcare Professional",
+      "Public Service": "Public Service",
+      Government: "Government",
+      Student: "Student",
+      Other: "Other",
+    },
+
+    // Relationship Pace - Database has lowercase
+    relationship_pace: {
+      Naturally: "Naturally",
+      Quickly: "Quickly",
+      Slowly: "Slowly",
+      "With clear definition": "With clear definition",
+      NATURALLY: "Naturally",
+      QUICKLY: "Quickly",
+      SLOWLY: "Slowly",
+      WITH_CLEAR_DEFINITION: "With clear definition",
+    },
+
+    // Children Preference
+    children_preference: {
+      WANT: "Want",
+      DONT_WANT: "Don't want",
+      HAVE_AND_WANT_MORE: "Have and want more",
+      HAVE_AND_DONT_WANT_MORE: "Have and don't want more",
+      OPEN: "Open / Not Sure yet",
+      NOT_SURE_YET: "Open / Not Sure yet",
+    },
+
+    // Self Expression
+    self_expression: {
+      "Clear and direct": "Clear and direct",
+      "Reflective and calm": "Reflective and calm",
+      "Expressive once I trust": "Expressive once I trust",
+      "Reserved until I feel safe": "Reserved until I feel safe",
+    },
+
+    // Health Activity Level
+    health_activity_level: {
+      Active: "Active",
+      "Semi-active": "Semi-active",
+      Light: "Light",
+      Minimal: "Minimal",
+    },
+
+    // Pets Preference
+    pets_preference: {
+      Want: "Want",
+      "Don't want": "Don't want",
+      "Have and want more": "Have and want more",
+      "Have and don't want more": "Have and don't want more",
+      Open: "Open / Not sure yet",
+      "Not Sure yet": "Open / Not sure yet",
+    },
+
+    // Free Time Style
+    freetime_style: {
+      "Mostly social": "Mostly social",
+      "With Partner": "With Partner",
+      "Balanced mix": "Balanced mix",
+      "Low-key and restful": "Low-key and restful",
+    },
+
+    // Religious Belief
+    religious_belief: {
+      Hindu: "Hindu",
+      Muslim: "Muslim",
+      Christian: "Christian",
+      Sikh: "Sikh",
+      Buddhist: "Buddhist",
+      Jain: "Jain",
+      Jewish: "Jewish",
+      Spiritual: "Spiritual",
+      Atheist: "Atheist",
+      Agnostic: "Agnostic",
+      Other: "Other",
+      "Prefer not to say": "Prefer not to say",
+    },
+
+    // Smoking
+    smoking: {
+      NO: "No",
+      YES: "Yes",
+      SOCIAL: "Socially",
+      No: "No",
+      Yes: "Yes",
+      Socially: "Socially",
+    },
+
+    // Drinking
+    drinking: {
+      NO: "No",
+      YES: "Yes",
+      SOCIAL: "Socially",
+      No: "No",
+      Yes: "Yes",
+      Socially: "Socially",
+    },
+
+    // Work Environment
+    work_environment: {
+      Remote: "Remote",
+      Hybrid: "Hybrid",
+      "Office/Location based": "Office/Location based",
+      "On-the-go": "On-the-go",
+      Other: "Other",
+    },
+
+    // Interaction Style
+    interaction_style: {
+      "Light and engaging": "Light and engaging",
+      "Deep and thought-provoking": "Deep and thought-provoking",
+      "Reserved unless invited": "Reserved unless invited",
+      Other: "Other",
+    },
+
+    // Career Decision Style - Database has different values
+    career_decision_style: {
+      Analytical: "Security-focused",
+      Intuitive: "Opportunity-driven",
+      Collaborative: "Balanced",
+      Independent: "Risk-positive",
+      "Security-focused": "Security-focused",
+      Balanced: "Balanced",
+      "Opportunity-driven": "Opportunity-driven",
+      "Risk-positive": "Risk-positive",
+    },
+
+    // Work Demand Response - Database has different values
+    work_demand_response: {
+      Proactive: "Adjusting plans quickly",
+      Reactive: "Keeping structure",
+      Balanced: "Taking space to rebalance",
+      Selective: "Communicating clearly and finding a middle ground",
+      "Adjusting plans quickly": "Adjusting plans quickly",
+      "Keeping structure": "Keeping structure",
+      "Taking space to rebalance": "Taking space to rebalance",
+      "Communicating clearly and finding a middle ground":
+        "Communicating clearly and finding a middle ground",
+    },
+
+    // Interested In
+    interested_in: {
+      Man: "Man",
+      Woman: "Woman",
+      "Non-Binary": "Non-Binary",
+      Everyone: "Everyone",
+    },
+
+    // Relationship Goal
+    relationship_goal: {
+      LONG_TERM: "LONG_TERM",
+      // "LIFE_PARTNER": "LIFE_PARTNER",
+      LIFE_PARTNER: "Life Partner",
+      DATING_WITH_INTENT: "DATING_WITH_INTENT",
+      FRIEND: "FRIEND",
+      FIGURING_IT_OUT: "FIGURING_IT_OUT",
+    },
+
+    // Preference of Closeness - Database has different values
+    preference_of_closeness: {
+      High: "More time together",
+      Medium: "A mix of space and closeness",
+      Low: "Regular personal time",
+      Variable: "Not yet sure",
+    },
+
+    // Work Rhythm - Database has different values
+    work_rhythm: {
+      Regular: "Structured routine",
+      Flexible: "Balanced with busy phases",
+      Intense: "High intensity",
+      Seasonal: "Project-based",
+    },
+
+    // Love Language - Special handling for array
+    love_language_affection: (value) => {
+      if (!value) return null;
+
+      // If it's already an array
+      if (Array.isArray(value)) {
+        return value.map((lang) => {
+          const langMap = {
+            "Physical Touch": "Physical Touch",
+            "Words of Affirmation": "Words of Affirmation",
+            "Quality Time": "Quality Time",
+            "Acts of Service": "Acts of Service",
+            "Thoughtful Gifts": "Thoughtful Gifts",
+            urdu: "Words of Affirmation", // Map invalid values
+            hindi: "Words of Affirmation",
+          };
+          return langMap[lang] || lang;
+        });
+      }
+
+      // If it's a string, split by comma
+      if (typeof value === "string") {
+        return value
+          .split(",")
+          .map((lang) => lang.trim())
+          .filter((lang) => lang !== "");
+      }
+
+      return value;
+    },
+  };
+
+  // Special handling for array fields
+  if (field === "love_language_affection" && MAP[field]) {
+    return MAP[field](value);
+  }
+
+  return MAP[field]?.[value] || value;
+};
+
+const mapToUIEnum = (field, value) => {
+  if (!value) return "";
+
+  // Reverse mapping for display (from DB to UI)
+  const REVERSE_MAP = {
+    education: {
+      "No Formal Education": "No Formal Education",
+      "Currently Studying": "Currently Studying",
+      "High School": "HIGH_SCHOOL",
+      "Vocational / Trade School": "OTHER",
+      "Associate Degree": "OTHER",
+      "Bachelors Degree": "BACHELORS",
+      "Masters Degree": "MASTERS",
+      Doctorate: "PHD",
+      Other: "OTHER",
+    },
+    children_preference: {
+      Want: "WANT",
+      "Don't want": "DONT_WANT",
+      "Have and want more": "HAVE_AND_WANT_MORE",
+      "Have and don't want more": "HAVE_AND_DONT_WANT_MORE",
+      "Open / Not Sure yet": "OPEN",
+    },
+    professional_identity: {
+      "Corporate Professional": "PROFESSIONAL",
+      Entrepreneur: "ENTREPRENEUR",
+      "Startup Founder": "ENTREPRENEUR",
+      Freelancer: "FREELANCER",
+      Consultant: "OTHER",
+      Trader: "OTHER",
+      Investor: "OTHER",
+      "Family Business Owner": "ENTREPRENEUR",
+      "Small Business Owner": "ENTREPRENEUR",
+      "Creative Professional": "PROFESSIONAL",
+      "Healthcare Professional": "PROFESSIONAL",
+      "Public Service": "PROFESSIONAL",
+      Government: "PROFESSIONAL",
+      Student: "STUDENT",
+      Other: "OTHER",
+    },
+    career_decision_style: {
+      "Security-focused": "Analytical",
+      Balanced: "Collaborative",
+      "Opportunity-driven": "Intuitive",
+      "Risk-positive": "Independent",
+    },
+    work_demand_response: {
+      "Adjusting plans quickly": "Proactive",
+      "Keeping structure": "Reactive",
+      "Taking space to rebalance": "Balanced",
+      "Communicating clearly and finding a middle ground": "Selective",
+    },
+    preference_of_closeness: {
+      "More time together": "High",
+      "A mix of space and closeness": "Medium",
+      "Regular personal time": "Low",
+      "Not yet sure": "Variable",
+    },
+    work_rhythm: {
+      "Structured routine": "Regular",
+      "Balanced with busy phases": "Flexible",
+      "High intensity": "Intense",
+      Unpredictable: "Flexible",
+      "Project-based": "Seasonal",
+      "Travel-heavy": "Seasonal",
+    },
+  };
+
+  return REVERSE_MAP[field]?.[value] || value;
+};
+
+// ================== COMPONENT ==================
 export default function EditProfilePage() {
   const { profile, updateProfile } = useUserProfile();
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 5;
 
   const [showCamera, setShowCamera] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -17,6 +368,296 @@ export default function EditProfilePage() {
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
 
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    age: "",
+    dob: "",
+    gender: "",
+    education: "",
+    relationship_pace: "",
+    city: "",
+    country: "",
+    state: "",
+    pincode: "",
+    address: "",
+    profession: "",
+    company: "",
+    experience: "",
+    headline: "",
+    position: "",
+    about: "",
+    skills: "",
+    interests: "",
+    hobbies: "",
+    height: "",
+    marital_status: "",
+    professional_identity: "",
+    company_type: "",
+    education_institution_name: "",
+    languages_spoken: "",
+    freetime_style: "",
+    health_activity_level: "",
+    smoking: "",
+    drinking: "",
+    pets_preference: "",
+    religious_belief: "",
+    zodiac_sign: "",
+    interested_in: "",
+    relationship_goal: "",
+    children_preference: "",
+    self_expression: "",
+    interaction_style: "",
+    work_environment: "",
+    work_rhythm: "",
+    career_decision_style: "",
+    work_demand_response: "",
+    preference_of_closeness: "",
+    love_language_affection: "",
+  });
+
+  // ================== LOAD PROFILE ==================
+  useEffect(() => {
+    if (!profile) return;
+
+    setFormData({
+      first_name: profile.first_name || "",
+      last_name: profile.last_name || "",
+      email: profile.email || "",
+      phone: profile.phone || "",
+      age: profile.age || "",
+      dob: profile.dob?.split("T")[0] || "",
+      gender: mapToUIEnum("gender", profile.gender),
+      education: mapToUIEnum("education", profile.education),
+      relationship_pace: mapToUIEnum(
+        "relationship_pace",
+        profile.relationship_pace
+      ),
+      city: profile.city || "",
+      country: profile.country || "",
+      state: profile.state || "",
+      pincode: profile.pincode || "",
+      address: profile.address || "",
+      profession: profile.profession || "",
+      company: profile.company || "",
+      experience: profile.experience || "",
+      headline: profile.headline || "",
+      position: profile.position || "",
+      about: profile.about || "",
+      skills: Array.isArray(profile.skills) ? profile.skills.join(", ") : "",
+      interests: Array.isArray(profile.interests)
+        ? profile.interests.join(", ")
+        : "",
+      hobbies: Array.isArray(profile.hobbies) ? profile.hobbies.join(", ") : "",
+      height: profile.height || "",
+      marital_status: profile.marital_status || "",
+      professional_identity: mapToUIEnum(
+        "professional_identity",
+        profile.professional_identity
+      ),
+      company_type: profile.company_type || "",
+      education_institution_name: profile.education_institution_name || "",
+      languages_spoken: Array.isArray(profile.languages_spoken)
+        ? profile.languages_spoken.join(", ")
+        : profile.languages_spoken || "",
+      freetime_style: profile.freetime_style || "",
+      health_activity_level: profile.health_activity_level || "",
+      smoking: profile.smoking || "",
+      drinking: profile.drinking || "",
+      pets_preference: profile.pets_preference || "",
+      religious_belief: profile.religious_belief || "",
+      zodiac_sign: profile.zodiac_sign || "",
+      interested_in: profile.interested_in || "",
+      relationship_goal: profile.relationship_goal || "",
+      children_preference: mapToUIEnum(
+        "children_preference",
+        profile.children_preference
+      ),
+      self_expression: profile.self_expression || "",
+      interaction_style: profile.interaction_style || "",
+      work_environment: profile.work_environment || "",
+      work_rhythm: mapToUIEnum("work_rhythm", profile.work_rhythm),
+      career_decision_style: mapToUIEnum(
+        "career_decision_style",
+        profile.career_decision_style
+      ),
+      work_demand_response: mapToUIEnum(
+        "work_demand_response",
+        profile.work_demand_response
+      ),
+      preference_of_closeness: mapToUIEnum(
+        "preference_of_closeness",
+        profile.preference_of_closeness
+      ),
+      love_language_affection: Array.isArray(profile.love_language_affection)
+        ? profile.love_language_affection.join(", ")
+        : profile.love_language_affection || "",
+    });
+
+    if (profile.profile_image) {
+      setImagePreview(profile.profile_image);
+    }
+  }, [profile]);
+
+  // ================== PROGRESS & STEP HANDLING ==================
+  const progressPercentage = (currentStep / totalSteps) * 100;
+
+  const nextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const goToStep = (step) => {
+    if (step >= 1 && step <= totalSteps) {
+      setCurrentStep(step);
+    }
+  };
+
+  const skipStep = () => {
+    nextStep();
+  };
+
+  // ================== CHANGE HANDLER ==================
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // ================== SUBMIT HANDLER ==================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Handle array fields properly
+      const handleArrayField = (value) => {
+        if (!value) return null;
+        if (Array.isArray(value)) return value;
+        if (typeof value === "string") {
+          return value
+            .split(",")
+            .map((item) => item.trim())
+            .filter((item) => item !== "");
+        }
+        return null;
+      };
+
+      const payload = {
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone || null,
+        age: formData.age ? Number(formData.age) : null,
+        dob: formData.dob || null,
+        gender: mapToDBEnum("gender", formData.gender),
+        education: mapToDBEnum("education", formData.education),
+        marital_status: mapToDBEnum("marital_status", formData.marital_status),
+        professional_identity: mapToDBEnum(
+          "professional_identity",
+          formData.professional_identity
+        ),
+        relationship_pace: mapToDBEnum(
+          "relationship_pace",
+          formData.relationship_pace
+        ),
+        city: formData.city || null,
+        country: formData.country || null,
+        state: formData.state || null,
+        pincode: formData.pincode || null,
+        address: formData.address || null,
+        profession: formData.profession || null,
+        company: formData.company || null,
+        experience: formData.experience ? Number(formData.experience) : null,
+        headline: formData.headline || null,
+        position: formData.position || null,
+        about: formData.about || null,
+        skills: handleArrayField(formData.skills),
+        interests: handleArrayField(formData.interests),
+        hobbies: handleArrayField(formData.hobbies),
+        height: formData.height || null,
+        company_type: formData.company_type || null,
+        education_institution_name: formData.education_institution_name || null,
+        languages_spoken: handleArrayField(formData.languages_spoken),
+        freetime_style: mapToDBEnum("freetime_style", formData.freetime_style),
+        health_activity_level: mapToDBEnum(
+          "health_activity_level",
+          formData.health_activity_level
+        ),
+        smoking: mapToDBEnum("smoking", formData.smoking),
+        drinking: mapToDBEnum("drinking", formData.drinking),
+        pets_preference: mapToDBEnum(
+          "pets_preference",
+          formData.pets_preference
+        ),
+        religious_belief: mapToDBEnum(
+          "religious_belief",
+          formData.religious_belief
+        ),
+        zodiac_sign: formData.zodiac_sign || null,
+        interested_in: mapToDBEnum("interested_in", formData.interested_in),
+        relationship_goal: mapToDBEnum(
+          "relationship_goal",
+          formData.relationship_goal
+        ),
+        children_preference: mapToDBEnum(
+          "children_preference",
+          formData.children_preference
+        ),
+        self_expression: mapToDBEnum(
+          "self_expression",
+          formData.self_expression
+        ),
+        interaction_style: mapToDBEnum(
+          "interaction_style",
+          formData.interaction_style
+        ),
+        work_environment: mapToDBEnum(
+          "work_environment",
+          formData.work_environment
+        ),
+        work_rhythm: mapToDBEnum("work_rhythm", formData.work_rhythm),
+        career_decision_style: mapToDBEnum(
+          "career_decision_style",
+          formData.career_decision_style
+        ),
+        work_demand_response: mapToDBEnum(
+          "work_demand_response",
+          formData.work_demand_response
+        ),
+        preference_of_closeness: mapToDBEnum(
+          "preference_of_closeness",
+          formData.preference_of_closeness
+        ),
+        love_language_affection: mapToDBEnum(
+          "love_language_affection",
+          handleArrayField(formData.love_language_affection)
+        ),
+      };
+
+      console.log("✅ FINAL PAYLOAD:", payload);
+
+      await updateUserProfile(payload);
+
+      updateProfile({ ...profile, ...payload });
+      alert("Profile updated successfully ✅");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Update Profile Error:", err);
+      alert(err?.response?.data?.error || "Update failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ================== CAMERA FUNCTIONS ==================
   const openCamera = () => {
     console.log("Opening camera...");
     setShowCamera(true);
@@ -57,8 +698,6 @@ export default function EditProfilePage() {
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-
-        // Wait for video to load metadata
         videoRef.current.onloadedmetadata = () => {
           console.log("Video metadata loaded");
           videoRef.current
@@ -76,18 +715,13 @@ export default function EditProfilePage() {
     } catch (error) {
       console.error("Camera error:", error);
       let errorMessage = "Failed to access camera. Please try again.";
-
       if (error.name === "NotAllowedError") {
-        errorMessage =
-          "Camera permission denied. Please allow camera access in your browser settings.";
+        errorMessage = "Camera permission denied.";
       } else if (error.name === "NotFoundError") {
-        errorMessage = "No camera found on this device.";
+        errorMessage = "No camera found.";
       } else if (error.name === "NotSupportedError") {
-        errorMessage = "Camera not supported in this browser.";
-      } else if (error.name === "NotReadableError") {
-        errorMessage = "Camera is already in use by another application.";
+        errorMessage = "Camera not supported.";
       }
-
       setCameraError(errorMessage);
       setIsCameraActive(false);
     }
@@ -103,855 +737,1140 @@ export default function EditProfilePage() {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
 
-    // Set canvas dimensions to match video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
-    // Draw current video frame to canvas
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Convert canvas to image data URL
     const imageDataUrl = canvas.toDataURL("image/png");
     console.log("Photo captured successfully");
     setCapturedImage(imageDataUrl);
     closeCamera();
   };
 
-  const retryCamera = () => {
-    setCameraError("");
-    startCamera();
-  };
-
-  const useCapturedImage = () => {
-    console.log("Using captured image:", capturedImage);
-    // Here you can use the capturedImage for your purpose
-    // For example: upload to server, set as profile picture, etc.
-    alert("Photo captured successfully! You can now use it.");
-  };
-
-  // Effect to handle camera start/stop
   useEffect(() => {
     if (showCamera) {
-      // Small delay to ensure DOM is updated
       const timer = setTimeout(() => {
         startCamera();
       }, 100);
-
       return () => clearTimeout(timer);
     } else {
       closeCamera();
     }
 
     return () => {
-      // Cleanup on unmount
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, [showCamera]);
 
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-    profession: "",
-    company: "",
-    experience: "",
-    education: "",
-    age: "",
-    gender: "",
-    marital_status: "",
-    country: "",
-    state: "",
-    pincode: "",
-    city: "",
-    address: "",
-    dob: "",
-    about: "",
-    skills: "",
-    interests: "",
-    headline: "",
-    position: "", // ✅ ADD THIS
-    hobbies: "", // ✅ ADD THIS
-    company_type: "", // Add this
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [imageLoading, setImageLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
-
-  // ✅ FIXED: Better form population with first_name and last_name handling
-  useEffect(() => {
-    if (profile) {
-      console.log("🔄 Loading profile data into form:", profile);
-
-      const formatDateForInput = (dateString) => {
-        if (!dateString || dateString === "Not provided") return "";
-        try {
-          const date = new Date(dateString);
-          return date.toISOString().split("T")[0];
-        } catch (error) {
-          return "";
-        }
-      };
-
-      // ✅ FIXED: Handle "Not provided" and empty values properly
-      const formatField = (value) => {
-        if (!value || value === "Not provided" || value === "null") return "";
-        return value;
-      };
-
-      // ✅ FIXED: Handle array fields properly
-      const formatArrayField = (field) => {
-        if (!field || field === "Not provided") return "";
-        if (Array.isArray(field)) {
-          return field.join(", ");
-        }
-        if (typeof field === "string") {
-          return field;
-        }
-        return "";
-      };
-
-      // ✅ FIXED: Handle full_name split for backward compatibility
-      let firstName = formatField(profile.first_name);
-      let lastName = formatField(profile.last_name);
-
-      // If first_name and last_name are empty but full_name exists, split it
-      if ((!firstName || !lastName) && profile.full_name) {
-        const fullNameParts = profile.full_name.split(" ");
-        firstName = fullNameParts[0] || "";
-        lastName = fullNameParts.slice(1).join(" ") || "";
-      }
-
-      setFormData({
-        first_name: firstName,
-        last_name: lastName,
-        email: formatField(profile.email),
-        phone: formatField(profile.phone),
-        profession: formatField(profile.profession),
-        company: formatField(profile.company),
-        experience: formatField(profile.experience),
-        education: formatField(profile.education),
-        age: formatField(profile.age),
-        gender: formatField(profile.gender),
-        marital_status: formatField(profile.marital_status),
-        city: formatField(profile.city),
-        country: formatField(profile.country) || "",
-        state: formatField(profile.state) || "",
-        pincode: formatField(profile.pincode) || "",
-        address: formatField(profile.address),
-        dob: formatDateForInput(profile.dob),
-        about: formatField(profile.about),
-        skills: formatArrayField(profile.skills),
-        interests: formatArrayField(profile.interests),
-        headline: formatField(profile.headline),
-        position: formatField(profile.position) || "", // ✅ ADD THIS
-        hobbies: formatArrayField(profile.hobbies) || "", // ✅ ADD THIS
-        company_type: formatField(profile.company_type) || "", // ✅ ADD THIS
-      });
-
-      // ✅ Set current profile image preview
-      if (profile.image_url && profile.image_url !== "Not provided") {
-        setImagePreview(profile.image_url);
-      }
-    }
-  }, [profile]);
-
-  // Start camera when modal opens
-  useEffect(() => {
-    if (showCamera) {
-      startCamera();
-    } else {
-      closeCamera();
-    }
-  }, [showCamera]);
-
   // ✅ Image Upload Handler
   const handleImageUpload = async (file) => {
     if (!file) return null;
-
     setImageLoading(true);
     try {
-      console.log("📤 Uploading image to Cloudinary...");
-
-      // Step 1: Upload image to Cloudinary
       const uploadFormData = new FormData();
       uploadFormData.append("image", file);
-
       const uploadResponse = await axios.post(
         "https://backend-q0wc.onrender.com/api/upload",
         uploadFormData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
-
-      console.log("✅ Image uploaded:", uploadResponse.data);
-
-      // Step 2: Save image URL to profile
       const saveResponse = await axios.post(
         "https://backend-q0wc.onrender.com/api/saveProfileImage",
-        {
-          user_id: profile.user_id,
-          imageUrl: uploadResponse.data.imageUrl,
-        }
+        { user_id: profile.user_id, imageUrl: uploadResponse.data.imageUrl }
       );
-
-      console.log("✅ Profile image saved:", saveResponse.data);
-
-      // Update context with new profile data
       updateProfile(saveResponse.data.profiles);
-
-      // Update image preview
       setImagePreview(uploadResponse.data.imageUrl);
-
       return uploadResponse.data.imageUrl;
     } catch (error) {
       console.error("❌ Image upload error:", error);
-      alert("Image upload failed. Please try again.");
+      alert("Image upload failed.");
       return null;
     } finally {
       setImageLoading(false);
     }
   };
 
-  // ✅ Handle Image Selection
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    // Validate file type
     const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      alert("Please select a valid image file (JPEG, PNG, JPG, WEBP)");
+      alert("Please select a valid image file");
       return;
     }
-
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert("Image size should be less than 5MB");
       return;
     }
-
     setSelectedImage(file);
-
-    // Create preview
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setImagePreview(e.target.result);
-    };
+    reader.onload = (e) => setImagePreview(e.target.result);
     reader.readAsDataURL(file);
-
-    // Auto-upload image
     handleImageUpload(file);
   };
 
-  // ✅ Remove Image with API Call
-  const handleRemoveImage = async () => {
-    try {
-      setImageLoading(true);
-
-      console.log("🗑️ Removing profile image for user:", profile.user_id);
-
-      // API call to remove profile image
-      const removeResponse = await axios.post(
-        "https://backend-q0wc.onrender.com/api/remove/profile-picture",
-        {
-          user_id: profile.user_id,
-        }
-      );
-
-      console.log("✅ Image removed successfully:", removeResponse.data);
-
-      if (
-        removeResponse.data.message === "Profile picture removed successfully"
-      ) {
-        // Update frontend state
-        setSelectedImage(null);
-        setImagePreview("");
-
-        // Update context with new profile data (without image)
-        const updatedProfile = {
-          ...profile,
-          image_url: null,
-          profile_picture_url: null,
-          profilePhoto: null,
-          last_updated: new Date().toISOString(),
-        };
-
-        updateProfile(updatedProfile);
-        alert("✅ Profile image removed successfully!");
-      } else {
-        throw new Error("Unexpected response from server");
-      }
-    } catch (error) {
-      console.error("❌ Error removing image:", error);
-
-      let errorMessage = "Failed to remove image. Please try again.";
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      alert(`❌ ${errorMessage}`);
-    } finally {
-      setImageLoading(false);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      console.log("🔵 Form Data Before Processing:", formData);
-
-      // ✅ FIXED: Proper payload with first_name and last_name
-      const payload = {
-        // Personal Information
-        first_name: formData.first_name?.trim() || "",
-        last_name: formData.last_name?.trim() || "",
-        email: formData.email?.trim() || "",
-        phone: formData.phone?.trim() || null,
-        gender: formData.gender || null,
-        marital_status: formData.marital_status || null,
-        city: formData.city?.trim() || null,
-        country: formData.country?.trim() || null,
-        state: formData.state?.trim() || null,
-        pincode: formData.pincode?.trim() || null,
-        address: formData.address?.trim() || null,
-        dob: formData.dob || null,
-        age: formData.age ? parseInt(formData.age) : null,
-
-        // Professional Information
-        profession: formData.profession?.trim() || null,
-        company: formData.company?.trim() || null,
-        company_type: formData.company_type?.trim() || null, // ✅ ADD THIS
-        experience: formData.experience ? parseInt(formData.experience) : null,
-        education: formData.education?.trim() || null,
-        headline: formData.headline?.trim() || null,
-        position: formData.position?.trim() || null, // ✅ ADD THIS
-
-        // Additional Information
-        about: formData.about?.trim() || null,
-        skills: formData.skills
-          ? formData.skills
-              .split(",")
-              .map((skill) => skill.trim())
-              .filter((skill) => skill !== "")
-          : [],
-        interests: formData.interests
-          ? formData.interests
-              .split(",")
-              .map((interest) => interest.trim())
-              .filter((interest) => interest !== "")
-          : [],
-
-        hobbies: formData.hobbies // ✅ ADD THIS
-          ? formData.hobbies
-              .split(",")
-              .map((hobby) => hobby.trim())
-              .filter((hobby) => hobby !== "")
-          : [],
-      };
-
-      console.log("🎯 Final API Payload:", payload);
-
-      // API call
-      const response = await updateUserProfile(payload);
-      console.log("✅ API Response:", response);
-
-      // ✅ FIXED: Create full_name for display purposes (if needed by other components)
-      const full_name = `${payload.first_name} ${payload.last_name}`.trim();
-
-      // ✅ FIXED: Better context update with first_name and last_name
-      const updatedProfile = {
-        // Keep existing profile data
-        ...profile,
-
-        // Update with new data
-        ...payload,
-
-        // Add full_name for backward compatibility (if needed)
-        full_name: full_name,
-
-        // Ensure required fields
-        is_submitted: true,
-        last_updated: new Date().toISOString(),
-
-        // ✅ FIXED: Ensure all fields have proper values
-        first_name: payload.first_name || "",
-        last_name: payload.last_name || "",
-        email: payload.email || "",
-        phone: payload.phone || "",
-        gender: payload.gender || "",
-        marital_status: payload.marital_status || "",
-        city: payload.city || "",
-        country: payload.country || "",
-        state: payload.state || "",
-        pincode: payload.pincode || "",
-        address: payload.address || "",
-        dob: payload.dob || "",
-        age: payload.age || "",
-        profession: payload.profession || "",
-        company: payload.company || "",
-        company_type: payload.company_type || "", // ✅ ADD THIS
-        experience: payload.experience || "",
-        education: payload.education || "",
-        headline: payload.headline || "",
-        position: payload.position || "", // add this new
-        about: payload.about || "",
-        skills: payload.skills || [],
-        interests: payload.interests || [],
-        hobbies: payload.hobbies || [], // ✅ ADD THIS
-      };
-
-      console.log("🔄 Updating context with:", updatedProfile);
-      updateProfile(updatedProfile);
-
-      alert("Profile updated successfully!");
-
-      // Navigate after short delay
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
-    } catch (error) {
-      console.error("❌ Profile update error:", error);
-      console.error("❌ Error details:", error.response?.data);
-
-      let errorMessage = "Failed to update profile. Please try again.";
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      }
-      alert(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ✅ Helper function to check if field has value
-  const hasValue = (value) => {
-    return (
-      value && value !== "" && value !== "Not provided" && value !== "null"
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">Edit Profile</h1>
-          <button
-            onClick={() => navigate("/dashboard/profile")}
-            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
-          >
-            Cancel
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Profile Image Upload Section */}
-          <Section title="Profile Picture">
-            <div className="flex flex-col items-center space-y-4">
-              {/* Image Preview */}
-              <div className="relative">
-                <div className="w-32 h-32 rounded-full border-4 border-gray-300 overflow-hidden bg-gray-200 flex items-center justify-center">
-                  {imagePreview ? (
-                    <img
-                      src={imagePreview}
-                      alt="Profile preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-gray-500 text-sm text-center">
-                      No Image
-                    </span>
-                  )}
-                </div>
-
-                {/* Loading Indicator */}
-                {imageLoading && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full">
-                    <div className="text-white text-sm">Uploading...</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Upload Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <label className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition cursor-pointer text-center">
-                  Upload Photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                    disabled={imageLoading}
-                  />
-                </label>
-
-                {/* ✅ Take Photo Button Added  */}
-                <button
-                  type="button"
-                  onClick={openCamera}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                  disabled={imageLoading}
-                >
-                  Take Photo
-                </button>
-
-                {imagePreview && (
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-                    disabled={imageLoading}
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-
-              {/* ✅ Camera Modal */}
-
-              {showCamera && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                  <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold">Take Photo</h3>
-                      <button
-                        onClick={closeCamera}
-                        className="text-gray-500 hover:text-gray-700 text-xl"
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    <div className="relative">
-                      {!isCameraActive ? (
-                        <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
-                            <p className="text-gray-600">Starting camera...</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <video
-                          ref={videoRef}
-                          autoPlay
-                          playsInline
-                          muted
-                          className="w-full h-64 bg-gray-200 rounded-lg object-cover"
-                        />
-                      )}
-                      <canvas ref={canvasRef} className="hidden" />
-                    </div>
-
-                    <div className="flex justify-center gap-4 mt-4">
-                      <button
-                        type="button"
-                        onClick={capturePhoto}
-                        disabled={!isCameraActive}
-                        className={`px-6 py-2 text-white rounded-lg transition flex items-center gap-2 ${
-                          isCameraActive
-                            ? "bg-indigo-600 hover:bg-indigo-700"
-                            : "bg-gray-400 cursor-not-allowed"
-                        }`}
-                      >
-                        📸 Capture
-                      </button>
-                      <button
-                        type="button"
-                        onClick={closeCamera}
-                        className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-
-                    {/* Camera Error Message */}
-                    {cameraError && (
-                      <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg">
-                        <p className="text-red-700 text-sm">{cameraError}</p>
-                        <button
-                          onClick={retryCamera}
-                          className="mt-2 text-red-600 hover:text-red-800 text-sm underline"
-                        >
-                          Retry Camera
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Help Text */}
-              <p className="text-sm text-gray-500 text-center">
-                Supported formats: JPEG, PNG, JPG, WEBP
-                <br />
-                Max size: 5MB
+    <div className="min-h-screen bg-gray-100 p-4 md:p-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-4 md:p-6">
+        {/* HEADER WITH PROGRESS BAR */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Edit Profile</h1>
+              <p className="text-gray-600 text-sm mt-1">
+                Step {currentStep} of {totalSteps}
               </p>
             </div>
-          </Section>
-
-          {/* Rest of your existing form sections remain exactly the same */}
-          <Section title="Personal Information">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* <FormField 
-                label="Full Name *" 
-                name="full_name" 
-                value={formData.full_name} 
-                onChange={handleChange} 
-                required 
-              />  */}
-
-              <FormField
-                label="First Name "
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-                required
-              />
-
-              <FormField
-                label="Last Name"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
-                required
-              />
-
-              <FormField
-                label="Country"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                placeholder="Enter your country"
-              />
-              <FormField
-                label="State"
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-                placeholder="Enter your state"
-              />
-              <FormField
-                label="Pincode"
-                name="pincode"
-                value={formData.pincode}
-                onChange={handleChange}
-                placeholder="Enter pincode"
-              />
-              <FormField
-                label="Email *"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-              <FormField
-                label="Phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="+91 1234567890"
-              />
-              <FormField
-                label="Date of Birth"
-                name="dob"
-                type="date"
-                value={formData.dob}
-                onChange={handleChange}
-              />
-              <FormField
-                label="Age"
-                name="age"
-                type="number"
-                value={formData.age}
-                onChange={handleChange}
-                placeholder="25"
-              />
-              <SelectField
-                label="Gender"
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                options={["", "Male", "Female", "Other"]}
-              />
-              <SelectField
-                label="Marital Status"
-                name="marital_status"
-                value={formData.marital_status}
-                onChange={handleChange}
-                options={["", "Single", "Married", "Divorced", "Widowed"]}
-              />
-              <FormField
-                label="City"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                placeholder="New Delhi"
-              />
-            </div>
-
-            <div className="mt-4">
-              <TextAreaField
-                label="Address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                rows={3}
-                placeholder="Enter your complete address"
-              />
-            </div>
-          </Section>
-
-          {/* Professional Information */}
-          <Section title="Professional Information">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                label="Headline"
-                name="headline"
-                value={formData.headline}
-                onChange={handleChange}
-                placeholder="Senior Software Engineer at Google"
-              />
-              <FormField
-                label="Profession"
-                name="profession"
-                value={formData.profession}
-                onChange={handleChange}
-                placeholder="Software Engineer"
-              />
-              <FormField
-                label="Company"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                placeholder="Google Inc."
-              />
-              {/* Position */}
-              <FormField
-                label="Position"
-                name="position"
-                value={formData.position}
-                onChange={handleChange}
-                placeholder="Software Engineer"
-              />
-
-              {/* Company Type - Dropdown */}
-              <div className="flex flex-col">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Company Type
-                </label>
-                <select
-                  name="company_type"
-                  value={formData.company_type}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select Type</option>
-                  <option value="MNC">MNC</option>
-                  <option value="Startup">Startup</option>
-                  <option value="SME">SME</option>
-                  <option value="Government">Government</option>
-                  <option value="NGO">NGO</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <FormField
-                label="Experience (years)"
-                name="experience"
-                type="number"
-                value={formData.experience}
-                onChange={handleChange}
-                placeholder="3"
-              />
-              <FormField
-                label="Education"
-                name="education"
-                value={formData.education}
-                onChange={handleChange}
-                placeholder="Bachelor of Technology"
-              />
-            </div>
-          </Section>
-
-          {/* About & Skills */}
-          <Section title="About Me">
-            <TextAreaField
-              label="About Yourself"
-              name="about"
-              value={formData.about}
-              onChange={handleChange}
-              rows={4}
-              placeholder="Tell us about yourself, your background, and your interests..."
-            />
-
-            {/* Hobbies */}
-            <FormField
-              label="Hobbies (comma separated)"
-              name="hobbies"
-              value={formData.hobbies}
-              onChange={handleChange}
-              placeholder="Reading, Traveling, Sports"
-              helpText="Enter hobbies separated by commas"
-            />
-          </Section>
-
-          <Section title="Skills & Interests">
-            <TextAreaField
-              label="Skills"
-              name="skills"
-              value={formData.skills}
-              onChange={handleChange}
-              rows={3}
-              placeholder="JavaScript, React, Node.js, Python (separate with commas)"
-            />
-            <TextAreaField
-              label="Interests"
-              name="interests"
-              value={formData.interests}
-              onChange={handleChange}
-              rows={3}
-              placeholder="Coding, Reading, Travel, Photography (separate with commas)"
-            />
-          </Section>
-
-          {/* Submit Buttons */}
-          <div className="flex justify-center gap-4 pt-6 border-t">
             <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+              onClick={() => navigate("/dashboard/profile")}
+              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition text-sm"
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={loading || imageLoading}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Save Changes"}
-            </button>
+          </div>
+
+          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+            <div
+              className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+              style={{ width: `${progressPercentage}%` }}
+            ></div>
+          </div>
+
+          <div className="flex justify-between mt-4">
+            {[1, 2, 3, 4, 5].map((step) => (
+              <button
+                key={step}
+                onClick={() => goToStep(step)}
+                className={`flex flex-col items-center ${
+                  step <= currentStep ? "text-indigo-600" : "text-gray-400"
+                }`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
+                    step === currentStep
+                      ? "bg-indigo-600 text-white"
+                      : step < currentStep
+                      ? "bg-indigo-100 text-indigo-600"
+                      : "bg-gray-200 text-gray-400"
+                  }`}
+                >
+                  {step}
+                </div>
+                <span className="text-xs font-medium">
+                  {step === 1
+                    ? "Photo"
+                    : step === 2
+                    ? "Personal"
+                    : step === 3
+                    ? "Professional"
+                    : step === 4
+                    ? "About"
+                    : "Relationships"}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* STEP 1: PROFILE PICTURE */}
+          {currentStep === 1 && (
+            <div className="animate-fadeIn">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Profile Picture
+                </h3>
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <div className="w-32 h-32 rounded-full border-4 border-gray-300 overflow-hidden bg-gray-200 flex items-center justify-center">
+                      {imagePreview ? (
+                        <img
+                          src={imagePreview}
+                          alt="Profile preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-gray-500 text-sm text-center">
+                          No Image
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <label className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition cursor-pointer text-center">
+                      Upload Photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        className="hidden"
+                        disabled={imageLoading}
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={openCamera}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                      disabled={imageLoading}
+                    >
+                      Take Photo
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: PERSONAL INFORMATION */}
+          {currentStep === 2 && (
+            <div className="animate-fadeIn">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Personal Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      First Name <span className="text-red-500 ml-1">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="first_name"
+                      value={formData.first_name}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Last Name <span className="text-red-500 ml-1">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="last_name"
+                      value={formData.last_name}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Email <span className="text-red-500 ml-1">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Phone
+                    </label>
+                    <input
+                      type="text"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+91 1234567890"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      name="dob"
+                      value={formData.dob}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Age
+                    </label>
+                    <input
+                      type="number"
+                      name="age"
+                      value={formData.age}
+                      onChange={handleChange}
+                      placeholder="25"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Height (feet.inches)
+                    </label>
+                    <input
+                      type="text"
+                      name="height"
+                      value={formData.height}
+                      onChange={handleChange}
+                      placeholder="5.6"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Example: 5.6 means 5 feet 6 inches
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Gender
+                    </label>
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                      <option value="Prefer not to say">
+                        Prefer not to say
+                      </option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Marital Status
+                    </label>
+                    <select
+                      name="marital_status"
+                      value={formData.marital_status}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select Marital Status</option>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Divorced">Divorced</option>
+                      <option value="Widowed">Widowed</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      placeholder="New Delhi"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Country
+                    </label>
+                    <input
+                      type="text"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      placeholder="Enter your country"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      State
+                    </label>
+                    <input
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleChange}
+                      placeholder="Enter your state"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Pincode
+                    </label>
+                    <input
+                      type="text"
+                      name="pincode"
+                      value={formData.pincode}
+                      onChange={handleChange}
+                      placeholder="Enter pincode"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Address
+                  </label>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Enter your complete address"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: PROFESSIONAL INFORMATION */}
+          {currentStep === 3 && (
+            <div className="animate-fadeIn">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Professional Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Headline
+                    </label>
+                    <input
+                      type="text"
+                      name="headline"
+                      value={formData.headline}
+                      onChange={handleChange}
+                      placeholder="Senior Software Engineer at Google"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Profession
+                    </label>
+                    <input
+                      type="text"
+                      name="profession"
+                      value={formData.profession}
+                      onChange={handleChange}
+                      placeholder="Software Engineer"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Professional Identity
+                    </label>
+                    <select
+                      name="professional_identity"
+                      value={formData.professional_identity}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select Professional Identity</option>
+                      <option value="STUDENT">STUDENT</option>
+                      <option value="PROFESSIONAL">PROFESSIONAL</option>
+                      <option value="ENTREPRENEUR">ENTREPRENEUR</option>
+                      <option value="FREELANCER">FREELANCER</option>
+                      <option value="OTHER">OTHER</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Company
+                    </label>
+                    <input
+                      type="text"
+                      name="company"
+                      value={formData.company}
+                      onChange={handleChange}
+                      placeholder="Google Inc."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Position
+                    </label>
+                    <input
+                      type="text"
+                      name="position"
+                      value={formData.position}
+                      onChange={handleChange}
+                      placeholder="Software Engineer"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Company Type
+                    </label>
+                    <select
+                      name="company_type"
+                      value={formData.company_type}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select Type</option>
+                      <option value="MNC">MNC</option>
+                      <option value="Startup">Startup</option>
+                      <option value="SME">SME</option>
+                      <option value="Government">Government</option>
+                      <option value="NGO">NGO</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Experience (years)
+                    </label>
+                    <input
+                      type="number"
+                      name="experience"
+                      value={formData.experience}
+                      onChange={handleChange}
+                      placeholder="3"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Education dropdown fixed */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Education
+                    </label>
+                    <select
+                      name="education"
+                      value={formData.education}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Select Education</option>
+                      <option value="No Formal Education">
+                        No Formal Education
+                      </option>
+                      <option value="Currently Studying">
+                        Currently Studying
+                      </option>
+                      <option value="High School">High School</option>
+                      <option value="Vocational / Trade School">
+                        Vocational / Trade School
+                      </option>
+                      <option value="Associate Degree">Associate Degree</option>
+                      <option value="Bachelors Degree">Bachelors Degree</option>
+                      <option value="Masters Degree">Masters Degree</option>
+                      <option value="Doctorate">Doctorate</option>
+                      <option value="HIGH_SCHOOL">HIGH_SCHOOL</option>
+                      <option value="BACHELORS">BACHELORS</option>
+                      <option value="MASTERS">MASTERS</option>
+                      <option value="PHD">PHD</option>
+                      <option value="OTHER">OTHER</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Education Institution
+                    </label>
+                    <input
+                      type="text"
+                      name="education_institution_name"
+                      value={formData.education_institution_name}
+                      onChange={handleChange}
+                      placeholder="University of Delhi"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Languages Spoken
+                    </label>
+                    <input
+                      type="text"
+                      name="languages_spoken"
+                      value={formData.languages_spoken}
+                      onChange={handleChange}
+                      placeholder="Hindi, English, Spanish"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Separate languages with commas
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: ABOUT & LIFESTYLE */}
+          {currentStep === 4 && (
+            <div className="animate-fadeIn">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  About & Lifestyle
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        About Yourself
+                      </label>
+                      <textarea
+                        name="about"
+                        value={formData.about}
+                        onChange={handleChange}
+                        rows={4}
+                        placeholder="Tell us about yourself..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Hobbies (comma separated)
+                      </label>
+                      <input
+                        type="text"
+                        name="hobbies"
+                        value={formData.hobbies}
+                        onChange={handleChange}
+                        placeholder="Reading, Traveling, Sports"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Separate with commas
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Skills
+                      </label>
+                      <textarea
+                        name="skills"
+                        value={formData.skills}
+                        onChange={handleChange}
+                        rows={3}
+                        placeholder="JavaScript, React, Node.js, Python"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Interests
+                      </label>
+                      <textarea
+                        name="interests"
+                        value={formData.interests}
+                        onChange={handleChange}
+                        rows={3}
+                        placeholder="Coding, Reading, Travel, Photography"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Free Time Style
+                      </label>
+                      <select
+                        name="freetime_style"
+                        value={formData.freetime_style}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Free Time Style</option>
+                        <option value="Mostly social">Mostly social</option>
+                        <option value="With Partner">With Partner</option>
+                        <option value="Balanced mix">Balanced mix</option>
+                        <option value="Low-key and restful">
+                          Low-key and restful
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Health Activity Level
+                      </label>
+                      <select
+                        name="health_activity_level"
+                        value={formData.health_activity_level}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Activity Level</option>
+                        <option value="Active">Active</option>
+                        <option value="Semi-active">Semi-active</option>
+                        <option value="Light">Light</option>
+                        <option value="Minimal">Minimal</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Smoking
+                      </label>
+                      <select
+                        name="smoking"
+                        value={formData.smoking}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Smoking Preference</option>
+                        <option value="NO">NO</option>
+                        <option value="YES">YES</option>
+                        <option value="SOCIAL">SOCIAL</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Drinking
+                      </label>
+                      <select
+                        name="drinking"
+                        value={formData.drinking}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Drinking Preference</option>
+                        <option value="NO">NO</option>
+                        <option value="YES">YES</option>
+                        <option value="SOCIAL">SOCIAL</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Pets Preference
+                      </label>
+                      <select
+                        name="pets_preference"
+                        value={formData.pets_preference}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Pets Preference</option>
+                        <option value="Want">Want</option>
+                        <option value="Don't want">Don't want</option>
+                        <option value="Have and want more">
+                          Have and want more
+                        </option>
+                        <option value="Have and don't want more">
+                          Have and don't want more
+                        </option>
+                        <option value="Open">Open</option>
+                        <option value="Not Sure yet">Not Sure yet</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Religious Belief
+                      </label>
+                      <select
+                        name="religious_belief"
+                        value={formData.religious_belief}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Religious Belief</option>
+                        <option value="Hindu">Hindu</option>
+                        <option value="Muslim">Muslim</option>
+                        <option value="Christian">Christian</option>
+                        <option value="Sikh">Sikh</option>
+                        <option value="Buddhist">Buddhist</option>
+                        <option value="Jain">Jain</option>
+                        <option value="Jewish">Jewish</option>
+                        <option value="Spiritual">Spiritual</option>
+                        <option value="Atheist">Atheist</option>
+                        <option value="Agnostic">Agnostic</option>
+                        <option value="Other">Other</option>
+                        <option value="Prefer not to say">
+                          Prefer not to say
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Zodiac Sign
+                      </label>
+                      <input
+                        type="text"
+                        name="zodiac_sign"
+                        value={formData.zodiac_sign}
+                        onChange={handleChange}
+                        placeholder="Aries, Taurus, Gemini..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 5: RELATIONSHIP PREFERENCES - FIXED FIELDS */}
+          {currentStep === 5 && (
+            <div className="animate-fadeIn">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Relationship Preferences
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Interested In
+                      </label>
+                      <select
+                        name="interested_in"
+                        value={formData.interested_in}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Interested In</option>
+                        <option value="Man">Man</option>
+                        <option value="Woman">Woman</option>
+                        <option value="Non-Binary">Non-Binary</option>
+                        <option value="Everyone">Everyone</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Relationship Goal
+                      </label>
+                      <select
+                        name="relationship_goal"
+                        value={formData.relationship_goal}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Relationship Goal</option>
+                        <option value="LONG_TERM">LONG_TERM</option>
+                        <option value="LIFE_PARTNER">LIFE_PARTNER</option>
+                        <option value="DATING_WITH_INTENT">
+                          DATING_WITH_INTENT
+                        </option>
+                        <option value="FRIEND">FRIEND</option>
+                        <option value="FIGURING_IT_OUT">FIGURING_IT_OUT</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Children Preference
+                      </label>
+                      <select
+                        name="children_preference"
+                        value={formData.children_preference}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Children Preference</option>
+                        <option value="WANT">WANT</option>
+                        <option value="DONT_WANT">DONT_WANT</option>
+                        <option value="HAVE_AND_WANT_MORE">
+                          HAVE_AND_WANT_MORE
+                        </option>
+                        <option value="HAVE_AND_DONT_WANT_MORE">
+                          HAVE_AND_DONT_WANT_MORE
+                        </option>
+                        <option value="OPEN">OPEN</option>
+                        <option value="NOT_SURE_YET">NOT_SURE_YET</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Relationship Pace
+                      </label>
+                      <select
+                        name="relationship_pace"
+                        value={formData.relationship_pace}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Relationship Pace</option>
+                        <option value="Naturally">Naturally</option>
+                        <option value="Quickly">Quickly</option>
+                        <option value="Slowly">Slowly</option>
+                        <option value="With clear definition">
+                          With clear definition
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Love Languages
+                      </label>
+                      <input
+                        type="text"
+                        name="love_language_affection"
+                        value={formData.love_language_affection}
+                        onChange={handleChange}
+                        placeholder="Physical Touch, Words of Affirmation, Quality Time, Acts of Service, Thoughtful Gifts"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Enter valid love languages: Physical Touch, Words of
+                        Affirmation, Quality Time, Acts of Service, Thoughtful
+                        Gifts
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Self Expression
+                      </label>
+                      <select
+                        name="self_expression"
+                        value={formData.self_expression}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Self Expression</option>
+                        <option value="Clear and direct">
+                          Clear and direct
+                        </option>
+                        <option value="Reflective and calm">
+                          Reflective and calm
+                        </option>
+                        <option value="Expressive once I trust">
+                          Expressive once I trust
+                        </option>
+                        <option value="Reserved until I feel safe">
+                          Reserved until I feel safe
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Interaction Style
+                      </label>
+                      <select
+                        name="interaction_style"
+                        value={formData.interaction_style}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Interaction Style</option>
+                        <option value="Light and engaging">
+                          Light and engaging
+                        </option>
+                        <option value="Deep and thought-provoking">
+                          Deep and thought-provoking
+                        </option>
+                        <option value="Reserved unless invited">
+                          Reserved unless invited
+                        </option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Work Environment
+                      </label>
+                      <select
+                        name="work_environment"
+                        value={formData.work_environment}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Work Environment</option>
+                        <option value="Remote">Remote</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="Office/Location based">
+                          Office/Location based
+                        </option>
+                        <option value="On-the-go">On-the-go</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+
+                    {/* Work Rhythm - Fixed dropdown */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Work Rhythm
+                      </label>
+                      <select
+                        name="work_rhythm"
+                        value={formData.work_rhythm}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Work Rhythm</option>
+                        <option value="Regular">Structured routine</option>
+                        <option value="Flexible">
+                          Balanced with busy phases
+                        </option>
+                        <option value="Intense">High intensity</option>
+                        <option value="Seasonal">Project-based</option>
+                      </select>
+                    </div>
+
+                    {/* Career Decision Style - Fixed dropdown */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Career Decision Style
+                      </label>
+                      <select
+                        name="career_decision_style"
+                        value={formData.career_decision_style}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Career Decision Style</option>
+                        <option value="Analytical">Security-focused</option>
+                        <option value="Intuitive">Opportunity-driven</option>
+                        <option value="Collaborative">Balanced</option>
+                        <option value="Independent">Risk-positive</option>
+                      </select>
+                    </div>
+
+                    {/* Work Demand Response - Fixed dropdown */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Work Demand Response
+                      </label>
+                      <select
+                        name="work_demand_response"
+                        value={formData.work_demand_response}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Work Demand Response</option>
+                        <option value="Proactive">
+                          Adjusting plans quickly
+                        </option>
+                        <option value="Reactive">Keeping structure</option>
+                        <option value="Balanced">
+                          Taking space to rebalance
+                        </option>
+                        <option value="Selective">
+                          Communicating clearly and finding a middle ground
+                        </option>
+                      </select>
+                    </div>
+
+                    {/* Preference of Closeness - Fixed dropdown */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Preference of Closeness
+                      </label>
+                      <select
+                        name="preference_of_closeness"
+                        value={formData.preference_of_closeness}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      >
+                        <option value="">Select Preference of Closeness</option>
+                        <option value="High">More time together</option>
+                        <option value="Medium">
+                          A mix of space and closeness
+                        </option>
+                        <option value="Low">Regular personal time</option>
+                        <option value="Variable">Not yet sure</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* NAVIGATION BUTTONS */}
+          <div className="flex justify-between items-center pt-8 border-t mt-8">
+            <div>
+              {currentStep > 1 && (
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"
+                >
+                  ← Back
+                </button>
+              )}
+            </div>
+
+            <div className="flex gap-4">
+              {currentStep < totalSteps && (
+                <>
+                  <button
+                    type="button"
+                    onClick={skipStep}
+                    className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                  >
+                    Skip for now
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2"
+                  >
+                    Next Step →
+                  </button>
+                </>
+              )}
+
+              {currentStep === totalSteps && (
+                <button
+                  type="submit"
+                  disabled={loading || imageLoading}
+                  className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 flex items-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    "✓ Save Profile"
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </form>
       </div>
@@ -959,87 +1878,1585 @@ export default function EditProfilePage() {
   );
 }
 
-// Reusable Form Components (Same as before - UNCHANGED)
-function Section({ title, children }) {
-  return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
-      {children}
-    </div>
-  );
-}
 
-function FormField({
-  label,
-  name,
-  type = "text",
-  value,
-  onChange,
-  required = false,
-  placeholder = "",
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-        required={required}
-      />
-    </div>
-  );
-}
 
-function TextAreaField({
-  label,
-  name,
-  value,
-  onChange,
-  rows = 3,
-  placeholder = "",
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label}
-      </label>
-      <textarea
-        name={name}
-        value={value}
-        onChange={onChange}
-        rows={rows}
-        placeholder={placeholder}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-      />
-    </div>
-  );
-}
 
-function SelectField({ label, name, value, onChange, options }) {
-  return (
-    <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
-        {label}
-      </label>
-      <select
-        name={name}
-        value={value}
-        onChange={onChange}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option || `Select ${label}`}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 2nd code woking
+// import React, { useState, useEffect, useRef } from "react";
+// import { useNavigate } from "react-router-dom";
+// import { useUserProfile } from "../context/UseProfileContext";
+// import { updateUserProfile } from "../services/api";
+// import { uploadImage, saveProfileImage } from "../services/api";
+// import axios from "axios";
+
+// export default function EditProfilePage() {
+//   const { profile, updateProfile } = useUserProfile();
+//   const navigate = useNavigate();
+
+//   const [showCamera, setShowCamera] = useState(false);
+//   const [isCameraActive, setIsCameraActive] = useState(false);
+//   const [cameraError, setCameraError] = useState("");
+//   const [capturedImage, setCapturedImage] = useState(null);
+//   const videoRef = useRef(null);
+//   const canvasRef = useRef(null);
+//   const streamRef = useRef(null);
+
+//   // ✅ NEW STATE FOR SWIPER
+//   const [currentStep, setCurrentStep] = useState(1);
+//   const totalSteps = 5; // Profile Pic, Personal, Professional, About, Relationship
+//   // ✅ SWIPER NAVIGATION FUNCTIONS
+//   const nextStep = () => {
+//     if (currentStep < totalSteps) {
+//       setCurrentStep(currentStep + 1);
+//       window.scrollTo({ top: 0, behavior: "smooth" });
+//     }
+//   };
+
+//   const prevStep = () => {
+//     if (currentStep > 1) {
+//       setCurrentStep(currentStep - 1);
+//       window.scrollTo({ top: 0, behavior: "smooth" });
+//     }
+//   };
+
+//   const skipStep = () => {
+//     nextStep();
+//   };
+
+//   const goToStep = (step) => {
+//     setCurrentStep(step);
+//     window.scrollTo({ top: 0, behavior: "smooth" });
+//   };
+
+//   // ✅ PROGRESS BAR CALCULATION
+//   const progressPercentage = (currentStep / totalSteps) * 100;
+
+//   const openCamera = () => {
+//     console.log("Opening camera...");
+//     setShowCamera(true);
+//     setCapturedImage(null);
+//   };
+
+//   const closeCamera = () => {
+//     if (streamRef.current) {
+//       streamRef.current.getTracks().forEach((track) => {
+//         track.stop();
+//       });
+//       streamRef.current = null;
+//     }
+//     setIsCameraActive(false);
+//     setCameraError("");
+//     setShowCamera(false);
+//   };
+
+//   const startCamera = async () => {
+//     try {
+//       setCameraError("");
+//       setIsCameraActive(false);
+
+//       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+//         throw new Error("Camera not supported in this browser");
+//       }
+
+//       const stream = await navigator.mediaDevices.getUserMedia({
+//         video: {
+//           facingMode: "user",
+//           width: { ideal: 1280 },
+//           height: { ideal: 720 },
+//         },
+//         audio: false,
+//       });
+
+//       streamRef.current = stream;
+
+//       if (videoRef.current) {
+//         videoRef.current.srcObject = stream;
+
+//         // Wait for video to load metadata
+//         videoRef.current.onloadedmetadata = () => {
+//           console.log("Video metadata loaded");
+//           videoRef.current
+//             .play()
+//             .then(() => {
+//               console.log("Camera started successfully");
+//               setIsCameraActive(true);
+//             })
+//             .catch((error) => {
+//               console.error("Video play error:", error);
+//               setCameraError("Failed to start video playback");
+//             });
+//         };
+//       }
+//     } catch (error) {
+//       console.error("Camera error:", error);
+//       let errorMessage = "Failed to access camera. Please try again.";
+
+//       if (error.name === "NotAllowedError") {
+//         errorMessage =
+//           "Camera permission denied. Please allow camera access in your browser settings.";
+//       } else if (error.name === "NotFoundError") {
+//         errorMessage = "No camera found on this device.";
+//       } else if (error.name === "NotSupportedError") {
+//         errorMessage = "Camera not supported in this browser.";
+//       } else if (error.name === "NotReadableError") {
+//         errorMessage = "Camera is already in use by another application.";
+//       }
+
+//       setCameraError(errorMessage);
+//       setIsCameraActive(false);
+//     }
+//   };
+
+//   const capturePhoto = () => {
+//     if (!videoRef.current || !canvasRef.current || !isCameraActive) {
+//       console.log("Cannot capture: Camera not ready");
+//       return;
+//     }
+
+//     const video = videoRef.current;
+//     const canvas = canvasRef.current;
+//     const context = canvas.getContext("2d");
+
+//     // Set canvas dimensions to match video
+//     canvas.width = video.videoWidth;
+//     canvas.height = video.videoHeight;
+
+//     // Draw current video frame to canvas
+//     context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+//     // Convert canvas to image data URL
+//     const imageDataUrl = canvas.toDataURL("image/png");
+//     console.log("Photo captured successfully");
+//     setCapturedImage(imageDataUrl);
+//     closeCamera();
+//   };
+
+//   const retryCamera = () => {
+//     setCameraError("");
+//     startCamera();
+//   };
+
+//   const useCapturedImage = () => {
+//     console.log("Using captured image:", capturedImage);
+//     // Here you can use the capturedImage for your purpose
+//     // For example: upload to server, set as profile picture, etc.
+//     alert("Photo captured successfully! You can now use it.");
+//   };
+
+//   // Effect to handle camera start/stop
+//   useEffect(() => {
+//     if (showCamera) {
+//       // Small delay to ensure DOM is updated
+//       const timer = setTimeout(() => {
+//         startCamera();
+//       }, 100);
+
+//       return () => clearTimeout(timer);
+//     } else {
+//       closeCamera();
+//     }
+
+//     return () => {
+//       // Cleanup on unmount
+//       if (streamRef.current) {
+//         streamRef.current.getTracks().forEach((track) => track.stop());
+//       }
+//     };
+//   }, [showCamera]);
+
+//   const [formData, setFormData] = useState({
+//     first_name: "",
+//     last_name: "",
+//     email: "",
+//     phone: "",
+//     profession: "",
+//     company: "",
+//     experience: "",
+//     education: "",
+//     age: "",
+//     gender: "",
+//     marital_status: "",
+//     country: "",
+//     state: "",
+//     pincode: "",
+//     city: "",
+//     address: "",
+//     dob: "",
+//     about: "",
+//     skills: "",
+//     interests: "",
+//     headline: "",
+//     position: "", // ✅ ADD THIS
+//     hobbies: "", // ✅ ADD THIS
+//     company_type: "", // Add this
+//     // ✅ NEW FIELDS TO ADD:
+//     height: "",
+//     professional_identity: "",
+//     interested_in: "",
+//     relationship_goal: "",
+//     children_preference: "",
+//     education_institution_name: "",
+//     languages_spoken: "",
+//     zodiac_sign: "",
+//     self_expression: "",
+//     freetime_style: "",
+//     health_activity_level: "",
+//     pets_preference: "",
+//     religious_belief: "",
+//     smoking: "",
+//     drinking: "",
+//     work_environment: "",
+//     interaction_style: "",
+//     work_rhythm: "",
+//     career_decision_style: "",
+//     work_demand_response: "",
+//     love_language_affection: [],
+//     preference_of_closeness: "",
+//     approach_to_physical_closeness: "",
+//     relationship_values: "",
+//     values_in_others: "",
+//     relationship_pace: "",
+//     life_rhythms: {},
+//     ways_i_spend_time: {},
+//   });
+
+//   const [loading, setLoading] = useState(false);
+//   const [imageLoading, setImageLoading] = useState(false);
+//   const [selectedImage, setSelectedImage] = useState(null);
+//   const [imagePreview, setImagePreview] = useState("");
+
+//   // ✅ FIXED: Better form population with first_name and last_name handling
+//   useEffect(() => {
+//     if (profile) {
+//       console.log("🔄 Loading profile data into form:", profile);
+
+//       const formatDateForInput = (dateString) => {
+//         if (!dateString || dateString === "Not provided") return "";
+//         try {
+//           const date = new Date(dateString);
+//           return date.toISOString().split("T")[0];
+//         } catch (error) {
+//           return "";
+//         }
+//       };
+
+//       // ✅ FIXED: Handle "Not provided" and empty values properly
+//       const formatField = (value) => {
+//         if (!value || value === "Not provided" || value === "null") return "";
+//         return value;
+//       };
+
+//       // ✅ FIXED: Handle array fields properly
+//       const formatArrayField = (field) => {
+//         if (!field || field === "Not provided") return "";
+//         if (Array.isArray(field)) {
+//           return field.join(", ");
+//         }
+//         if (typeof field === "string") {
+//           return field;
+//         }
+//         return "";
+//       };
+
+//       // ✅ FIXED: Handle full_name split for backward compatibility
+//       let firstName = formatField(profile.first_name);
+//       let lastName = formatField(profile.last_name);
+
+//       // If first_name and last_name are empty but full_name exists, split it
+//       if ((!firstName || !lastName) && profile.full_name) {
+//         const fullNameParts = profile.full_name.split(" ");
+//         firstName = fullNameParts[0] || "";
+//         lastName = fullNameParts.slice(1).join(" ") || "";
+//       }
+
+//       setFormData({
+//         first_name: firstName,
+//         last_name: lastName,
+//         email: formatField(profile.email),
+//         phone: formatField(profile.phone),
+//         profession: formatField(profile.profession),
+//         company: formatField(profile.company),
+//         experience: formatField(profile.experience),
+//         education: formatField(profile.education),
+//         age: formatField(profile.age),
+//         gender: formatField(profile.gender),
+//         marital_status: formatField(profile.marital_status),
+//         city: formatField(profile.city),
+//         country: formatField(profile.country) || "",
+//         state: formatField(profile.state) || "",
+//         pincode: formatField(profile.pincode) || "",
+//         address: formatField(profile.address),
+//         dob: formatDateForInput(profile.dob),
+//         about: formatField(profile.about),
+//         skills: formatArrayField(profile.skills),
+//         interests: formatArrayField(profile.interests),
+//         headline: formatField(profile.headline),
+//         position: formatField(profile.position) || "", // ✅ ADD THIS
+//         hobbies: formatArrayField(profile.hobbies) || "", // ✅ ADD THIS
+//         company_type: formatField(profile.company_type) || "", // ✅ ADD THIS
+//         // ✅ NEW FIELDS:
+//         height: formatField(profile.height),
+//         professional_identity: formatField(profile.professional_identity),
+//         interested_in: formatField(profile.interested_in),
+//         relationship_goal: formatField(profile.relationship_goal),
+//         children_preference: formatField(profile.children_preference),
+//         education_institution_name: formatField(
+//           profile.education_institution_name
+//         ),
+//         languages_spoken: formatArrayField(profile.languages_spoken),
+//         zodiac_sign: formatField(profile.zodiac_sign),
+//         self_expression: formatField(profile.self_expression),
+//         freetime_style: formatField(profile.freetime_style),
+//         health_activity_level: formatField(profile.health_activity_level),
+//         pets_preference: formatField(profile.pets_preference),
+//         religious_belief: formatField(profile.religious_belief),
+//         smoking: formatField(profile.smoking),
+//         drinking: formatField(profile.drinking),
+//         work_environment: formatField(profile.work_environment),
+//         interaction_style: formatField(profile.interaction_style),
+//         work_rhythm: formatField(profile.work_rhythm),
+//         career_decision_style: formatField(profile.career_decision_style),
+//         work_demand_response: formatField(profile.work_demand_response),
+//         love_language_affection: formatArrayField(
+//           profile.love_language_affection
+//         ),
+//         preference_of_closeness: formatField(profile.preference_of_closeness),
+//         approach_to_physical_closeness: formatField(
+//           profile.approach_to_physical_closeness
+//         ),
+//         relationship_values: formatField(profile.relationship_values),
+//         values_in_others: formatField(profile.values_in_others),
+//         relationship_pace: formatField(profile.relationship_pace),
+//         // JSON fields ko as it is rakhna hoga
+//         life_rhythms: profile.life_rhythms || {},
+//         ways_i_spend_time: profile.ways_i_spend_time || {},
+//       });
+
+//       // ✅ Set current profile image preview
+//       if (profile.image_url && profile.image_url !== "Not provided") {
+//         setImagePreview(profile.image_url);
+//       }
+//     }
+//   }, [profile]);
+
+//   // Start camera when modal opens
+//   useEffect(() => {
+//     if (showCamera) {
+//       startCamera();
+//     } else {
+//       closeCamera();
+//     }
+//   }, [showCamera]);
+
+//   // ✅ Image Upload Handler
+//   const handleImageUpload = async (file) => {
+//     if (!file) return null;
+
+//     setImageLoading(true);
+//     try {
+//       console.log("📤 Uploading image to Cloudinary...");
+
+//       // Step 1: Upload image to Cloudinary
+//       const uploadFormData = new FormData();
+//       uploadFormData.append("image", file);
+
+//       const uploadResponse = await axios.post(
+//         "https://backend-q0wc.onrender.com/api/upload",
+//         uploadFormData,
+//         {
+//           headers: {
+//             "Content-Type": "multipart/form-data",
+//           },
+//         }
+//       );
+
+//       console.log("✅ Image uploaded:", uploadResponse.data);
+
+//       // Step 2: Save image URL to profile
+//       const saveResponse = await axios.post(
+//         "https://backend-q0wc.onrender.com/api/saveProfileImage",
+//         {
+//           user_id: profile.user_id,
+//           imageUrl: uploadResponse.data.imageUrl,
+//         }
+//       );
+
+//       console.log("✅ Profile image saved:", saveResponse.data);
+
+//       // Update context with new profile data
+//       updateProfile(saveResponse.data.profiles);
+
+//       // Update image preview
+//       setImagePreview(uploadResponse.data.imageUrl);
+
+//       return uploadResponse.data.imageUrl;
+//     } catch (error) {
+//       console.error("❌ Image upload error:", error);
+//       alert("Image upload failed. Please try again.");
+//       return null;
+//     } finally {
+//       setImageLoading(false);
+//     }
+//   };
+
+//   // ✅ Handle Image Selection
+//   const handleImageSelect = (e) => {
+//     const file = e.target.files[0];
+//     if (!file) return;
+
+//     // Validate file type
+//     const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+//     if (!allowedTypes.includes(file.type)) {
+//       alert("Please select a valid image file (JPEG, PNG, JPG, WEBP)");
+//       return;
+//     }
+
+//     // Validate file size (5MB)
+//     if (file.size > 5 * 1024 * 1024) {
+//       alert("Image size should be less than 5MB");
+//       return;
+//     }
+
+//     setSelectedImage(file);
+
+//     // Create preview
+//     const reader = new FileReader();
+//     reader.onload = (e) => {
+//       setImagePreview(e.target.result);
+//     };
+//     reader.readAsDataURL(file);
+
+//     // Auto-upload image
+//     handleImageUpload(file);
+//   };
+
+//   // ✅ Remove Image with API Call
+//   const handleRemoveImage = async () => {
+//     try {
+//       setImageLoading(true);
+
+//       console.log("🗑️ Removing profile image for user:", profile.user_id);
+
+//       // API call to remove profile image
+//       const removeResponse = await axios.post(
+//         "https://backend-q0wc.onrender.com/api/remove/profile-picture",
+//         {
+//           user_id: profile.user_id,
+//         }
+//       );
+
+//       console.log("✅ Image removed successfully:", removeResponse.data);
+
+//       if (
+//         removeResponse.data.message === "Profile picture removed successfully"
+//       ) {
+//         // Update frontend state
+//         setSelectedImage(null);
+//         setImagePreview("");
+
+//         // Update context with new profile data (without image)
+//         const updatedProfile = {
+//           ...profile,
+//           image_url: null,
+//           profile_picture_url: null,
+//           profilePhoto: null,
+//           last_updated: new Date().toISOString(),
+//         };
+
+//         updateProfile(updatedProfile);
+//         alert("✅ Profile image removed successfully!");
+//       } else {
+//         throw new Error("Unexpected response from server");
+//       }
+//     } catch (error) {
+//       console.error("❌ Error removing image:", error);
+
+//       let errorMessage = "Failed to remove image. Please try again.";
+//       if (error.response?.data?.message) {
+//         errorMessage = error.response.data.message;
+//       } else if (error.message) {
+//         errorMessage = error.message;
+//       }
+
+//       alert(`❌ ${errorMessage}`);
+//     } finally {
+//       setImageLoading(false);
+//     }
+//   };
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({
+//       ...prev,
+//       [name]: value,
+//     }));
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setLoading(true);
+
+//     try {
+//       console.log("🔵 Form Data Before Processing:", formData);
+
+//       // ✅ FIXED: Proper payload with first_name and last_name
+//       const payload = {
+//         // Personal Information
+//         first_name: formData.first_name?.trim() || "",
+//         last_name: formData.last_name?.trim() || "",
+//         email: formData.email?.trim() || "",
+//         phone: formData.phone?.trim() || null,
+//         gender: formData.gender || null,
+//         marital_status: formData.marital_status || null,
+//         city: formData.city?.trim() || null,
+//         country: formData.country?.trim() || null,
+//         state: formData.state?.trim() || null,
+//         pincode: formData.pincode?.trim() || null,
+//         address: formData.address?.trim() || null,
+//         // dob: formData.dob || null,
+//         age: formData.age ? parseInt(formData.age) : null,
+
+//         // Professional Information
+//         profession: formData.profession?.trim() || null,
+//         company: formData.company?.trim() || null,
+//         company_type: formData.company_type?.trim() || null, // ✅ ADD THIS
+//         experience: formData.experience ? parseInt(formData.experience) : null,
+//         education: formData.education?.trim() || null,
+//         headline: formData.headline?.trim() || null,
+//         position: formData.position?.trim() || null, // ✅ ADD THIS
+
+//         // ✅ NEW FIELDS IN PAYLOAD:
+//         height: formData.height ? parseInt(formData.height) : null,
+//         professional_identity: formData.professional_identity || null,
+//         interested_in: formData.interested_in || null,
+//         relationship_goal: formData.relationship_goal || null,
+//         children_preference: formData.children_preference || null,
+//         education_institution_name: formData.education_institution_name || null,
+//         languages_spoken: formData.languages_spoken
+//           ? formData.languages_spoken
+//               .split(",")
+//               .map((lang) => lang.trim())
+//               .filter((lang) => lang !== "")
+//           : [],
+//         zodiac_sign: formData.zodiac_sign || null,
+//         self_expression: formData.self_expression || null,
+//         freetime_style: formData.freetime_style || null,
+//         health_activity_level: formData.health_activity_level || null,
+//         pets_preference: formData.pets_preference || null,
+//         religious_belief: formData.religious_belief || null,
+//         smoking: formData.smoking || null,
+//         drinking: formData.drinking || null,
+//         work_environment: formData.work_environment || null,
+//         interaction_style: formData.interaction_style || null,
+//         work_rhythm: formData.work_rhythm || null,
+//         career_decision_style: formData.career_decision_style || null,
+//         work_demand_response: formData.work_demand_response || null,
+//         love_language_affection: formData.love_language_affection
+//           ? Array.isArray(formData.love_language_affection)
+//             ? formData.love_language_affection
+//             : formData.love_language_affection
+//                 .split(",")
+//                 .map((item) => item.trim())
+//                 .filter((item) => item !== "")
+//           : [],
+//         preference_of_closeness: formData.preference_of_closeness || null,
+//         approach_to_physical_closeness:
+//           formData.approach_to_physical_closeness || null,
+//         relationship_values: formData.relationship_values || null,
+//         values_in_others: formData.values_in_others || null,
+//         relationship_pace: formData.relationship_pace || null,
+//         life_rhythms: formData.life_rhythms || {},
+//         ways_i_spend_time: formData.ways_i_spend_time || {},
+
+//         // Additional Information
+//         about: formData.about?.trim() || null,
+//         skills: formData.skills
+//           ? formData.skills
+//               .split(",")
+//               .map((skill) => skill.trim())
+//               .filter((skill) => skill !== "")
+//           : [],
+//         interests: formData.interests
+//           ? formData.interests
+//               .split(",")
+//               .map((interest) => interest.trim())
+//               .filter((interest) => interest !== "")
+//           : [],
+
+//         hobbies: formData.hobbies // ✅ ADD THIS
+//           ? formData.hobbies
+//               .split(",")
+//               .map((hobby) => hobby.trim())
+//               .filter((hobby) => hobby !== "")
+//           : [],
+//       };
+
+//       console.log("🎯 Final API Payload:", payload);
+
+//       // API call
+//       const response = await updateUserProfile(payload);
+//       console.log("✅ API Response:", response);
+
+//       // ✅ FIXED: Create full_name for display purposes (if needed by other components)
+//       const full_name = `${payload.first_name} ${payload.last_name}`.trim();
+
+//       // ✅ FIXED: Better context update with first_name and last_name
+//       const updatedProfile = {
+//         // Keep existing profile data
+//         ...profile,
+
+//         // Update with new data
+//         ...payload,
+
+//         // Add full_name for backward compatibility (if needed)
+//         full_name: full_name,
+
+//         // Ensure required fields
+//         is_submitted: true,
+//         last_updated: new Date().toISOString(),
+
+//         // ✅ FIXED: Ensure all fields have proper values
+//         first_name: payload.first_name || "",
+//         last_name: payload.last_name || "",
+//         email: payload.email || "",
+//         phone: payload.phone || "",
+//         gender: payload.gender || "",
+//         marital_status: payload.marital_status || "",
+//         city: payload.city || "",
+//         country: payload.country || "",
+//         state: payload.state || "",
+//         pincode: payload.pincode || "",
+//         address: payload.address || "",
+//         dob: payload.dob || "",
+//         age: payload.age || "",
+//         profession: payload.profession || "",
+//         company: payload.company || "",
+//         company_type: payload.company_type || "", // ✅ ADD THIS
+//         experience: payload.experience || "",
+//         education: payload.education || "",
+//         headline: payload.headline || "",
+//         position: payload.position || "", // add this new
+//         about: payload.about || "",
+//         skills: payload.skills || [],
+//         interests: payload.interests || [],
+//         hobbies: payload.hobbies || [], // ✅ ADD THIS
+
+//         // ✅ NEW FIELDS (तुम्हारे DB schema के according):
+//         height: payload.height || "",
+//         professional_identity: payload.professional_identity || "",
+//         interested_in: payload.interested_in || "",
+//         relationship_goal: payload.relationship_goal || "",
+//         children_preference: payload.children_preference || "",
+//         education_institution_name: payload.education_institution_name || "",
+//         languages_spoken: payload.languages_spoken || [],
+//         zodiac_sign: payload.zodiac_sign || "",
+//         self_expression: payload.self_expression || "",
+//         freetime_style: payload.freetime_style || "",
+//         health_activity_level: payload.health_activity_level || "",
+//         pets_preference: payload.pets_preference || "",
+//         religious_belief: payload.religious_belief || "",
+//         smoking: payload.smoking || "",
+//         drinking: payload.drinking || "",
+//         work_environment: payload.work_environment || "",
+//         interaction_style: payload.interaction_style || "",
+//         work_rhythm: payload.work_rhythm || "",
+//         career_decision_style: payload.career_decision_style || "",
+//         work_demand_response: payload.work_demand_response || "",
+//         love_language_affection: payload.love_language_affection || [],
+//         preference_of_closeness: payload.preference_of_closeness || "",
+//         approach_to_physical_closeness:
+//           payload.approach_to_physical_closeness || "",
+//         relationship_values: payload.relationship_values || "",
+//         values_in_others: payload.values_in_others || "",
+//         relationship_pace: payload.relationship_pace || "",
+//         life_rhythms: payload.life_rhythms || {},
+//         ways_i_spend_time: payload.ways_i_spend_time || {},
+//         // helpText = "",
+//       };
+
+//       console.log("🔄 Updating context with:",updatedProfile);
+//       updateProfile(updatedProfile);
+
+//       alert("Profile updated successfully!");
+
+//       // Navigate after short delay
+//       setTimeout(() => {
+//         navigate("/dashboard");
+//       }, 1000);
+//     } catch (error) {
+//       console.error("❌ Profile update error:", error);
+//       console.error("❌ Error details:", error.response?.data);
+
+//       let errorMessage = "Failed to update profile. Please try again.";
+//       if (error.response?.data?.message) {
+//         errorMessage = error.response.data.message;
+//       } else if (error.response?.data?.error) {
+//         errorMessage = error.response.data.error;
+//       }
+//       alert(errorMessage);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // ✅ Helper function to check if field has value
+//   const hasValue = (value) => {
+//     return (
+//       value && value !== "" && value !== "Not provided" && value !== "null"
+//     );
+//   };
+
+//   return (
+
+//     <div className="min-h-screen bg-gray-100 p-4 md:p-6">
+//       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-4 md:p-6">
+
+//         {/* ✅ HEADER WITH PROGRESS BAR */}
+//         <div className="mb-8">
+//           <div className="flex justify-between items-center mb-4">
+//             <div>
+//               <h1 className="text-2xl font-bold text-gray-800">Edit Profile</h1>
+//               <p className="text-gray-600 text-sm mt-1">
+//                 Step {currentStep} of {totalSteps}
+//               </p>
+//             </div>
+//             <button
+//               onClick={() => navigate("/dashboard/profile")}
+//               className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition text-sm"
+//             >
+//               Cancel
+//             </button>
+//           </div>
+
+//           {/* ✅ PROGRESS BAR */}
+//           <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+//             <div
+//               className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+//               style={{ width: `${progressPercentage}%` }}
+//             ></div>
+//           </div>
+
+//           {/* ✅ STEP INDICATORS */}
+//           <div className="flex justify-between mt-4">
+//             {[1, 2, 3, 4, 5].map((step) => (
+//               <button
+//                 key={step}
+//                 onClick={() => goToStep(step)}
+//                 className={`flex flex-col items-center ${
+//                   step <= currentStep ? 'text-indigo-600' : 'text-gray-400'
+//                 }`}
+//               >
+//                 <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
+//                   step === currentStep
+//                     ? 'bg-indigo-600 text-white'
+//                     : step < currentStep
+//                       ? 'bg-indigo-100 text-indigo-600'
+//                       : 'bg-gray-200 text-gray-400'
+//                 }`}>
+//                   {step}
+//                 </div>
+//                 <span className="text-xs font-medium">
+//                   {step === 1 ? 'Photo' :
+//                    step === 2 ? 'Personal' :
+//                    step === 3 ? 'Professional' :
+//                    step === 4 ? 'About' :
+//                    'Relationships'}
+//                 </span>
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+
+//         <form onSubmit={handleSubmit} className="space-y-8">
+//           {/* ✅ STEP 1: PROFILE PICTURE */}
+//           {currentStep === 1 && (
+//             <div className="animate-fadeIn">
+//               <Section title="Profile Picture">
+//                 {/* ... तुम्हारा existing profile picture code ... */}
+//                 <div className="flex flex-col items-center space-y-4">
+//                   {/* Image Preview */}
+//                   <div className="relative">
+//                     <div className="w-32 h-32 rounded-full border-4 border-gray-300 overflow-hidden bg-gray-200 flex items-center justify-center">
+//                       {imagePreview ? (
+//                         <img
+//                           src={imagePreview}
+//                           alt="Profile preview"
+//                           className="w-full h-full object-cover"
+//                         />
+//                       ) : (
+//                         <span className="text-gray-500 text-sm text-center">
+//                           No Image
+//                         </span>
+//                       )}
+//                     </div>
+//                   </div>
+
+//                   {/* Upload Buttons */}
+//                   <div className="flex flex-col sm:flex-row gap-4">
+//                     <label className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition cursor-pointer text-center">
+//                       Upload Photo
+//                       <input
+//                         type="file"
+//                         accept="image/*"
+//                         onChange={handleImageSelect}
+//                         className="hidden"
+//                         disabled={imageLoading}
+//                       />
+//                     </label>
+
+//                     <button
+//                       type="button"
+//                       onClick={openCamera}
+//                       className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+//                       disabled={imageLoading}
+//                     >
+//                       Take Photo
+//                     </button>
+//                   </div>
+//                 </div>
+//               </Section>
+//             </div>
+//           )}
+
+//           {/* ✅ STEP 2: PERSONAL INFORMATION */}
+//           {currentStep === 2 && (
+//             <div className="animate-fadeIn">
+//               <Section title="Personal Information">
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                   <FormField
+//                     label="First Name"
+//                     name="first_name"
+//                     value={formData.first_name}
+//                     onChange={handleChange}
+//                     required
+//                   />
+
+//                   <FormField
+//                     label="Last Name"
+//                     name="last_name"
+//                     value={formData.last_name}
+//                     onChange={handleChange}
+//                     required
+//                   />
+
+//                   <FormField
+//                     label="Email"
+//                     name="email"
+//                     type="email"
+//                     value={formData.email}
+//                     onChange={handleChange}
+//                     required
+//                   />
+
+//                   <FormField
+//                     label="Phone"
+//                     name="phone"
+//                     value={formData.phone}
+//                     onChange={handleChange}
+//                     placeholder="+91 1234567890"
+//                   />
+
+//                   <FormField
+//                     label="Date of Birth"
+//                     name="dob"
+//                     type="date"
+//                     value={formData.dob}
+//                     onChange={handleChange}
+//                   />
+
+//                   <FormField
+//                     label="Age"
+//                     name="age"
+//                     type="number"
+//                     value={formData.age}
+//                     onChange={handleChange}
+//                     placeholder="25"
+//                   />
+
+//                   <FormField
+//                     label="Height (cm)"
+//                     name="height"
+//                     type="number"
+//                     value={formData.height}
+//                     onChange={handleChange}
+//                     placeholder="170"
+//                   />
+
+//                   <SelectField
+//                     label="Gender"
+//                     name="gender"
+//                     value={formData.gender}
+//                     onChange={handleChange}
+//                     options={["", "Male", "Female", "Other"]}
+//                   />
+
+//                   <SelectField
+//                     label="Marital Status"
+//                     name="marital_status"
+//                     value={formData.marital_status}
+//                     onChange={handleChange}
+//                     options={["", "Single", "Married", "Divorced", "Widowed"]}
+//                   />
+
+//                   <FormField
+//                     label="City"
+//                     name="city"
+//                     value={formData.city}
+//                     onChange={handleChange}
+//                     placeholder="New Delhi"
+//                   />
+
+//                   <FormField
+//                     label="Country"
+//                     name="country"
+//                     value={formData.country}
+//                     onChange={handleChange}
+//                     placeholder="Enter your country"
+//                   />
+
+//                   <FormField
+//                     label="State"
+//                     name="state"
+//                     value={formData.state}
+//                     onChange={handleChange}
+//                     placeholder="Enter your state"
+//                   />
+
+//                   <FormField
+//                     label="Pincode"
+//                     name="pincode"
+//                     value={formData.pincode}
+//                     onChange={handleChange}
+//                     placeholder="Enter pincode"
+//                   />
+//                 </div>
+
+//                 <div className="mt-4">
+//                   <TextAreaField
+//                     label="Address"
+//                     name="address"
+//                     value={formData.address}
+//                     onChange={handleChange}
+//                     rows={3}
+//                     placeholder="Enter your complete address"
+//                   />
+//                 </div>
+//               </Section>
+//             </div>
+//           )}
+
+//           {/* ✅ STEP 3: PROFESSIONAL INFORMATION */}
+//           {currentStep === 3 && (
+//             <div className="animate-fadeIn">
+//               <Section title="Professional Information">
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                   <FormField
+//                     label="Headline"
+//                     name="headline"
+//                     value={formData.headline}
+//                     onChange={handleChange}
+//                     placeholder="Senior Software Engineer at Google"
+//                   />
+
+//                   <FormField
+//                     label="Profession"
+//                     name="profession"
+//                     value={formData.profession}
+//                     onChange={handleChange}
+//                     placeholder="Software Engineer"
+//                   />
+
+//                   <SelectField
+//                     label="Professional Identity"
+//                     name="professional_identity"
+//                     value={formData.professional_identity}
+//                     onChange={handleChange}
+//                     options={["", "Corporate professional", "Entrepreneur", "Startup founder", "Freelancer", "Consultant", "Investor", "Family business owner", "Small business owner", "Creative professional", "Healthcare professional", "Government", "Student", "Other"]}
+//                   />
+
+//                   <FormField
+//                     label="Company"
+//                     name="company"
+//                     value={formData.company}
+//                     onChange={handleChange}
+//                     placeholder="Google Inc."
+//                   />
+
+//                   <FormField
+//                     label="Position"
+//                     name="position"
+//                     value={formData.position}
+//                     onChange={handleChange}
+//                     placeholder="Software Engineer"
+//                   />
+
+//                   <div className="flex flex-col">
+//                     <label className="block text-sm font-medium text-gray-700 mb-1">
+//                       Company Type
+//                     </label>
+//                     <select
+//                       name="company_type"
+//                       value={formData.company_type}
+//                       onChange={handleChange}
+//                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+//                     >
+//                       <option value="">Select Type</option>
+//                       <option value="MNC">MNC</option>
+//                       <option value="Startup">Startup</option>
+//                       <option value="SME">SME</option>
+//                       <option value="Government">Government</option>
+//                       <option value="NGO">NGO</option>
+//                       <option value="Other">Other</option>
+//                     </select>
+//                   </div>
+
+//                   <FormField
+//                     label="Experience (years)"
+//                     name="experience"
+//                     type="number"
+//                     value={formData.experience}
+//                     onChange={handleChange}
+//                     placeholder="3"
+//                   />
+
+//                   <FormField
+//                     label="Education"
+//                     name="education"
+//                     value={formData.education}
+//                     onChange={handleChange}
+//                     placeholder="Bachelor of Technology"
+//                   />
+
+//                   <FormField
+//                     label="Education Institution"
+//                     name="education_institution_name"
+//                     value={formData.education_institution_name}
+//                     onChange={handleChange}
+//                     placeholder="University of Delhi"
+//                   />
+
+//                   <FormField
+//                     label="Languages Spoken"
+//                     name="languages_spoken"
+//                     value={formData.languages_spoken}
+//                     onChange={handleChange}
+//                     placeholder="Hindi, English, Spanish"
+//                     helpText="Separate languages with commas"
+//                   />
+//                 </div>
+//               </Section>
+//             </div>
+//           )}
+
+//           {/* ✅ STEP 4: ABOUT & LIFESTYLE */}
+//           {currentStep === 4 && (
+//             <div className="animate-fadeIn">
+//               <Section title="About & Lifestyle">
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//                   {/* Left Column */}
+//                   <div className="space-y-4">
+//                     <TextAreaField
+//                       label="About Yourself"
+//                       name="about"
+//                       value={formData.about}
+//                       onChange={handleChange}
+//                       rows={4}
+//                       placeholder="Tell us about yourself..."
+//                     />
+
+//                     <FormField
+//                       label="Hobbies (comma separated)"
+//                       name="hobbies"
+//                       value={formData.hobbies}
+//                       onChange={handleChange}
+//                       placeholder="Reading, Traveling, Sports"
+//                       helpText="Separate with commas"
+//                     />
+
+//                     <TextAreaField
+//                       label="Skills"
+//                       name="skills"
+//                       value={formData.skills}
+//                       onChange={handleChange}
+//                       rows={3}
+//                       placeholder="JavaScript, React, Node.js, Python"
+//                     />
+
+//                     <TextAreaField
+//                       label="Interests"
+//                       name="interests"
+//                       value={formData.interests}
+//                       onChange={handleChange}
+//                       rows={3}
+//                       placeholder="Coding, Reading, Travel, Photography"
+//                     />
+//                   </div>
+
+//                   {/* Right Column - Lifestyle */}
+//                   <div className="space-y-4">
+//                     <SelectField
+//                       label="Free Time Style"
+//                       name="freetime_style"
+//                       value={formData.freetime_style}
+//                       onChange={handleChange}
+//                       options={["", "Mostly social", "With Partner", "Balanced mix", "Low-key and restful"]}
+//                     />
+
+//                     <SelectField
+//                       label="Health Activity Level"
+//                       name="health_activity_level"
+//                       value={formData.health_activity_level}
+//                       onChange={handleChange}
+//                       options={["", "Active", "Semi-active", "Light", "Minimal"]}
+//                     />
+
+//                     <SelectField
+//                       label="Smoking"
+//                       name="smoking"
+//                       value={formData.smoking}
+//                       onChange={handleChange}
+//                       options={["", "No", "Yes", "Socially"]}
+//                     />
+
+//                     <SelectField
+//                       label="Drinking"
+//                       name="drinking"
+//                       value={formData.drinking}
+//                       onChange={handleChange}
+//                       options={["", "No", "Yes", "Socially"]}
+//                     />
+
+//                     <SelectField
+//                       label="Pets Preference"
+//                       name="pets_preference"
+//                       value={formData.pets_preference}
+//                       onChange={handleChange}
+//                       options={["", "Want", "Don't want", "Have and want more", "Have and don't want more", "Open", "Not Sure yet"]}
+//                     />
+//                   </div>
+//                 </div>
+//               </Section>
+//             </div>
+//           )}
+
+//           {/* ✅ STEP 5: RELATIONSHIP PREFERENCES */}
+//           {currentStep === 5 && (
+//             <div className="animate-fadeIn">
+//               <Section title="Relationship Preferences">
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//                   {/* Left Column */}
+//                   <div className="space-y-4">
+//                     <SelectField
+//                       label="Interested In"
+//                       name="interested_in"
+//                       value={formData.interested_in}
+//                       onChange={handleChange}
+//                       options={["", "Man", "Woman", "Non-Binary", "Everyone"]}
+//                     />
+
+//                     <SelectField
+//                       label="Relationship Goal"
+//                       name="relationship_goal"
+//                       value={formData.relationship_goal}
+//                       onChange={handleChange}
+//                       options={["", "Long-term", "Life Partner", "Dating with intent", "Friend", "Figuring it out"]}
+//                     />
+
+//                     <SelectField
+//                       label="Children Preference"
+//                       name="children_preference"
+//                       value={formData.children_preference}
+//                       onChange={handleChange}
+//                       options={["", "Want", "Don't want", "Have and want more", "Have and don't want more", "Open", "Not Sure yet"]}
+//                     />
+
+//                     <SelectField
+//                       label="Relationship Pace"
+//                       name="relationship_pace"
+//                       value={formData.relationship_pace}
+//                       onChange={handleChange}
+//                       options={["", "Naturally", "Quickly", "Slowly", "With clear definition"]}
+//                     />
+
+//                     <FormField
+//                       label="Love Languages"
+//                       name="love_language_affection"
+//                       value={formData.love_language_affection}
+//                       onChange={handleChange}
+//                       placeholder="Physical Touch, Words of Affirmation, Quality Time"
+//                       helpText="Separate with commas"
+//                     />
+//                   </div>
+
+//                   {/* Right Column */}
+//                   <div className="space-y-4">
+//                     <SelectField
+//                       label="Self Expression"
+//                       name="self_expression"
+//                       value={formData.self_expression}
+//                       onChange={handleChange}
+//                       options={["", "Clear and direct", "Reflective and calm", "Expressive once I trust", "Reserved until I feel safe"]}
+//                     />
+
+//                     <SelectField
+//                       label="Interaction Style"
+//                       name="interaction_style"
+//                       value={formData.interaction_style}
+//                       onChange={handleChange}
+//                       options={["", "Light and engaging", "Deep and thought-provoking", "Reserved unless invited", "Other"]}
+//                     />
+
+//                     <SelectField
+//                       label="Work Environment"
+//                       name="work_environment"
+//                       value={formData.work_environment}
+//                       onChange={handleChange}
+//                       options={["", "Remote", "Hybrid", "Office/Location based", "On-the-go", "Other"]}
+//                     />
+
+//                     <SelectField
+//                       label="Religious Belief"
+//                       name="religious_belief"
+//                       value={formData.religious_belief}
+//                       onChange={handleChange}
+//                       options={["", "Hindu", "Muslim", "Christian", "Sikh", "Buddhist", "Jain", "Atheist", "Agnostic", "Spiritual", "Other"]}
+//                     />
+
+//                     <FormField
+//                       label="Zodiac Sign"
+//                       name="zodiac_sign"
+//                       value={formData.zodiac_sign}
+//                       onChange={handleChange}
+//                       placeholder="Aries, Taurus, Gemini..."
+//                     />
+//                   </div>
+//                 </div>
+//               </Section>
+//             </div>
+//           )}
+
+//           {/* ✅ NAVIGATION BUTTONS - BOTTOM */}
+//           <div className="flex justify-between items-center pt-8 border-t mt-8">
+//             <div>
+//               {currentStep > 1 && (
+//                 <button
+//                   type="button"
+//                   onClick={prevStep}
+//                   className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center gap-2"
+//                 >
+//                   ← Back
+//                 </button>
+//               )}
+//             </div>
+
+//             <div className="flex gap-4">
+//               {currentStep < totalSteps && (
+//                 <>
+//                   <button
+//                     type="button"
+//                     onClick={skipStep}
+//                     className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+//                   >
+//                     Skip for now
+//                   </button>
+
+//                   <button
+//                     type="button"
+//                     onClick={nextStep}
+//                     className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2"
+//                   >
+//                     Next Step →
+//                   </button>
+//                 </>
+//               )}
+
+//               {currentStep === totalSteps && (
+//                 <button
+//                   type="submit"
+//                   disabled={loading || imageLoading}
+//                   className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 flex items-center gap-2"
+//                 >
+//                   {loading ? (
+//                     <>
+//                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+//                       Saving...
+//                     </>
+//                   ) : (
+//                     "✓ Save Profile"
+//                   )}
+//                 </button>
+//               )}
+//             </div>
+//           </div>
+//         </form>
+//       </div>
+
+//       {/* ✅ Camera Modal (तुम्हारा existing code) */}
+//       {showCamera && (
+//         // ... तुम्हारा camera modal code ...
+//         <div>  </div>
+//       )}
+//     </div>
+//   );
+// }
+
+// // ✅ CSS FOR ANIMATION
+// const styles = `
+// @keyframes fadeIn {
+//   from { opacity: 0; transform: translateY(10px); }
+//   to { opacity: 1; transform: translateY(0); }
+// }
+// .animate-fadeIn {
+//   animation: fadeIn 0.3s ease-out;
+// }
+// `;
+
+// // ✅ Add CSS to head
+// const styleSheet = document.createElement("style");
+// styleSheet.innerText = styles;
+// document.head.appendChild(styleSheet);
+
+// // Reusable Components (तुम्हारे existing components - UNCHANGED)
+// function Section({ title, children }) {
+//   return (
+//     <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+//       <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
+//       {children}
+//     </div>
+//   );
+// }
+
+// function FormField({ label, name, type = "text", value, onChange, required = false, placeholder = "", helpText }) {
+//   return (
+//     <div>
+//       <label className="block text-sm font-semibold text-gray-700 mb-2">
+//         {label}
+//         {required && <span className="text-red-500 ml-1">*</span>}
+//       </label>
+//       <input
+//         type={type}
+//         name={name}
+//         value={value}
+//         onChange={onChange}
+//         placeholder={placeholder}
+//         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+//         required={required}
+//       />
+//       {helpText && <p className="text-xs text-gray-500 mt-1">{helpText}</p>}
+//     </div>
+//   );
+// }
+
+// function TextAreaField({ label, name, value, onChange, rows = 3, placeholder = "" }) {
+//   return (
+//     <div>
+//       <label className="block text-sm font-semibold text-gray-700 mb-2">
+//         {label}
+//       </label>
+//       <textarea
+//         name={name}
+//         value={value}
+//         onChange={onChange}
+//         rows={rows}
+//         placeholder={placeholder}
+//         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+//       />
+//     </div>
+//   );
+// }
+
+// function SelectField({ label, name, value, onChange, options }) {
+//   return (
+//     <div>
+//       <label className="block text-sm font-semibold text-gray-700 mb-2">
+//         {label}
+//       </label>
+//       <select
+//         name={name}
+//         value={value}
+//         onChange={onChange}
+//         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+//       >
+//         {options.map((option) => (
+//           <option key={option} value={option}>
+//             {option || `Select ${label}`}
+//           </option>
+//         ))}
+//       </select>
+//     </div>
+//   );
+// }
