@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getUserProfile } from "../services/api";
 
@@ -6,13 +5,13 @@ import { getUserProfile } from "../services/api";
 const refreshAuthToken = async (refreshToken) => {
   try {
     console.log("🔄 Attempting token refresh...");
-    
+
     const currentToken = localStorage.getItem("accessToken");
     if (currentToken) {
       console.log("✅ Using current token as fallback");
-      return { 
-        token: currentToken, 
-        refresh: refreshToken 
+      return {
+        token: currentToken,
+        refresh: refreshToken,
       };
     }
     throw new Error("No token available for refresh");
@@ -40,11 +39,11 @@ export const UserProfileProvider = ({ children }) => {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
       const currentToken = localStorage.getItem("accessToken");
-      
+
       if (!refreshToken && !currentToken) {
         throw new Error("No tokens available");
       }
-      
+
       const response = await refreshAuthToken(refreshToken || currentToken);
       if (response.token) {
         localStorage.setItem("accessToken", response.token);
@@ -62,7 +61,7 @@ export const UserProfileProvider = ({ children }) => {
 
   const loadProfile = async () => {
     let token = localStorage.getItem("accessToken");
-    
+
     if (!token) {
       console.log("🚫 No token found - clearing profile");
       clearProfile();
@@ -72,16 +71,17 @@ export const UserProfileProvider = ({ children }) => {
 
     try {
       console.log("🔄 Loading FRESH profile data from API...");
-      
+
       const data = await getUserProfile();
       console.log("📊 Raw API response:", data);
-      
+
       let userProfile = data?.data || data;
-      
+
       if (userProfile) {
         console.log("🔵 Fresh data from API:", userProfile);
-        
+
         const completeProfile = {
+          // Personal Information
           first_name: userProfile.first_name || "",
           last_name: userProfile.last_name || "",
           full_name: userProfile.full_name || "",
@@ -96,30 +96,127 @@ export const UserProfileProvider = ({ children }) => {
           address: userProfile.address || "",
           dob: userProfile.dob || "",
           age: userProfile.age || "",
+
+          // ✅ NEW: Personal Details
+          height: userProfile.height || "",
+          professional_identity: userProfile.professional_identity || "",
+          zodiac_sign: userProfile.zodiac_sign || "",
+          languages_spoken: Array.isArray(userProfile.languages_spoken)
+            ? userProfile.languages_spoken
+            : userProfile.languages_spoken || [],
+
+          // Professional Information
           profession: userProfile.profession || "",
           company: userProfile.company || "",
-            position: userProfile.position || "",  // ✅ ADD THIS
-  company_type: userProfile.company_type || "", // ✅ ADD THIS
+          position: userProfile.position || "",
+          company_type: userProfile.company_type || "",
           experience: userProfile.experience || "",
           education: userProfile.education || "",
           headline: userProfile.headline || "",
+
+          // ✅ NEW: Education Details
+          education_institution_name:
+            userProfile.education_institution_name || "",
+
+          // ✅ NEW: Work Style
+          work_environment: userProfile.work_environment || "",
+          interaction_style: userProfile.interaction_style || "",
+          work_rhythm: userProfile.work_rhythm || "",
+          career_decision_style: userProfile.career_decision_style || "",
+          work_demand_response: userProfile.work_demand_response || "",
+
+          // About & Interests
           about: userProfile.about || "",
-          skills: Array.isArray(userProfile.skills) ? userProfile.skills : (userProfile.skills || []),
-          hobbies: Array.isArray(userProfile.hobbies) ? userProfile.hobbies : (userProfile.hobbies || []),
-          interests: Array.isArray(userProfile.interests) ? userProfile.interests : (userProfile.interests || []),
+          skills: Array.isArray(userProfile.skills)
+            ? userProfile.skills
+            : userProfile.skills || [],
+          hobbies: Array.isArray(userProfile.hobbies)
+            ? userProfile.hobbies
+            : userProfile.hobbies || [],
+          interests: Array.isArray(userProfile.interests)
+            ? userProfile.interests
+            : userProfile.interests || [],
+
+          // ✅ NEW: Lifestyle
+          self_expression: userProfile.self_expression || "",
+          freetime_style: userProfile.freetime_style || "",
+          health_activity_level: userProfile.health_activity_level || "",
+          pets_preference: userProfile.pets_preference || "",
+          religious_belief: userProfile.religious_belief || "",
+          smoking: userProfile.smoking || "",
+          drinking: userProfile.drinking || "",
+
+          // ✅ NEW: Relationship Preferences
+          interested_in: userProfile.interested_in || "",
+          relationship_goal: userProfile.relationship_goal || "",
+          children_preference: userProfile.children_preference || "",
+
+          // ✅ NEW: Relationship Styles
+          love_language_affection: Array.isArray(
+            userProfile.love_language_affection
+          )
+            ? userProfile.love_language_affection
+            : userProfile.love_language_affection || [],
+          preference_of_closeness: userProfile.preference_of_closeness || "",
+          approach_to_physical_closeness:
+            userProfile.approach_to_physical_closeness || "",
+          relationship_values: userProfile.relationship_values || "",
+          values_in_others: userProfile.values_in_others || "",
+          relationship_pace: userProfile.relationship_pace || "",
+
+          // ✅ NEW: JSON Fields
+          life_rhythms: userProfile.life_rhythms || {},
+          ways_i_spend_time: userProfile.ways_i_spend_time || {},
+
+          // System Fields
           id: userProfile.id || null,
-
-        
-          user_id: userProfile.user_id || null, // required fix for payment
-         
-
+          user_id: userProfile.user_id || null,
           is_submitted: userProfile.is_submitted || false,
+
+          // Image Fields
           profile_picture_url: userProfile.profile_picture_url || "",
           profilePhoto: userProfile.profilePhoto || "",
           image_url: userProfile.image_url || "",
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
         };
-        
+
+        //       const completeProfile = {
+        //         first_name: userProfile.first_name || "",
+        //         last_name: userProfile.last_name || "",
+        //         full_name: userProfile.full_name || "",
+        //         email: userProfile.email || "",
+        //         phone: userProfile.phone || "",
+        //         gender: userProfile.gender || "",
+        //         marital_status: userProfile.marital_status || "",
+        //         city: userProfile.city || "",
+        //         country: userProfile.country || "",
+        //         state: userProfile.state || "",
+        //         pincode: userProfile.pincode || "",
+        //         address: userProfile.address || "",
+        //         dob: userProfile.dob || "",
+        //         age: userProfile.age || "",
+        //         profession: userProfile.profession || "",
+        //         company: userProfile.company || "",
+        //           position: userProfile.position || "",  // ✅ ADD THIS
+        // company_type: userProfile.company_type || "", // ✅ ADD THIS
+        //         experience: userProfile.experience || "",
+        //         education: userProfile.education || "",
+        //         headline: userProfile.headline || "",
+        //         about: userProfile.about || "",
+        //         skills: Array.isArray(userProfile.skills) ? userProfile.skills : (userProfile.skills || []),
+        //         hobbies: Array.isArray(userProfile.hobbies) ? userProfile.hobbies : (userProfile.hobbies || []),
+        //         interests: Array.isArray(userProfile.interests) ? userProfile.interests : (userProfile.interests || []),
+        //         id: userProfile.id || null,
+
+        //         user_id: userProfile.user_id || null, // required fix for payment
+
+        //         is_submitted: userProfile.is_submitted || false,
+        //         profile_picture_url: userProfile.profile_picture_url || "",
+        //         profilePhoto: userProfile.profilePhoto || "",
+        //         image_url: userProfile.image_url || "",
+        //         last_updated: new Date().toISOString()
+        //       };
+
         console.log("✅ Setting FRESH profile:", completeProfile);
         setProfile(completeProfile);
 
@@ -133,8 +230,12 @@ export const UserProfileProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("❌ API Error:", error);
-      
-      if (error.response?.status === 401 || error.message?.includes("token") || error.message?.includes("expired")) {
+
+      if (
+        error.response?.status === 401 ||
+        error.message?.includes("token") ||
+        error.message?.includes("expired")
+      ) {
         console.log("🔄 Token expired, attempting refresh...");
         try {
           const newToken = await refreshToken();
@@ -144,12 +245,15 @@ export const UserProfileProvider = ({ children }) => {
             return;
           }
         } catch (refreshError) {
-          console.error("❌ Token refresh failed, using cached data:", refreshError);
+          console.error(
+            "❌ Token refresh failed, using cached data:",
+            refreshError
+          );
           loadCachedProfile();
           return;
         }
       }
-      
+
       loadCachedProfile();
     } finally {
       setLoading(false);
@@ -167,7 +271,6 @@ export const UserProfileProvider = ({ children }) => {
 
         // ⭐ Store user_id for payment even in cached mode
         localStorage.setItem("user_id", cachedProfile.user_id);
-
       } catch (parseError) {
         console.error("❌ Error parsing cached data:", parseError);
         localStorage.removeItem("userProfile");
@@ -193,13 +296,13 @@ export const UserProfileProvider = ({ children }) => {
 
   const updateProfile = (newProfileData) => {
     console.log("🔄 Updating profile with:", newProfileData);
-    
+
     const updatedProfile = {
       ...profile,
       ...newProfileData,
-      last_updated: new Date().toISOString()
+      last_updated: new Date().toISOString(),
     };
-    
+
     console.log("✅ Final updated profile:", updatedProfile);
     setProfile(updatedProfile);
     localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
@@ -225,7 +328,12 @@ export const UserProfileProvider = ({ children }) => {
   };
 
   const hasCompleteProfile = () => {
-    return profile && profile.is_submitted && (profile.first_name || profile.full_name) && profile.email;
+    return (
+      profile &&
+      profile.is_submitted &&
+      (profile.first_name || profile.full_name) &&
+      profile.email
+    );
   };
 
   const value = {
@@ -234,7 +342,7 @@ export const UserProfileProvider = ({ children }) => {
     clearProfile,
     refreshProfile,
     loading,
-    hasCompleteProfile: hasCompleteProfile()
+    hasCompleteProfile: hasCompleteProfile(),
   };
 
   return (
@@ -243,8 +351,3 @@ export const UserProfileProvider = ({ children }) => {
     </UserProfileContext.Provider>
   );
 };
-
-
-
-
-
