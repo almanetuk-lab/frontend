@@ -277,7 +277,7 @@ function Header() {
                   to="/register"
                   className="bg-[#727bf1] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#041cfa] transition-all duration-200"
                 >
-                  Register Free
+                  Register 
                 </Link>
               </div>
             )}
@@ -515,7 +515,7 @@ function Header() {
                     className="block py-3 px-4 text-center bg-[#FF66CC] text-white rounded-lg font-semibold hover:bg-[#ff4dc2] transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Register Free
+                    Register 
                   </Link>
                 </div>
               )}
