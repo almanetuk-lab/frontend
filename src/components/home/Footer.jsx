@@ -32,39 +32,41 @@ export default function Footer() {
                   {" "}
                   {/* space-y-3 se space-y-2 */}
                   <li>
-                       <Link
-                  onClick={() => window.scrollTo(0, 0)}
-                  to="/coming-soon"
-                  className="text-sm text-[#546E7A] hover:text-[#4D6D9E] transition-colors"
-                >
-                  Pricecy Noice
-                </Link>
-
-
-                
-                    {/* <a
-                      href="#"
-                      className="text-sm text-[#546E7A] hover:text-[#4D6D9E] transition-colors" /* text-sm added /
+                    <Link
+                      onClick={() => window.scrollTo(0, 0)}
+                      to="/privacy-policy"
+                      className="text-sm text-[#546E7A] hover:text-[#4D6D9E] transition-colors"
                     >
-                      Pricecy Notice
-                    </a> */}
-
+                      Privacy Policy
+                    </Link>
                   </li>
                   <li>
                     <Link
-                      to="/coming-soon"
+                      to="/accessibility"
                       className="text-sm text-[#546E7A] hover:text-[#4D6D9E] transition-colors"
                       onClick={() => window.scrollTo(0, 0)}
                     >
-                      Terms And Condition
+                      Accessibility
                     </Link>
-
-                    {/* <a
-                      href="#"
+                  </li>
+                  <li>
+                    <Link
+                      to="/imprint"
                       className="text-sm text-[#546E7A] hover:text-[#4D6D9E] transition-colors"
+                      onClick={() => window.scrollTo(0, 0)}
                     >
-                      Terms and Condition
-                    </a> */}
+                      Imprint
+                    </Link>
+                  </li>
+                  <li>
+
+                    <Link
+                      to="/terms-and-conditions"
+                      className="text-sm text-[#546E7A] hover:text-[#4D6D9E] transition-colors"
+                      onClick={() => window.scrollTo(0, 0)}
+                    >
+                      Terms & Condition.
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -74,20 +76,20 @@ export default function Footer() {
             <div className="mt-4 space-y-2">
               <div>
                 <Link
-                  to="/coming-soon"
+                  to="/Online-dating-policy"
                   className="text-sm text-[#546E7A] hover:text-[#4D6D9E] transition-colors"
                   onClick={() => window.scrollTo(0, 0)}
                 >
-                  Trust and Safety
+                  Online dating Safety Policy 
                 </Link>
               </div>
               <div>
                 <Link
-                  to="/coming-soon"
+                  to="/security"
                   className="text-sm text-[#546E7A] hover:text-[#4D6D9E] transition-colors"
                   onClick={() => window.scrollTo(0, 0)}
                 >
-                  Community Code of Conduct
+                 Security
                 </Link>
               </div>
             </div>
