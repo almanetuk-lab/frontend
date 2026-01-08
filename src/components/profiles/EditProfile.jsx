@@ -418,7 +418,7 @@ export default function EditProfilePage() {
     love_language_affection: "",
   });
 
-  // ================== LOAD PROFILE ==================
+  // ================== LOAD PROFILE PrivacyPolicy ==================
   useEffect(() => {
     if (!profile) return;
 

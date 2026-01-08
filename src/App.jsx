@@ -64,7 +64,12 @@ import FallbackPage from "./components/pages/FallbackPage";
 import FacebookPage from "./components/social/FacebookPage";
 import LinkedInPage from "./components/social/LinkedinPage";
 import TwitterPage from "./components/social/TwitterPage";
-
+import PrivacyPolicy from "./components/social/PrivacyPolicy";
+import Accessibility from "./components/social/Accessibility";
+import Imprint from "./components/social/Imprint";
+import OnlineDating from "./components/social/OnlineDating";
+import TermsAndConditions from "./components/social/TermsAndConditions";
+import Securety from "./components/social/Securety";
 // import TwitterPage from "./components/SocialPages/TwitterPage";
 // import FacebookPage from "./components/SocialPages/FacebookPage";
 // import LinkedInPage from "./components/SocialPages/LinkedInPage";
@@ -336,6 +341,57 @@ export default function App() {
 
         {/* Member Routes WITH Header & Footer */}
         <Route
+          path="/privacy-policy"
+          element={
+            <MainLayout>
+              <PrivacyPolicy />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/accessibility"
+          element={
+            <MainLayout>
+              <Accessibility />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/imprint"
+          element={
+            <MainLayout>
+              <Imprint />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/Online-dating-policy"
+          element={
+            <MainLayout>
+              <OnlineDating />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/terms-and-conditions"
+          element={
+            <MainLayout>
+              <TermsAndConditions />
+            </MainLayout>
+          }
+        />
+           <Route
+          path="/security"
+          element={
+            <MainLayout>
+              <Securety />
+            </MainLayout>
+          }
+        />
+
+        <Route
           path="/members"
           element={
             <MainLayout>
@@ -376,7 +432,7 @@ export default function App() {
           path="/facebook"
           element={
             <MainLayout>
-              <FacebookPage/>
+              <FacebookPage />
             </MainLayout>
           }
         />
