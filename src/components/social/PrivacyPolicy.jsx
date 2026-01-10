@@ -289,9 +289,10 @@ Berlin, May 2026`
               <h3 className="font-bold text-gray-800">UK Headquarters</h3>
             </div>
             <p className="text-gray-600 text-sm">
-              Spark Networks Services GmbH<br />
-              c/o Mindspace, Zimmerstraße 78<br />
-              10117 Berlin, Germany
+              Correspondence address
+225 B, Woodgrange Drive,    <br /> Southend-On-Sea, Essex, England, SS1 2SG<br />
+          
+              
             </p>
           </div>
 
@@ -304,7 +305,7 @@ Berlin, May 2026`
             </div>
             <p className="text-gray-600 text-sm">
               UK: https:www.intentionalconnections.app/privacy<br />
-              US: cancellation@intentionalconnections.app
+              Uk: cancellation@intentionalconnections.app
             </p>
           </div>
 

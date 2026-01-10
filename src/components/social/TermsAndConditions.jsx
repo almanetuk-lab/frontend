@@ -44,7 +44,8 @@ const TermsAndConditions = () => {
           
           <div className="space-y-4 text-gray-700">
             <p>
-              <strong>1.1</strong> These Terms & Conditions are between Spark Networks Services GmbH (the "Company", "Spark Germany", "we," "us," or "our") and you ("you," "your," or "yourself").
+              <strong>1.1</strong>
+225 B, Woodgrange Drive, Southend-On-Sea, Essex, England, SS1 2SG and  ("you," "your," or "yourself").
             </p>
             
             <p>
@@ -61,10 +62,10 @@ const TermsAndConditions = () => {
                 <p className="font-bold">Spark Networks Services GmbH</p>
                 <div className="flex items-start gap-2">
                   <FaMapMarkerAlt className="text-gray-500 mt-1" />
-                  <p>c/o Mindspace, Zimmerstraße 78, 10117 Berlin, Germany</p>
+                  <p>Correspondence address
+225 B, Woodgrange Drive, Southend-On-Sea, Essex, England, SS1 2SG</p>
                 </div>
-                <p>Geschäftsführer: Colleen Birdnow Brown, Kristie Goodgion</p>
-                <p>Handelsregisternummer: 115958 B (Registergericht: AG Charlottenburg, Berlin)</p>
+                <p></p>
               </div>
             </div>
             
@@ -224,9 +225,10 @@ const TermsAndConditions = () => {
               <div>
                 <p className="font-medium">Postal Address:</p>
                 <p>Customer Care – United Kingdom</p>
-                <p>Spark Networks Services GmbH</p>
-                <p>c/o Mindspace, Zimmerstraße 78</p>
-                <p>10117 Berlin, Germany</p>
+                <p></p>
+                <p></p>
+                <p>
+225 B, Woodgrange Drive, Southend-On-Sea, Essex, England, SS1 2SG</p>
               </div>
             </div>
           </div>
@@ -244,12 +246,7 @@ const TermsAndConditions = () => {
             </div>
           </div>
         </div>
-{/* 
-        Footer
-        <div className="mt-8 text-center text-gray-500 text-sm">
-          <p>© {new Date().getFullYear()} Intentional connections. All rights reserved.</p>
-          <p className="mt-1">Terms & Conditions last updated: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-        </div> */}
+
       </div>
     </div>
   );
