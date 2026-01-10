@@ -134,7 +134,7 @@ const OnlineDating = () => {
           
           <div className="text-gray-700 space-y-4">
             <p>
-              By joining EliteSingles, you confirm that you:
+              By joining Intentional Connetions, you confirm that you:
             </p>
             
             <div className="space-y-2 ml-4">
