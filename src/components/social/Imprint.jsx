@@ -54,7 +54,8 @@ const Imprint = () => {
                   <FaMapMarkerAlt className="text-gray-500 mt-1" />
                   <div>
                     <p className="font-medium">Business address:</p>
-                    <p>123 Dating Street Suite 100 Uk</p>
+                    <p>Correspondence address
+225 B, Woodgrange Drive, Southend-On-Sea, Essex, England, SS1 2SG</p>
                   </div>
                 </div>
 

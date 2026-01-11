@@ -221,6 +221,31 @@ const mapToDBEnum = (field, value) => {
       FIGURING_IT_OUT: "FIGURING_IT_OUT",
     },
 
+     // ✅ ADD THESE NEW MAPPINGS:
+    relationship_values: {
+      "Growth": "Growth",
+      "Stability": "Stability", 
+      "Emotional openness": "Emotional openness",
+      "Shared rhythm": "Shared rhythm",
+      "Practical harmony": "Practical harmony",
+    },
+    
+    values_in_others: {
+      "Self-awareness": "Self-awareness",
+      "Emotional intelligence": "Emotional intelligence",
+      "Ambition": "Ambition",
+      "Kindness": "Kindness",
+      "Humour": "Humour",
+    },
+    
+    approach_to_physical_closeness: {
+      "Gradual build-up": "Gradual build-up",
+      "Connect early if aligned": "Connect early if aligned",
+      "Emotional-first": "Emotional-first",
+      "Emotional + physical balanced": "Emotional + physical balanced",
+      "Prefer more time": "Prefer more time",
+    },
+
     // Preference of Closeness - Database has different values
     preference_of_closeness: {
       High: "More time together",
@@ -272,6 +297,11 @@ const mapToDBEnum = (field, value) => {
   // Special handling for array fields
   if (field === "love_language_affection" && MAP[field]) {
     return MAP[field](value);
+  }
+
+  // ✅ Handle height fields
+  if (field === "height_ft" || field === "height_in") {
+    return MAP[field] ? MAP[field](value) : value;
   }
 
   return MAP[field]?.[value] || value;
@@ -392,6 +422,7 @@ export default function EditProfilePage() {
     skills: "",
     interests: "",
     hobbies: "",
+    //  height: heightDisplay,
     height: "",
     marital_status: "",
     professional_identity: "",
@@ -414,6 +445,9 @@ export default function EditProfilePage() {
     work_rhythm: "",
     career_decision_style: "",
     work_demand_response: "",
+      relationship_values: "",
+  values_in_others: "",
+  approach_to_physical_closeness: "",
     preference_of_closeness: "",
     love_language_affection: "",
   });
@@ -421,6 +455,17 @@ export default function EditProfilePage() {
   // ================== LOAD PROFILE PrivacyPolicy ==================
   useEffect(() => {
     if (!profile) return;
+
+    // ✅ Convert height from inches (77) to "feet.inches" format (6.5)
+    let heightDisplay = "";
+    if (profile.height) {
+      const totalInches = Number(profile.height);
+      if (!isNaN(totalInches)) {
+        const feet = Math.floor(totalInches / 12);
+        const inches = totalInches % 12;
+        heightDisplay = `${feet}.${inches}`;
+      }
+    }
 
     setFormData({
       first_name: profile.first_name || "",
@@ -451,7 +496,8 @@ export default function EditProfilePage() {
         ? profile.interests.join(", ")
         : "",
       hobbies: Array.isArray(profile.hobbies) ? profile.hobbies.join(", ") : "",
-      height: profile.height || "",
+      // height: profile.height || "",
+      height: heightDisplay,
       marital_status: profile.marital_status || "",
       professional_identity: mapToUIEnum(
         "professional_identity",
@@ -487,6 +533,11 @@ export default function EditProfilePage() {
         "work_demand_response",
         profile.work_demand_response
       ),
+// ✅ ADD THESE:
+    relationship_values: profile.relationship_values || "",
+    values_in_others: profile.values_in_others || "",
+    approach_to_physical_closeness: profile.approach_to_physical_closeness || "",
+
       preference_of_closeness: mapToUIEnum(
         "preference_of_closeness",
         profile.preference_of_closeness
@@ -549,6 +600,17 @@ export default function EditProfilePage() {
         }
         return null;
       };
+      // ✅ SIMPLE HEIGHT CONVERSION
+      let height_ft = null;
+      let height_in = null;
+
+      if (formData.height && formData.height.trim() !== "") {
+        const parts = formData.height.split(".");
+        if (parts.length === 2) {
+          height_ft = parseInt(parts[0]);
+          height_in = parseInt(parts[1]);
+        }
+      }
 
       const payload = {
         first_name: formData.first_name.trim(),
@@ -582,7 +644,9 @@ export default function EditProfilePage() {
         skills: handleArrayField(formData.skills),
         interests: handleArrayField(formData.interests),
         hobbies: handleArrayField(formData.hobbies),
-        height: formData.height || null,
+        // height: formData.height || null,
+        height_ft: height_ft, // ✅ ADD THIS
+        height_in: height_in,
         company_type: formData.company_type || null,
         education_institution_name: formData.education_institution_name || null,
         languages_spoken: handleArrayField(formData.languages_spoken),
@@ -632,6 +696,10 @@ export default function EditProfilePage() {
           "work_demand_response",
           formData.work_demand_response
         ),
+          // ✅ ADD THESE MISSING FIELDS:
+  relationship_values: mapToDBEnum("relationship_values", formData.relationship_values),
+  values_in_others: mapToDBEnum("values_in_others", formData.values_in_others),
+  approach_to_physical_closeness: mapToDBEnum("approach_to_physical_closeness", formData.approach_to_physical_closeness),
         preference_of_closeness: mapToDBEnum(
           "preference_of_closeness",
           formData.preference_of_closeness
@@ -1015,8 +1083,28 @@ export default function EditProfilePage() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
-
                   <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Height (feet.inches)
+                    </label>
+                    <input
+                      type="text"
+                      name="height"
+                      value={formData.height}
+                      onChange={(e) => {
+                        // Allow only numbers and dot
+                        const value = e.target.value.replace(/[^0-9.]/g, "");
+                        setFormData({ ...formData, height: value });
+                      }}
+                      placeholder="5.6"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Example: 5.6 means 5 feet 6 inches
+                    </p>
+                  </div>
+
+                  {/*  <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Height (feet.inches)
                     </label>
@@ -1031,7 +1119,7 @@ export default function EditProfilePage() {
                     <p className="text-xs text-gray-500 mt-1">
                       Example: 5.6 means 5 feet 6 inches
                     </p>
-                  </div>
+                  </div> */}
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -1192,11 +1280,11 @@ export default function EditProfilePage() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     >
                       <option value="">Select Professional Identity</option>
-                      <option value="STUDENT">STUDENT</option>
-                      <option value="PROFESSIONAL">PROFESSIONAL</option>
-                      <option value="ENTREPRENEUR">ENTREPRENEUR</option>
-                      <option value="FREELANCER">FREELANCER</option>
-                      <option value="OTHER">OTHER</option>
+                      <option value="STUDENT">Student</option>
+                      <option value="PROFESSIONAL">Professional</option>
+                      <option value="ENTREPRENEUR">Entreprenuer</option>
+                      <option value="FREELANCER">Freelancer</option>
+                      <option value="OTHER">Other</option>
                     </select>
                   </div>
 
@@ -1288,11 +1376,11 @@ export default function EditProfilePage() {
                       <option value="Bachelors Degree">Bachelors Degree</option>
                       <option value="Masters Degree">Masters Degree</option>
                       <option value="Doctorate">Doctorate</option>
-                      <option value="HIGH_SCHOOL">HIGH_SCHOOL</option>
-                      <option value="BACHELORS">BACHELORS</option>
-                      <option value="MASTERS">MASTERS</option>
+                      <option value="HIGH_SCHOOL">High_School</option>
+                      <option value="BACHELORS">Bachelors</option>
+                      <option value="MASTERS">Master</option>
                       <option value="PHD">PHD</option>
-                      <option value="OTHER">OTHER</option>
+                      <option value="OTHER">Others</option>
                     </select>
                   </div>
 
@@ -1450,9 +1538,9 @@ export default function EditProfilePage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       >
                         <option value="">Select Smoking Preference</option>
-                        <option value="NO">NO</option>
-                        <option value="YES">YES</option>
-                        <option value="SOCIAL">SOCIAL</option>
+                        <option value="NO">No</option>
+                        <option value="YES">Yes</option>
+                        <option value="SOCIAL">Social</option>
                       </select>
                     </div>
 
@@ -1467,9 +1555,9 @@ export default function EditProfilePage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       >
                         <option value="">Select Drinking Preference</option>
-                        <option value="NO">NO</option>
-                        <option value="YES">YES</option>
-                        <option value="SOCIAL">SOCIAL</option>
+                        <option value="NO">No</option>
+                        <option value="YES">Yes</option>
+                        <option value="SOCIAL">Social</option>
                       </select>
                     </div>
 
@@ -1582,13 +1670,13 @@ export default function EditProfilePage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       >
                         <option value="">Select Relationship Goal</option>
-                        <option value="LONG_TERM">LONG_TERM</option>
-                        <option value="LIFE_PARTNER">LIFE_PARTNER</option>
+                        <option value="LONG_TERM">Long_Term</option>
+                        <option value="LIFE_PARTNER">Life_Patner</option>
                         <option value="DATING_WITH_INTENT">
-                          DATING_WITH_INTENT
+                          Datting_With_Intent
                         </option>
-                        <option value="FRIEND">FRIEND</option>
-                        <option value="FIGURING_IT_OUT">FIGURING_IT_OUT</option>
+                        <option value="FRIEND">Friend</option>
+                        <option value="FIGURING_IT_OUT">Figuring_It_Out</option>
                       </select>
                     </div>
 
@@ -1603,18 +1691,58 @@ export default function EditProfilePage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                       >
                         <option value="">Select Children Preference</option>
-                        <option value="WANT">WANT</option>
-                        <option value="DONT_WANT">DONT_WANT</option>
+                        <option value="WANT">Want</option>
+                        <option value="DONT_WANT">Dont_Want</option>
                         <option value="HAVE_AND_WANT_MORE">
-                          HAVE_AND_WANT_MORE
+                          Have_And_Want_More
                         </option>
                         <option value="HAVE_AND_DONT_WANT_MORE">
-                          HAVE_AND_DONT_WANT_MORE
+                          Have_And_Dont_Want_More
                         </option>
-                        <option value="OPEN">OPEN</option>
-                        <option value="NOT_SURE_YET">NOT_SURE_YET</option>
+                        <option value="OPEN">Open</option>
+                        <option value="NOT_SURE_YET">Not_Sure_Yet</option>
                       </select>
                     </div>
+                       {/* ✅ NEW FIELD: Relationship Values */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Relationship Values
+            </label>
+            <select
+              name="relationship_values"
+              value={formData.relationship_values}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              <option value="">Select Relationship Values</option>
+              <option value="Growth">Growth</option>
+              <option value="Stability">Stability</option>
+              <option value="Emotional openness">Emotional openness</option>
+              <option value="Shared rhythm">Shared rhythm</option>
+              <option value="Practical harmony">Practical harmony</option>
+            </select>
+          </div>
+
+          {/* ✅ NEW FIELD: Values in Others */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Values in Others
+            </label>
+            <select
+              name="values_in_others"
+              value={formData.values_in_others}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              <option value="">Select Values in Others</option>
+              <option value="Self-awareness">Self-awareness</option>
+              <option value="Emotional intelligence">Emotional intelligence</option>
+              <option value="Ambition">Ambition</option>
+              <option value="Kindness">Kindness</option>
+              <option value="Humour">Humour</option>
+            </select>
+          </div>
+
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -1635,8 +1763,29 @@ export default function EditProfilePage() {
                         </option>
                       </select>
                     </div>
+                    
+          {/* ✅ NEW FIELD: Approach to Physical Closeness */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Approach to Physical Closeness
+            </label>
+            <select
+              name="approach_to_physical_closeness"
+              value={formData.approach_to_physical_closeness}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              <option value="">Select Approach to Physical Closeness</option>
+              <option value="Gradual build-up">Gradual build-up</option>
+              <option value="Connect early if aligned">Connect early if aligned</option>
+              <option value="Emotional-first">Emotional-first</option>
+              <option value="Emotional + physical balanced">Emotional + physical balanced</option>
+              <option value="Prefer more time">Prefer more time</option>
+            </select>
+          </div>
 
-                    <div>
+
+                    {/* <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Love Languages
                       </label>
@@ -1652,6 +1801,31 @@ export default function EditProfilePage() {
                         Enter valid love languages: Physical Touch, Words of
                         Affirmation, Quality Time, Acts of Service, Thoughtful
                         Gifts
+                      </p>
+                    </div> */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Love Languages
+                      </label>
+                      <select
+                        name="love_language_affection"
+                        value={formData.love_language_affection || []}
+                        onChange={handleChange}
+                        multiple
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-32"
+                      >
+                        <option value="Physical Touch">Physical Touch</option>
+                        <option value="Words of Affirmation">
+                          Words of Affirmation
+                        </option>
+                        <option value="Quality Time">Quality Time</option>
+                        <option value="Acts of Service">Acts of Service</option>
+                        <option value="Thoughtful Gifts">
+                          Thoughtful Gifts
+                        </option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Hold Ctrl (Cmd on Mac) to select multiple options
                       </p>
                     </div>
                   </div>
@@ -1877,179 +2051,6 @@ export default function EditProfilePage() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
