@@ -85,6 +85,7 @@ export const UserProfileProvider = ({ children }) => {
           first_name: userProfile.first_name || "",
           last_name: userProfile.last_name || "",
           full_name: userProfile.full_name || "",
+          username: userProfile.username || "",
           email: userProfile.email || "",
           phone: userProfile.phone || "",
           gender: userProfile.gender || "",
@@ -126,7 +127,8 @@ export const UserProfileProvider = ({ children }) => {
           work_demand_response: userProfile.work_demand_response || "",
 
           // About & Interests
-          about: userProfile.about || "",
+          about_me: userProfile.about_me || "",
+          // username: userProfile.username || "",
           skills: Array.isArray(userProfile.skills)
             ? userProfile.skills
             : userProfile.skills || [],
@@ -179,43 +181,6 @@ export const UserProfileProvider = ({ children }) => {
           image_url: userProfile.image_url || "",
           last_updated: new Date().toISOString(),
         };
-
-        //       const completeProfile = {
-        //         first_name: userProfile.first_name || "",
-        //         last_name: userProfile.last_name || "",
-        //         full_name: userProfile.full_name || "",
-        //         email: userProfile.email || "",
-        //         phone: userProfile.phone || "",
-        //         gender: userProfile.gender || "",
-        //         marital_status: userProfile.marital_status || "",
-        //         city: userProfile.city || "",
-        //         country: userProfile.country || "",
-        //         state: userProfile.state || "",
-        //         pincode: userProfile.pincode || "",
-        //         address: userProfile.address || "",
-        //         dob: userProfile.dob || "",
-        //         age: userProfile.age || "",
-        //         profession: userProfile.profession || "",
-        //         company: userProfile.company || "",
-        //           position: userProfile.position || "",  // ✅ ADD THIS
-        // company_type: userProfile.company_type || "", // ✅ ADD THIS
-        //         experience: userProfile.experience || "",
-        //         education: userProfile.education || "",
-        //         headline: userProfile.headline || "",
-        //         about: userProfile.about || "",
-        //         skills: Array.isArray(userProfile.skills) ? userProfile.skills : (userProfile.skills || []),
-        //         hobbies: Array.isArray(userProfile.hobbies) ? userProfile.hobbies : (userProfile.hobbies || []),
-        //         interests: Array.isArray(userProfile.interests) ? userProfile.interests : (userProfile.interests || []),
-        //         id: userProfile.id || null,
-
-        //         user_id: userProfile.user_id || null, // required fix for payment
-
-        //         is_submitted: userProfile.is_submitted || false,
-        //         profile_picture_url: userProfile.profile_picture_url || "",
-        //         profilePhoto: userProfile.profilePhoto || "",
-        //         image_url: userProfile.image_url || "",
-        //         last_updated: new Date().toISOString()
-        //       };
 
         console.log("✅ Setting FRESH profile:", completeProfile);
         setProfile(completeProfile);

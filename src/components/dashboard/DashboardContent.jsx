@@ -552,9 +552,10 @@ export default function DashboardHome({ profile }) {
                   <StatCard
                     label="Matches"
                     // value={loading ? "..." : matchesCount.toString()}
-                    value={loading ? "..." : (matchesCount || 155).toString()}
+                    value={loading ? "..." : (matchesCount || 9 ).toString()}
                     // trend="+5%"
                   />
+                  
                 </div>
                 <div>
                   <StatCard
