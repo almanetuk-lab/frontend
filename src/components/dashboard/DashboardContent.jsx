@@ -574,9 +574,10 @@ const handleUserSelectFromSearch = (user) => {
                   <StatCard
                     label="Matches"
                     // value={loading ? "..." : matchesCount.toString()}
-                    value={loading ? "..." : (matchesCount || 155).toString()}
+                    value={loading ? "..." : (matchesCount || 9 ).toString()}
                     // trend="+5%"
                   />
+                  
                 </div>
                 <div>
                   <StatCard

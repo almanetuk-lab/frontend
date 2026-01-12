@@ -70,6 +70,7 @@ import Imprint from "./components/social/Imprint";
 import OnlineDating from "./components/social/OnlineDating";
 import TermsAndConditions from "./components/social/TermsAndConditions";
 import Securety from "./components/social/Securety";
+import LifeRhythmsForm from "./components/profiles/LifeRhythmsForm";
 // import TwitterPage from "./components/SocialPages/TwitterPage";
 // import FacebookPage from "./components/SocialPages/FacebookPage";
 // import LinkedInPage from "./components/SocialPages/LinkedInPage";
@@ -409,6 +410,17 @@ export default function App() {
               <UserProtectedRoute>
                 <ProfileViews />
               </UserProtectedRoute>
+            </MainLayout>
+          }
+        />
+
+        {/* <Route path="/life-rhythms" element={<LifeRhythmsPage />} /> */}
+
+         <Route
+          path="/life-rhythms"
+          element={
+            <MainLayout>
+              <LifeRhythmsForm />
             </MainLayout>
           }
         />
