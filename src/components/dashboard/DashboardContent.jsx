@@ -207,25 +207,47 @@ export default function DashboardHome({ profile }) {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
+  // // Handle user selection from search
+  // const handleUserSelectFromSearch = (user) => {
+  //   console.log("Selected user from search:", user);
+  //   navigate("/dashboard/messages");
+  //   setSearchQuery("");
+  //   setShowSearchResults(false);
+  // };
+
+  // // Close search results when clicking outside
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (!event.target.closest(".search-container")) {
+  //       setShowSearchResults(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("click", handleClickOutside);
+  //   return () => document.removeEventListener("click", handleClickOutside);
+  // }, []);
+
   // Handle user selection from search
-  const handleUserSelectFromSearch = (user) => {
-    console.log("Selected user from search:", user);
-    navigate("/dashboard/messages");
-    setSearchQuery("");
-    setShowSearchResults(false);
-  };
-
-  // Close search results when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest(".search-container")) {
-        setShowSearchResults(false);
+const handleUserSelectFromSearch = (user) => {
+  console.log("Selected user from search:", user);
+  
+  // ✅ State ke through user data pass karein
+  navigate("/dashboard/messages", { 
+    state: { 
+      selectedUser: {
+        id: user.id,
+        name: user.name || `${user.first_name || ""} ${user.last_name || ""}`.trim(),
+        email: user.email,
+        // Additional fields agar chahiye
+        city: user.city,
+        profession: user.profession
       }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+    }
+  });
+  
+  setSearchQuery("");
+  setShowSearchResults(false);
+};
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
@@ -254,7 +276,7 @@ export default function DashboardHome({ profile }) {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search users by name, profession, or city..."
+                  placeholder="Search by User Name..."
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);

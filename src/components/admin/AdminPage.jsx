@@ -16,8 +16,17 @@ const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false); // New state for mobile sidebar
 
   // for admin usestate//
-  const [memberApproval, setMemberApproval] = useState(0);
+  
   const [settingsLoading, setSettingsLoading] = useState(false);
+
+  const [settings, setSettings] = useState({
+    member_approval: 0,
+    check_video_call_limit: 0,
+    check_audio_call_limit: 0,
+    check_search_limit: 0,
+    check_message_limit: 0,
+  });
+
 
   //We are getting Admin details from Localstorage :-
   let [loggedInUser, setLoggedInUser] = useState({});
@@ -38,26 +47,33 @@ const AdminDashboard = () => {
   // Member_approval function end here ----
 
   // 🔥 FETCH CURRENT SETTING
-  const fetchMemberApproval = async () => {
+ const fetchMemberApproval = async () => {
     try {
       const response = await adminAPI.getMemberApproval(); // GET API
-      setMemberApproval(response.data.member_approval);
+      setSettings({
+        member_approval: response.data.member_approval,
+        check_video_call_limit: response.data.check_video_call_limit,
+        check_audio_call_limit: response.data.check_audio_call_limit,
+        check_search_limit: response.data.check_search_limit,
+        check_message_limit: response.data.check_message_limit,
+      });
+    
     } catch (error) {
       console.error("Failed to fetch setting", error);
     }
   };
 
   //  UPDATE SETTING (ON / OFF)
-  const updateMemberApproval = async (value) => {
+  const updateSetting = async (key, value) => {
     try {
       setSettingsLoading(true);
-      setMemberApproval(value); // optimistic UI
 
-      await adminAPI.updateMemberApproval({
-        member_approval: value, // 1 or 0
-      });
+    const updatedSettings = { ...settings, [key]: value };
+    setSettings(updatedSettings);
+
+      await adminAPI.updateMemberApproval(updatedSettings); // PUT API
     } catch (error) {
-      console.error("Failed to update setting", error);
+      console.error("Failed to update setting:", error);
       alert("Failed to update setting");
     } finally {
       setSettingsLoading(false);
@@ -906,19 +922,13 @@ const AdminDashboard = () => {
       case "settings":
         return (
           <div className="p-4 sm:p-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
-              Settings
-            </h1>
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-gray-200">
               <h3 className="text-lg font-semibold text-gray-700 mb-3 sm:mb-4">
                 System Settings
               </h3>
-              {/* <p className="text-gray-600 text-sm sm:text-base">
-                Settings content will be displayed here.
-              </p> */}
               {/* start code for button */}
               {/* 🔥 MEMBER APPROVAL TOGGLE */}
-              <div className="flex items-center justify-between">
+             <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-gray-700">Member Approval</p>
                   <p className="text-sm text-gray-500">
@@ -931,9 +941,9 @@ const AdminDashboard = () => {
                   <input
                     type="checkbox"
                     className="sr-only peer"
-                    checked={memberApproval === 1}
+                    checked={settings.member_approval === 1}
                     onChange={(e) =>
-                      updateMemberApproval(e.target.checked ? 1 : 0)
+                      updateSetting("member_approval", e.target.checked ? 1 : 0)
                     }
                     disabled={settingsLoading}
                   />
@@ -953,6 +963,164 @@ const AdminDashboard = () => {
                 </p>
               )}
               {/* end code of button     */}
+
+              {/* ================= LIMIT SETTINGS START ================= */}
+
+              <hr className="my-6" />
+
+              {/* 🔹 VIDEO CALL LIMIT */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-700">Video Call Limit</p>
+                  <p className="text-sm text-gray-500">
+                    Enable or disable video call limit
+                  </p>
+                </div>
+
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={settings.check_video_call_limit === 1}
+                    onChange={(e) =>
+                      updateSetting(
+                        "check_video_call_limit",
+                        e.target.checked ? 1 : 0
+                      )
+                    }
+                    disabled={settingsLoading}
+                  />
+                  <div
+                    className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 
+      after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+      after:bg-white after:rounded-full after:h-5 after:w-5 
+      after:transition-all peer-checked:after:translate-x-full"
+                  ></div>
+                </label>
+              </div>
+                {settingsLoading && (
+                <p className="text-sm text-gray-400 mt-2">
+                  Updating setting...
+                </p>
+              )}
+              
+
+              {/* ================= LIMIT SETTINGS END ================= */}
+              <hr className="my-6" />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-700">
+                    People Search Limit
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Enable or disable people search limit
+                  </p>
+                </div>
+
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={settings.check_search_limit === 1}
+                    onChange={(e) =>
+                      updateSetting(
+                        "check_search_limit",
+                        e.target.checked ? 1 : 0
+                      )
+                    }
+                    disabled={settingsLoading}
+                  />
+                  <div
+                    className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600
+      after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+      after:bg-white after:rounded-full after:h-5 after:w-5
+      after:transition-all peer-checked:after:translate-x-full"
+                  ></div>
+                </label>
+              </div>
+              {settingsLoading && (
+                <p className="text-sm text-gray-400 mt-2">
+                  Updating setting...
+                </p>
+              )}
+             
+              <hr className="my-6" />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-700">
+                    People Message Limit
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Enable or disable people message limit
+                  </p>
+                </div>
+
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={settings.check_message_limit === 1}
+                    onChange={(e) =>
+                      updateSetting(
+                        "check_message_limit",
+                        e.target.checked ? 1 : 0
+                      )
+                    }
+                    disabled={settingsLoading}
+                  />
+                  <div
+                    className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600
+      after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+      after:bg-white after:rounded-full after:h-5 after:w-5
+      after:transition-all peer-checked:after:translate-x-full"
+                  ></div>
+                </label>
+              </div>
+               {settingsLoading && (
+                <p className="text-sm text-gray-400 mt-2">
+                  Updating setting...
+                </p>
+              )}
+              
+              <hr className="my-6" />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-700">Audio Call Limit</p>
+                  <p className="text-sm text-gray-500">
+                    Enable or disable audio call limit
+                  </p>
+                </div>
+
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={settings.check_audio_call_limit === 1}
+                    onChange={(e) =>
+                      updateSetting(
+                        "check_audio_call_limit",
+                        e.target.checked ? 1 : 0
+                      )
+                    }
+                    disabled={settingsLoading}
+                  />
+                  <div
+                    className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600
+      after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+      after:bg-white after:rounded-full after:h-5 after:w-5
+      after:transition-all peer-checked:after:translate-x-full"
+                  ></div>
+                </label>
+              </div>
+               {settingsLoading && (
+                <p className="text-sm text-gray-400 mt-2">
+                  Updating setting...
+                </p>
+              )}
+            
             </div>
           </div>
         );
