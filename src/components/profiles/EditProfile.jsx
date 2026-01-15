@@ -5,6 +5,7 @@ import { updateUserProfile } from "../services/api";
 import LifeRhythmsForm from "./LifeRhythmsForm";
 import axios from "axios";
 import InterestsForm from "./InterestsForm";
+import ProfileQuestions from "./ProfileQuestions";
 
 // ================== ENUM HELPERS ==================
 const mapToDBEnum = (field, value) => {
@@ -370,8 +371,54 @@ const mapToUIEnum = (field, value) => {
     },
   };
 
+
+
   return REVERSE_MAP[field]?.[value] || value;
 };
+  
+// ✅ ADD THIS HERE - RIGHT AFTER ENUM HELPERS (line ~175 ke baad)
+const PROFILE_QUESTIONS = [
+  {
+    key: "small_habit",
+    label: "A small habit that says a lot about me…",
+    placeholder: "E.g., I always make my bed first thing in the morning..."
+  },
+  {
+    key: "life_goal", 
+    label: "What I'm genuinely trying to build in my life right now…",
+    placeholder: "E.g., A sustainable business that helps local artisans..."
+  },
+  {
+    key: "home_moment",
+    label: "A moment that felt like home to me…",
+    placeholder: "E.g., That evening when we all cooked together..."
+  },
+  {
+    key: "belief_that_shapes_life",
+    label: "One belief that quietly shapes how I live…",
+    placeholder: "E.g., That small consistent efforts compound over time..."
+  },
+  {
+    key: "appreciate_people",
+    label: "Something I always appreciate in people…",
+    placeholder: "E.g., When they remember small details about others..."
+  },
+  {
+    key: "if_someone_knows_me",
+    label: "If someone really knows me, they know…",
+    placeholder: "E.g., That I need quiet time to recharge..."
+  },
+  {
+    key: "what_makes_me_understood",
+    label: "What makes me feel truly understood…",
+    placeholder: "E.g., When someone gets my sense of humor..."
+  },
+  {
+    key: "usual_day",
+    label: "How my usual day looks like…",
+    placeholder: "E.g., Morning workout, work from 9-6, evening reading..."
+  }
+];
 
 // ================== COMPONENT ==================
 export default function EditProfilePage() {
@@ -380,6 +427,9 @@ export default function EditProfilePage() {
 
   const [showLifeRhythms, setShowLifeRhythms] = useState(false);
   const [isInterestsModalOpen, setIsInterestsModalOpen] = useState(false);
+
+   const [showQuestions, setShowQuestions] = useState(false);
+     const [isQuestionsModalOpen, setIsQuestionsModalOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
@@ -451,7 +501,39 @@ export default function EditProfilePage() {
     preference_of_closeness: "",
     love_language_affection: "",
     life_rhythms: {},
+     profile_questions: {},
   });
+// ProfileQuestions modal ke liye handler
+const handleQuestionsSave = async (promptsData) => {
+  try {
+    // 1. Pehle profile update karo prompts ke saath
+    const updatedFormData = {
+      ...formData,
+      profile_questions: promptsData["question-key"] || {}
+    };
+    
+    setFormData(updatedFormData);
+    
+    // 2. Alag se prompts save karo (optional, agar alag endpoint hai to)
+    try {
+      await saveProfilePrompts(promptsData);
+      console.log("✅ Prompts saved separately");
+    } catch (promptsError) {
+      console.log("⚠️ Could not save prompts separately:", promptsError);
+    }
+    
+    // 3. Modal band karo
+    setIsQuestionsModalOpen(false);
+    
+    // 4. Success message
+    alert('Answers saved successfully!');
+    
+  } catch (error) {
+    console.error("Error saving questions:", error);
+    alert('Error saving answers');
+  }
+};
+  
 
   // ✅ Life Rhythms save handler
   const handleLifeRhythmsSave = (data) => {
@@ -553,6 +635,7 @@ export default function EditProfilePage() {
       zodiac_sign: profile.zodiac_sign || "",
       interested_in: profile.interested_in || "",
       relationship_goal: profile.relationship_goal || "",
+        profile_questions: profile.profile_questions || {},
       children_preference: mapToUIEnum(
         "children_preference",
         profile.children_preference
@@ -649,15 +732,14 @@ export default function EditProfilePage() {
 
       // ✅ FIX: दोनों interests को handle करो
       const simpleInterests = handleArrayField(formData.interests);
-      
-      // ✅ checkbox interests को JSON.stringify करो
-      let checkboxInterests = null;
-      if (formData.interests_categories && 
-          typeof formData.interests_categories === 'object' &&
-          Object.keys(formData.interests_categories).length > 0) {
-        checkboxInterests = JSON.stringify(formData.interests_categories);
-      }
-
+        // ✅ CORRECT: Prompts format backend ke hisaab se
+    let promptsToSend = null;
+    if (formData.profile_questions && 
+        Object.keys(formData.profile_questions).length > 0) {
+      promptsToSend = {
+        "question-key": formData.profile_questions
+      };
+    }
       const payload = {
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
@@ -767,7 +849,13 @@ export default function EditProfilePage() {
         love_language_affection: mapToDBEnum(
           "love_language_affection",
           handleArrayField(formData.love_language_affection)
+
         ),
+
+  
+      prompts: promptsToSend,
+
+        
       };
 
       console.log("✅ FINAL PAYLOAD:", payload);
@@ -1801,6 +1889,80 @@ export default function EditProfilePage() {
                       </p>
                     </div>
                   )}
+
+                  
+      {/* ✅ NEW: Profile Questions Section */}
+      <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
+        <h4 className="text-lg font-semibold text-gray-800 mb-2">
+          Tell Us More About Yourself
+        </h4>
+        <p className="text-sm text-gray-600 mb-3">
+          Answer these prompts to help others know you better
+        </p>
+
+        <button
+          type="button"
+          onClick={() => setIsQuestionsModalOpen(true)}
+          className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+        >
+          ✍️ Edit Profile Questions
+        </button>
+
+        {/* Display existing questions answers */}
+        {formData.profile_questions && 
+         typeof formData.profile_questions === 'object' &&
+         Object.keys(formData.profile_questions).length > 0 ? (
+          <div className="mt-4 p-3 bg-white border rounded-md">
+            <div className="flex justify-between items-center mb-2">
+              <p className="font-medium text-gray-700">
+                Answered Questions:
+              </p>
+              <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+                {Object.keys(formData.profile_questions).length} answered
+              </span>
+            </div>
+            <div className="space-y-3">
+              {Object.entries(formData.profile_questions)
+                .slice(0, 3)
+                .map(([question_key, answer]) => {
+                  const question = PROFILE_QUESTIONS.find(q => q.key === question_key);
+                  const label = question ? question.label : question_key;
+                  
+                  return (
+                    <div key={question_key} className="border-l-4 border-purple-300 pl-3 py-2">
+                      <p className="font-medium text-sm text-gray-800 mb-1">
+                        {label}
+                      </p>
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {answer}
+                      </p>
+                    </div>
+                  );
+                })}
+              
+              {Object.keys(formData.profile_questions).length > 3 && (
+                <div className="text-center pt-2 border-t">
+                  <p className="text-xs text-purple-600">
+                    +{Object.keys(formData.profile_questions).length - 3} more questions answered
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 p-4 bg-white border border-dashed border-gray-300 rounded-md text-center">
+            <p className="text-gray-500 text-sm italic">
+              No questions answered yet
+            </p>
+            <p className="text-gray-400 text-xs mt-1">
+              Click above button to answer prompts about yourself
+            </p>
+          </div>
+        )}
+      {/* </div> */}
+    </div>
+  {/* </div> */}
+   
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2225,6 +2387,14 @@ export default function EditProfilePage() {
           onSave={handleInterestsSave}
         />
       )}
+{isQuestionsModalOpen && (
+  <ProfileQuestions
+    initialData={formData.profile_questions || {}}
+    onSave={handleQuestionsSave} // ✅ Yahan correct handler use karein
+    onClose={() => setIsQuestionsModalOpen(false)}
+    isOpen={isQuestionsModalOpen}
+  />
+)}
     </div>
   );
 }

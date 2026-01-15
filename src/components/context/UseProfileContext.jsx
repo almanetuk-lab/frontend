@@ -1,3 +1,5 @@
+
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getUserProfile } from "../services/api";
 
@@ -169,6 +171,7 @@ export const UserProfileProvider = ({ children }) => {
           // ✅ NEW: JSON Fields
           life_rhythms: userProfile.life_rhythms || {},
           ways_i_spend_time: userProfile.ways_i_spend_time || {},
+          // profile_questions: userProfile.profile_questions || {},
 
           // System Fields
           id: userProfile.id || null,
@@ -181,6 +184,8 @@ export const UserProfileProvider = ({ children }) => {
           image_url: userProfile.image_url || "",
           last_updated: new Date().toISOString(),
         };
+
+        
 
         console.log("✅ Setting FRESH profile:", completeProfile);
         setProfile(completeProfile);
