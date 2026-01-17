@@ -58,16 +58,30 @@ const ProfileQuestions = ({
   // Load initial data
   useEffect(() => {
     if (initialData) {
+      console.log("📥 ProfileQuestions - Initial Data:", initialData);
+      
       let dataToLoad = initialData;
+
+      // ✅ IMPORTANT: Check if data has "question-key" wrapper
+      if (initialData["question-key"]) {
+        dataToLoad = initialData["question-key"];
+        console.log("✅ Found question-key wrapper:", dataToLoad);
+      }
 
       if (typeof initialData === "string") {
         try {
           dataToLoad = JSON.parse(initialData);
+          // Check for question-key again after parsing
+          if (dataToLoad["question-key"]) {
+            dataToLoad = dataToLoad["question-key"];
+          }
         } catch (error) {
           console.error("Error parsing prompts data:", error);
           dataToLoad = {};
         }
       }
+
+      console.log("📥 Data to load:", dataToLoad);
 
       if (dataToLoad && typeof dataToLoad === "object") {
         const newAnswers = {};
@@ -78,8 +92,11 @@ const ProfileQuestions = ({
           newCounts[question.key] = (dataToLoad[question.key] || '').length;
         });
         
+        console.log("✅ Setting answers:", newAnswers);
         setAnswers(newAnswers);
         setCharacterCounts(newCounts);
+      } else {
+        console.log("⚠️ No valid data to load");
       }
     }
   }, [initialData]);
@@ -110,14 +127,17 @@ const ProfileQuestions = ({
       }
     });
     
-    return {
-      "question-key": finalData
-    };
+    console.log("💾 Final data to save:", finalData);
+    
+    // ✅ IMPORTANT: Direct object bhejna hai, "question-key" wrapper nahi
+    // EditProfile mein hum wrapper add kar denge
+    return finalData;
   };
 
   // Handle save
   const handleSave = () => {
     const finalData = getFinalData();
+    console.log("💾 Saving data to EditProfile:", finalData);
     onSave?.(finalData);
     onClose?.();
   };
@@ -267,3 +287,12 @@ const ProfileQuestions = ({
 };
 
 export default ProfileQuestions;
+
+
+
+
+
+
+
+
+
