@@ -1,45 +1,39 @@
 import React from "react";
-
-export default function PlanCard({ plan, theme, addToCart, handleBuy }) {
+export default function PlanCard({ plan, config, theme, addToCart, handleBuy }) {
     return (
         <div className="w-full sm:w-[320px]">
-            <div
-                className={`rounded-xl p-6 shadow border ${theme.text} ${theme.border} bg-gradient-to-br ${theme.bg} transition-transform duration-300 hover:-translate-y-2 hover:shadow-lg`}
-            >
-                {/* Plan Header */}
+            <div className={`rounded-xl p-6 shadow border ${theme?.text || ""} ${theme?.border || ""} bg-gradient-to-br ${theme?.bg || ""} ...`}>
                 <h3 className="font-bold uppercase text-center mb-4 flex justify-center items-center gap-2">
                     <span>{plan.name}</span>
-                    <span className="text-blue-600 font-semibold text-lg">
-                        £{plan.price}
-                    </span>
+                    <span className="text-blue-600 font-semibold text-lg">£{plan.price}</span>
                 </h3>
 
-                {/* Plan Details */}
-                <ul className="text-start mb-4 space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                        <i className="fa-solid fa-video text-blue-500"></i>
-                        Video Call Limit: {plan.video_call_limit}
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <i className="fa-solid fa-magnifying-glass text-blue-500"></i>
-                        Search Limit: {plan.people_search_limit}
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <i className="fa-solid fa-message text-blue-500"></i>
-                        Message Limit: {plan.people_message_limit}
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <i className="fa-solid fa-headset text-blue-500"></i>
-                        Audio Call Limit: {plan.audio_call_limit}
-                    </li>
-                    
+                <p>{plan.description}</p>
+
+              <ul className="text-gray-700 text-sm mb-4">
+                    {plan.duration && <li>Duration: {plan.duration} Months</li>}
+                    {plan.video_call_limit > 0 && (
+                        <li>Video Calls: {plan.video_call_limit}</li>
+                    )}
+                    {plan.audio_call_limit > 0 && (
+                        <li>Audio Calls: {plan.audio_call_limit}</li>
+                    )}
+                    {plan.people_search_limit > 0 && (
+                        <li>Search Limit: {plan.people_search_limit}</li>
+                    )}
+                    {plan.people_message_limit > 0 && (
+                        <li>Message Limit: {plan.people_message_limit}</li>
+                    )}
+                    {plan.billing_info && (
+                        <li>Billing Info: {plan.billing_info}</li>
+                    )}
                 </ul>
 
-                {/* Buttons */}
+
                 <div className="flex flex-col gap-3">
                     <button
                         onClick={() => addToCart(plan)}
-                        className={`py-2 rounded-lg font-medium transition-transform duration-300 hover:-translate-y-1 hover:shadow-md ${theme.cartBtn}`}
+                        className={`rounded-xl p-6 shadow border ${theme?.text || ""} ${theme?.border || ""} bg-gradient-to-br ${theme?.bg || ""} ...`}
                     >
                         <i className="fa-solid fa-cart-shopping mr-2"></i> Add to Cart
                     </button>
@@ -52,6 +46,6 @@ export default function PlanCard({ plan, theme, addToCart, handleBuy }) {
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

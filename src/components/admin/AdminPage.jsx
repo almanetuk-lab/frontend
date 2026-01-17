@@ -3,6 +3,7 @@ import { adminAPI } from "../services/adminApi";
 import AdminPlans from "./AdminAllPlan.jsx";
 import AdminBlog from "../pages/AdminBlog.jsx";
 import AdminFooter from "./AdminFooter.jsx";
+import AdminReport from "../pages/AdminReport.jsx";
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [userStatusFilter, setUserStatusFilter] = useState("all");
@@ -16,7 +17,7 @@ const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false); // New state for mobile sidebar
 
   // for admin usestate//
-  
+
   const [settingsLoading, setSettingsLoading] = useState(false);
 
   const [settings, setSettings] = useState({
@@ -26,7 +27,6 @@ const AdminDashboard = () => {
     check_search_limit: 0,
     check_message_limit: 0,
   });
-
 
   //We are getting Admin details from Localstorage :-
   let [loggedInUser, setLoggedInUser] = useState({});
@@ -47,7 +47,7 @@ const AdminDashboard = () => {
   // Member_approval function end here ----
 
   // 🔥 FETCH CURRENT SETTING
- const fetchMemberApproval = async () => {
+  const fetchMemberApproval = async () => {
     try {
       const response = await adminAPI.getMemberApproval(); // GET API
       setSettings({
@@ -57,7 +57,6 @@ const AdminDashboard = () => {
         check_search_limit: response.data.check_search_limit,
         check_message_limit: response.data.check_message_limit,
       });
-    
     } catch (error) {
       console.error("Failed to fetch setting", error);
     }
@@ -68,8 +67,8 @@ const AdminDashboard = () => {
     try {
       setSettingsLoading(true);
 
-    const updatedSettings = { ...settings, [key]: value };
-    setSettings(updatedSettings);
+      const updatedSettings = { ...settings, [key]: value };
+      setSettings(updatedSettings);
 
       await adminAPI.updateMemberApproval(updatedSettings); // PUT API
     } catch (error) {
@@ -928,7 +927,7 @@ const AdminDashboard = () => {
               </h3>
               {/* start code for button */}
               {/* 🔥 MEMBER APPROVAL TOGGLE */}
-             <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-gray-700">Member Approval</p>
                   <p className="text-sm text-gray-500">
@@ -998,12 +997,11 @@ const AdminDashboard = () => {
                   ></div>
                 </label>
               </div>
-                {settingsLoading && (
+              {settingsLoading && (
                 <p className="text-sm text-gray-400 mt-2">
                   Updating setting...
                 </p>
               )}
-              
 
               {/* ================= LIMIT SETTINGS END ================= */}
               <hr className="my-6" />
@@ -1044,7 +1042,7 @@ const AdminDashboard = () => {
                   Updating setting...
                 </p>
               )}
-             
+
               <hr className="my-6" />
 
               <div className="flex items-center justify-between">
@@ -1078,12 +1076,12 @@ const AdminDashboard = () => {
                   ></div>
                 </label>
               </div>
-               {settingsLoading && (
+              {settingsLoading && (
                 <p className="text-sm text-gray-400 mt-2">
                   Updating setting...
                 </p>
               )}
-              
+
               <hr className="my-6" />
 
               <div className="flex items-center justify-between">
@@ -1115,12 +1113,11 @@ const AdminDashboard = () => {
                   ></div>
                 </label>
               </div>
-               {settingsLoading && (
+              {settingsLoading && (
                 <p className="text-sm text-gray-400 mt-2">
                   Updating setting...
                 </p>
               )}
-            
             </div>
           </div>
         );
@@ -1162,6 +1159,15 @@ const AdminDashboard = () => {
             {loggedInUser && <AdminBlog user={loggedInUser} />}
           </div>
         );
+
+
+      case "reports":
+        return (
+          <div className="p-4 sm:p-6">
+             <AdminReport />
+          </div>
+        );
+
 
       default:
         return (
@@ -1214,7 +1220,7 @@ const AdminDashboard = () => {
         </div>
 
         <nav className="mt-4 sm:mt-6">
-          {["dashboard", "users", "settings", "logs", "plans", "blogs"].map(
+          {["dashboard", "users", "settings", "logs", "plans", "blogs","reports"].map(
             (section) => (
               <div key={section} className="px-4 sm:px-6 py-2 sm:py-3">
                 <button
@@ -1281,10 +1287,11 @@ const AdminDashboard = () => {
 
         {renderContent()}
 
-        <AdminFooter/>
+        <AdminFooter />
       </div>
     </div>
   );
 };
+
 
 export default AdminDashboard;

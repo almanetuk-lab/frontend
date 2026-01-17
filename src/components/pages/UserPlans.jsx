@@ -16,52 +16,19 @@ import { useNavigate } from "react-router-dom";
 
 export default function UserPlans() {
   const [plans, setPlans] = useState([]);
+  const [config, setConfig] = useState({});
   const navigate = useNavigate();
 
   // 🎨 Tailwind-friendly theme object
-  const planThemes = {
-    free: {
-      bg: "from-white to-gray-100",
-      text: "text-gray-800",
-      border: "border-gray-300",
-      selectBtn:
-        "bg-transparent border border-gray-700 text-gray-800 hover:bg-gray-100",
-      cartBtn: "bg-gray-700 text-white hover:bg-gray-800",
-    },
-    basic: {
-      bg: "from-sky-100 to-sky-200",
-      text: "text-gray-800",
-      border: "border-sky-400",
-      selectBtn:
-        "bg-sky-400 text-gray-800 hover:bg-sky-500 transition duration-300",
-      cartBtn:
-        "border border-sky-400 text-sky-600 hover:bg-sky-100 transition duration-300",
-    },
-    advance: {
-      bg: "from-yellow-200 to-yellow-400",
-      text: "text-gray-800",
-      border: "border-yellow-400",
-      selectBtn:
-        "bg-yellow-400 text-gray-900 hover:bg-yellow-500 transition duration-300",
-      cartBtn:
-        "border border-yellow-400 text-gray-900 hover:bg-yellow-100 transition duration-300",
-    },
-    pro: {
-      bg: "from-gray-900 via-purple-900 to-amber-900",
-      text: "text-white",
-      border: "border-yellow-400 border-2",
-      selectBtn:
-        "bg-white text-gray-900 hover:bg-gray-200 transition duration-300",
-      cartBtn:
-        "border border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-gray-900 transition duration-300",
-    },
-  };
+const planThemes = { /* your same theme object */ };
 
   useEffect(() => {
     const loadPlans = async () => {
       try {
-        const data = await fetchPlans();
-        setPlans(data);
+        let plans = await fetchPlans();
+        console.log(plans);
+        setPlans(plans);
+        // setConfig(config);
       } catch (err) {
         console.error("Error fetching plans:", err);
       }
@@ -72,25 +39,17 @@ export default function UserPlans() {
   const addToCart = async (plan) => {
     try {
       const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
-
       const existingItem = existingCart.find((item) => item.id === plan.id);
 
       if (!existingItem) {
-        const cartItem = {
-          id: plan.id,
-          name: plan.name,
-          plan: plan,
-          price: plan.price,
-        };
+        const cartItem = { id: plan.id, name: plan.name, plan, price: plan.price };
         existingCart.push(cartItem);
         localStorage.setItem("cart", JSON.stringify(existingCart));
-
         window.dispatchEvent(new Event("storage"));
         window.dispatchEvent(new Event("cartUpdated"));
       }
 
       await addToCartAPI(plan.id, 1);
-
       alert("Plan added to cart!");
     } catch (err) {
       console.log("Error adding to cart:", err.message);
@@ -110,6 +69,7 @@ export default function UserPlans() {
 
       <PlansList
         plans={plans}
+        config={config} // ✅ pass config
         planThemes={planThemes}
         addToCart={addToCart}
         handleBuy={handleBuy}
