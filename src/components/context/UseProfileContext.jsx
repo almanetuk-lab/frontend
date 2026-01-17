@@ -211,6 +211,7 @@ export const UserProfileProvider = ({ children }) => {
           )
             ? userProfile.love_language_affection
             : userProfile.love_language_affection || [],
+            
           preference_of_closeness: userProfile.preference_of_closeness || "",
           approach_to_physical_closeness:
             userProfile.approach_to_physical_closeness || "",
