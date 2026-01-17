@@ -6,7 +6,7 @@ import profileViewApi from "../services/profileViewApi";
 
 // ✅ LifeRhythmsDisplay Component - Add kar diya
 function LifeRhythmsDisplay({ data }) {
-  if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+  if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-gray-500 italic">No life rhythms data available</p>
@@ -18,7 +18,7 @@ function LifeRhythmsDisplay({ data }) {
     work_rhythm: { title: "Work Rhythm", icon: "💼" },
     social_energy: { title: "Social Energy", icon: "👥" },
     life_pace: { title: "Life Pace", icon: "⏱️" },
-    emotional_style: { title: "Emotional Style", icon: "💖" }
+    emotional_style: { title: "Emotional Style", icon: "💖" },
   };
 
   return (
@@ -30,21 +30,30 @@ function LifeRhythmsDisplay({ data }) {
         }
 
         return (
-          <div key={key} className="bg-white border border-gray-200 rounded-lg p-4">
+          <div
+            key={key}
+            className="bg-white border border-gray-200 rounded-lg p-4"
+          >
             <div className="flex items-center gap-3 mb-3">
               <span className="text-xl">{section.icon}</span>
-              <h4 className="text-lg font-semibold text-gray-800">{section.title}</h4>
+              <h4 className="text-lg font-semibold text-gray-800">
+                {section.title}
+              </h4>
             </div>
-            
+
             <div className="ml-9">
               {rhythmData.combination ? (
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Combination:</p>
+                  <p className="text-sm font-medium text-gray-700">
+                    Combination:
+                  </p>
                   <p className="text-gray-900 font-medium text-lg mt-1">
                     {rhythmData.combination}
                   </p>
                   {rhythmData.statement && (
-                    <p className="text-gray-600 mt-2 italic">"{rhythmData.statement}"</p>
+                    <p className="text-gray-600 mt-2 italic">
+                      "{rhythmData.statement}"
+                    </p>
                   )}
                 </div>
               ) : (
@@ -54,7 +63,9 @@ function LifeRhythmsDisplay({ data }) {
                     {rhythmData.single}
                   </p>
                   {rhythmData.statement && (
-                    <p className="text-gray-600 mt-2 italic">"{rhythmData.statement}"</p>
+                    <p className="text-gray-600 mt-2 italic">
+                      "{rhythmData.statement}"
+                    </p>
                   )}
                 </div>
               )}
@@ -183,7 +194,8 @@ export default function ProfilePage() {
     if (typeof value === "string" && value.trim() === "") return false;
     if (typeof value === "number" && isNaN(value)) return false;
     if (Array.isArray(value) && value.length === 0) return false;
-    if (typeof value === "object" && Object.keys(value).length === 0) return false;
+    if (typeof value === "object" && Object.keys(value).length === 0)
+      return false;
     return true;
   };
 
@@ -217,8 +229,8 @@ export default function ProfilePage() {
   // ✅ Parse life rhythms data if it's a string
   const getLifeRhythmsData = () => {
     if (!displayProfile.life_rhythms) return null;
-    
-    if (typeof displayProfile.life_rhythms === 'string') {
+
+    if (typeof displayProfile.life_rhythms === "string") {
       try {
         return JSON.parse(displayProfile.life_rhythms);
       } catch (error) {
@@ -226,7 +238,7 @@ export default function ProfilePage() {
         return null;
       }
     }
-    
+
     return displayProfile.life_rhythms;
   };
 
@@ -394,9 +406,12 @@ export default function ProfilePage() {
             {/* LEFT COLUMN - Personal Information */}
             <div className="space-y-6">
               <Section title="Personal Information">
-                <InfoItem label="First Name" value={displayProfile.first_name} />
+                <InfoItem
+                  label="First Name"
+                  value={displayProfile.first_name}
+                />
                 <InfoItem label="Last Name" value={displayProfile.last_name} />
-                    <InfoItem
+                <InfoItem
                   label="User Name"
                   value={displayProfile.username}
                   type="UserName"
@@ -426,7 +441,10 @@ export default function ProfilePage() {
 
               {/* Personal Details */}
               <Section title="Personal Details">
-                <InfoItem label="Height in Inches" value={displayProfile.height} />
+                <InfoItem
+                  label="Height in Inches"
+                  value={displayProfile.height}
+                />
                 <InfoItem
                   label="Professional Identity"
                   value={displayProfile.professional_identity}
@@ -450,7 +468,10 @@ export default function ProfilePage() {
             <div className="space-y-6">
               <Section title="Professional Information">
                 <InfoItem label="Headline" value={displayProfile.headline} />
-                <InfoItem label="Profession" value={displayProfile.profession} />
+                <InfoItem
+                  label="Profession"
+                  value={displayProfile.profession}
+                />
                 <InfoItem label="Company" value={displayProfile.company} />
                 <InfoItem label="Position" value={displayProfile.position} />
                 <InfoItem
@@ -616,226 +637,423 @@ export default function ProfilePage() {
         )}
 
         {/* ✅ NEW PAGE 3: LIFE RHYTHMS & INTERESTS */}
-{activeTab === 2 && (
-  <div className="space-y-6">
-    <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-6">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-          <span className="text-xl">🎵</span>
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Life Rhythms & Interests</h2>
-          <p className="text-gray-600">Your personal rhythms and passions</p>
-        </div>
-      </div>
-    </div>
-
-    {/* ✅ 50-50 Layout for Life Rhythms and Interests */}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* LEFT SIDE - Life Rhythms (50%) */}
-      <div className="space-y-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-              <span className="text-lg">🎵</span>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800">Life Rhythms</h3>
-          </div>
-          
-          {lifeRhythmsData ? (
-            <LifeRhythmsDisplay data={lifeRhythmsData} />
-          ) : (
-            <div className="text-center py-8">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-xl">🎵</span>
-              </div>
-              <p className="text-gray-500 italic">No life rhythms data available</p>
-              {isCurrentUser && (
-                <button
-                  onClick={() => navigate("/edit-profile")}
-                  className="mt-3 px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition"
-                >
-                  Add Life Rhythms
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* RIGHT SIDE - Interests (50%) */}
-      <div className="space-y-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-lg">🎯</span>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800">Interests & Passions</h3>
-          </div>
-
-          {/* ✅ Interests Categories Display (Checkbox wala) */}
-          {displayProfile.interests_categories ? (
-            <div>
-              {/* Parse JSON if it's a string */}
-              {(() => {
-                let interestsData;
-                try {
-                  interestsData = typeof displayProfile.interests_categories === 'string' 
-                    ? JSON.parse(displayProfile.interests_categories) 
-                    : displayProfile.interests_categories;
-                } catch (error) {
-                  console.error("Error parsing interests_categories:", error);
-                  interestsData = {};
-                }
-
-                if (!interestsData || typeof interestsData !== 'object' || Object.keys(interestsData).length === 0) {
-                  return (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500 italic">No interests categories added yet</p>
-                    </div>
-                  );
-                }
-
-                const categoriesConfig = {
-                  creative_cultural: { label: "Creative & Cultural", color: "bg-purple-100 text-purple-800" },
-                  lifestyle_exploration: { label: "Lifestyle & Exploration", color: "bg-green-100 text-green-800" },
-                  mind_purpose: { label: "Mind & Purpose", color: "bg-blue-100 text-blue-800" },
-                  sports_activity: { label: "Sports & Activity", color: "bg-red-100 text-red-800" },
-                  music_genres: { label: "Music Genres", color: "bg-yellow-100 text-yellow-800" }
-                };
-
-                return (
-                  <div className="space-y-6">
-                    {Object.entries(interestsData).map(([category, items]) => {
-                      const config = categoriesConfig[category];
-                      if (!items || !Array.isArray(items) || items.length === 0) return null;
-
-                      return (
-                        <div key={category} className="mb-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium text-gray-700">
-                              {config?.label || category.replace("_", " ").toUpperCase()}
-                            </h4>
-                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                              {items.length} selected
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {items.map((interest, index) => (
-                              <span
-                                key={index}
-                                className={`px-3 py-1.5 text-sm rounded-full ${config?.color || 'bg-gray-100 text-gray-800'}`}
-                              >
-                                {interest}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {/* Total Count */}
-                    <div className="mt-6 pt-4 border-t border-gray-100">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-gray-700">Total Interests:</span>
-                        <span className="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm font-medium rounded-full">
-                          {Object.values(interestsData).flat().length} interests
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          ) : (
-            /* ✅ Fallback to simple interests (text field wala) */
-            <div>
-              {displayProfile.interests ? (
+        {activeTab === 2 && (
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span className="text-xl">🎵</span>
+                </div>
                 <div>
-                  <div className="flex flex-wrap gap-2">
-                    {(() => {
-                      let interestsArray = [];
-                      
-                      // Handle different formats
-                      if (Array.isArray(displayProfile.interests)) {
-                        interestsArray = displayProfile.interests;
-                      } else if (typeof displayProfile.interests === 'string') {
-                        // Split comma separated string
-                        interestsArray = displayProfile.interests
-                          .split(',')
-                          .map(item => item.trim())
-                          .filter(item => item !== '');
-                      }
-                      
-                      if (interestsArray.length === 0) {
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    Life Rhythms & Interests
+                  </h2>
+                  <p className="text-gray-600">
+                    Your personal rhythms and passions
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* ✅ 50-50 Layout for Life Rhythms and Interests */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* LEFT SIDE - Life Rhythms (50%) */}
+              <div className="space-y-6">
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <span className="text-lg">🎵</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      Life Rhythms
+                    </h3>
+                  </div>
+
+                  {lifeRhythmsData ? (
+                    <LifeRhythmsDisplay data={lifeRhythmsData} />
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span className="text-xl">🎵</span>
+                      </div>
+                      <p className="text-gray-500 italic">
+                        No life rhythms data available
+                      </p>
+                      {isCurrentUser && (
+                        <button
+                          onClick={() => navigate("/edit-profile")}
+                          className="mt-3 px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition"
+                        >
+                          Add Life Rhythms
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT SIDE - Interests (50%) */}
+              <div className="space-y-6">
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-lg">🎯</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      Interests & Passions
+                    </h3>
+                  </div>
+
+                  {/* ✅ Interests Categories Display (Checkbox wala) */}
+                  {displayProfile.ways_i_spend_time ? (
+                    <div>
+                      {/* Parse JSON if it's a string */}
+                      {(() => {
+                        let interestsData;
+                        try {
+                          interestsData =
+                            typeof displayProfile.ways_i_spend_time === "string"
+                              ? JSON.parse(displayProfile.ways_i_spend_time)
+                              : displayProfile.ways_i_spend_time;
+                        } catch (error) {
+                          console.error(
+                            "Error parsing ways_i_spend_time:",
+                            error
+                          );
+                          interestsData = {};
+                        }
+
+                        if (
+                          !interestsData ||
+                          typeof interestsData !== "object" ||
+                          Object.keys(interestsData).length === 0
+                        ) {
+                          return (
+                            <div className="text-center py-8">
+                              <p className="text-gray-500 italic">
+                                No interests categories added yet
+                              </p>
+                            </div>
+                          );
+                        }
+
+                        const categoriesConfig = {
+                          creative_cultural: {
+                            label: "Creative & Cultural",
+                            color: "bg-purple-100 text-purple-800",
+                          },
+                          lifestyle_exploration: {
+                            label: "Lifestyle & Exploration",
+                            color: "bg-green-100 text-green-800",
+                          },
+                          mind_purpose: {
+                            label: "Mind & Purpose",
+                            color: "bg-blue-100 text-blue-800",
+                          },
+                          sports_activity: {
+                            label: "Sports & Activity",
+                            color: "bg-red-100 text-red-800",
+                          },
+                          music_genres: {
+                            label: "Music Genres",
+                            color: "bg-yellow-100 text-yellow-800",
+                          },
+                        };
+
                         return (
-                          <div className="text-center py-8">
-                            <p className="text-gray-500 italic">No interests added yet</p>
+                          <div className="space-y-6">
+                            {Object.entries(interestsData).map(
+                              ([category, items]) => {
+                                const config = categoriesConfig[category];
+                                if (
+                                  !items ||
+                                  !Array.isArray(items) ||
+                                  items.length === 0
+                                )
+                                  return null;
+
+                                return (
+                                  <div key={category} className="mb-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <h4 className="font-medium text-gray-700">
+                                        {config?.label ||
+                                          category
+                                            .replace("_", " ")
+                                            .toUpperCase()}
+                                      </h4>
+                                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                        {items.length} selected
+                                      </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {items.map((interest, index) => (
+                                        <span
+                                          key={index}
+                                          className={`px-3 py-1.5 text-sm rounded-full ${
+                                            config?.color ||
+                                            "bg-gray-100 text-gray-800"
+                                          }`}
+                                        >
+                                          {interest}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            )}
+
+                            {/* Total Count */}
+                            <div className="mt-6 pt-4 border-t border-gray-100">
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium text-gray-700">
+                                  Total Interests:
+                                </span>
+                                <span className="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm font-medium rounded-full">
+                                  {Object.values(interestsData).flat().length}{" "}
+                                  interests
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         );
-                      }
-
-                      return interestsArray.map((interest, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1.5 bg-gray-100 text-gray-800 text-sm rounded-full"
-                        >
-                          {interest}
-                        </span>
-                      ));
-                    })()}
-                  </div>
-                  
-                  <div className="mt-6 pt-4 border-t border-gray-100">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium text-gray-700">Total Interests:</span>
-                      <span className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-full">
-                        {(() => {
-                          if (Array.isArray(displayProfile.interests)) {
-                            return displayProfile.interests.length;
-                          } else if (typeof displayProfile.interests === 'string') {
-                            return displayProfile.interests.split(',').filter(i => i.trim()).length;
-                          }
-                          return 0;
-                        })()} interests
-                      </span>
+                      })()}
                     </div>
-                  </div>
+                  ) : (
+                    /* ✅ Fallback to simple interests (text field wala) */
+                    <div>
+                      {displayProfile.interests ? (
+                        <div>
+                          <div className="flex flex-wrap gap-2">
+                            {(() => {
+                              let interestsArray = [];
+
+                              // Handle different formats
+                              if (Array.isArray(displayProfile.interests)) {
+                                interestsArray = displayProfile.interests;
+                              } else if (
+                                typeof displayProfile.interests === "string"
+                              ) {
+                                // Split comma separated string
+                                interestsArray = displayProfile.interests
+                                  .split(",")
+                                  .map((item) => item.trim())
+                                  .filter((item) => item !== "");
+                              }
+
+                              if (interestsArray.length === 0) {
+                                return (
+                                  <div className="text-center py-8">
+                                    <p className="text-gray-500 italic">
+                                      No interests added yet
+                                    </p>
+                                  </div>
+                                );
+                              }
+
+                              return interestsArray.map((interest, index) => (
+                                <span
+                                  key={index}
+                                  className="px-3 py-1.5 bg-gray-100 text-gray-800 text-sm rounded-full"
+                                >
+                                  {interest}
+                                </span>
+                              ));
+                            })()}
+                          </div>
+
+                          <div className="mt-6 pt-4 border-t border-gray-100">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium text-gray-700">
+                                Total Interests:
+                              </span>
+                              <span className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-full">
+                                {(() => {
+                                  if (Array.isArray(displayProfile.interests)) {
+                                    return displayProfile.interests.length;
+                                  } else if (
+                                    typeof displayProfile.interests === "string"
+                                  ) {
+                                    return displayProfile.interests
+                                      .split(",")
+                                      .filter((i) => i.trim()).length;
+                                  }
+                                  return 0;
+                                })()}{" "}
+                                interests
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <span className="text-xl">🎯</span>
+                          </div>
+                          <p className="text-gray-500 italic">
+                            No interests added yet
+                          </p>
+                          {isCurrentUser && (
+                            <button
+                              onClick={() => navigate("/edit-profile")}
+                              className="mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+                            >
+                              Add Interests
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              ) : (
+                
+        {/* ✅ NEW: Profile Questions Section */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-lg">💭</span>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-800">
+              Get to Know Me
+            </h3>
+          </div>
+
+          {(() => {
+            // Safely extract profile questions
+            let profileQuestions = {};
+            
+            // Check multiple possible sources
+            if (displayProfile.profile_questions && typeof displayProfile.profile_questions === 'object') {
+              profileQuestions = displayProfile.profile_questions;
+            }
+            else if (displayProfile.prompts && displayProfile.prompts["question-key"]) {
+              profileQuestions = displayProfile.prompts["question-key"];
+            }
+            else if (displayProfile.prompts && typeof displayProfile.prompts === 'object') {
+              profileQuestions = displayProfile.prompts;
+            }
+            else if (Array.isArray(displayProfile.profile_prompts)) {
+              displayProfile.profile_prompts.forEach(prompt => {
+                if (prompt.question_key && prompt.answer) {
+                  profileQuestions[prompt.question_key] = prompt.answer;
+                }
+              });
+            }
+            
+            console.log("📝 Profile Questions for display:", profileQuestions);
+            
+            if (!profileQuestions || Object.keys(profileQuestions).length === 0) {
+              return (
                 <div className="text-center py-8">
                   <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-xl">🎯</span>
+                    <span className="text-xl">💭</span>
                   </div>
-                  <p className="text-gray-500 italic">No interests added yet</p>
+                  <p className="text-gray-500 italic mb-3">
+                    No profile questions answered yet
+                  </p>
                   {isCurrentUser && (
                     <button
                       onClick={() => navigate("/edit-profile")}
-                      className="mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+                      className="mt-2 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
                     >
-                      Add Interests
+                      Answer Questions
                     </button>
                   )}
                 </div>
-              )}
-            </div>
-          )}
+              );
+            }
+
+            // Define questions with labels
+            const questionsConfig = {
+              small_habit: { 
+                label: "A small habit that says a lot about me…", 
+                icon: "✨" 
+              },
+              life_goal: { 
+                label: "What I'm genuinely trying to build in my life right now…", 
+                icon: "🏗️" 
+              },
+              home_moment: { 
+                label: "A moment that felt like home to me…", 
+                icon: "🏠" 
+              },
+              belief_that_shapes_life: { 
+                label: "One belief that quietly shapes how I live…", 
+                icon: "🌟" 
+              },
+              appreciate_people: { 
+                label: "Something I always appreciate in people…", 
+                icon: "👥" 
+              },
+              if_someone_knows_me: { 
+                label: "If someone really knows me, they know…", 
+                icon: "🤔" 
+              },
+              what_makes_me_understood: { 
+                label: "What makes me feel truly understood…", 
+                icon: "💬" 
+              },
+              usual_day: { 
+                label: "How my usual day looks like…", 
+                icon: "📅" 
+              }
+            };
+
+            return (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-gray-600">
+                    Answered {Object.keys(profileQuestions).length} of {Object.keys(questionsConfig).length} questions
+                  </p>
+                  {isCurrentUser && (
+                    <button
+                      onClick={() => navigate("/edit-profile")}
+                      className="text-sm text-green-600 hover:text-green-800 font-medium"
+                    >
+                      Edit Answers
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  {Object.entries(profileQuestions).map(([questionKey, answer]) => {
+                    const config = questionsConfig[questionKey] || { 
+                      label: questionKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                      icon: "💬"
+                    };
+                    
+                    // ✅ FIX: Ensure answer is a string
+                    const answerText = typeof answer === 'string' 
+                      ? answer 
+                      : (typeof answer === 'object' ? JSON.stringify(answer) : String(answer || ''));
+                    
+                    return (
+                      <div key={questionKey} className="border-l-4 border-green-300 pl-4 py-3 bg-green-50 rounded-r-lg">
+                        <div className="flex items-start gap-2 mb-2">
+                          <span className="text-lg">{config.icon}</span>
+                          <h4 className="font-medium text-gray-800 text-sm">
+                            {config.label}
+                          </h4>
+                        </div>
+                        <p className="text-gray-600 text-sm pl-7">
+                          {answerText}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
-        {/* Quick Summary */}
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-          <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
-            <span>💡</span> About Interests
-          </h4>
-          <p className="text-blue-700 text-sm">
-            Interests show what you enjoy doing in your free time. They help others connect with you over shared passions.
-          </p>
-        </div>
+      
       </div>
     </div>
-
-    </div>
+  </div>
 )}
+
+           
 
         {/* ✅ UPDATED NAVIGATION BUTTONS FOR 3 PAGES */}
         <div className="flex justify-between items-center mt-8 pt-6 border-t">
@@ -936,18 +1154,3 @@ function Section({ title, children }) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
