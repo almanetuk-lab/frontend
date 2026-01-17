@@ -221,7 +221,7 @@ export const UserProfileProvider = ({ children }) => {
 
           // JSON Fields
           life_rhythms: userProfile.life_rhythms || {},
-          // ways_i_spend_time: userProfile.ways_i_spend_time || {},
+          ways_i_spend_time: userProfile.ways_i_spend_time || {},
              ways_i_spend_time: parsedWaysISpendTime,
 
           // System Fields

@@ -267,26 +267,21 @@ const mapToDBEnum = (field, value) => {
     love_language_affection: (value) => {
       if (!value) return null;
 
-      // Agar already array hai (checkbox se aaya hai)
       if (Array.isArray(value)) {
-        // Filter out empty strings and map values
-        return value
-          .filter((lang) => lang && lang.trim() !== "")
-          .map((lang) => {
-            const langMap = {
-              "Physical Touch": "Physical Touch",
-              "Words of Affirmation": "Words of Affirmation",
-              "Quality Time": "Quality Time",
-              "Acts of Service": "Acts of Service",
-              "Thoughtful Gifts": "Thoughtful Gifts",
-              urdu: "Words of Affirmation",
-              hindi: "Words of Affirmation",
-            };
-            return langMap[lang] || lang;
-          });
+        return value.map((lang) => {
+          const langMap = {
+            "Physical Touch": "Physical Touch",
+            "Words of Affirmation": "Words of Affirmation",
+            "Quality Time": "Quality Time",
+            "Acts of Service": "Acts of Service",
+            "Thoughtful Gifts": "Thoughtful Gifts",
+            urdu: "Words of Affirmation",
+            hindi: "Words of Affirmation",
+          };
+          return langMap[lang] || lang;
+        });
       }
 
-      // Agar string hai (comma separated)
       if (typeof value === "string") {
         return value
           .split(",")
@@ -301,6 +296,12 @@ const mapToDBEnum = (field, value) => {
   if (field === "love_language_affection" && MAP[field]) {
     return MAP[field](value);
   }
+
+  if (field === "height_ft" || field === "height_in") {
+    return MAP[field] ? MAP[field](value) : value;
+  }
+
+  return MAP[field]?.[value] || value;
 };
 
 const mapToUIEnum = (field, value) => {
@@ -418,7 +419,6 @@ const PROFILE_QUESTIONS = [
 ];
 
 // ================== COMPONENT ==================
-
 export default function EditProfilePage() {
   const { profile, updateProfile } = useUserProfile();
   const navigate = useNavigate();
@@ -498,12 +498,11 @@ export default function EditProfilePage() {
     values_in_others: "",
     approach_to_physical_closeness: "",
     preference_of_closeness: "",
-    love_language_affection: [],
+    love_language_affection: "",
     life_rhythms: {},
     profile_questions: {},
   });
 
-  //qustion save handler
   const handleQuestionsSave = (data) => {
     setFormData((prev) => ({
       ...prev,
@@ -512,18 +511,18 @@ export default function EditProfilePage() {
     setIsQuestionsModalOpen(false);
   };
 
-  //  Life Rhythms save handler
+  // ✅ Life Rhythms save handler
   const handleLifeRhythmsSave = (data) => {
     setFormData((prev) => ({
       ...prev,
       life_rhythms: data,
     }));
   };
-  //intrested save handler
+
   const handleInterestsSave = (data) => {
     setFormData((prev) => ({
       ...prev,
-      interests_categories: data,
+      interests_categories: data, // UI ke liye same
     }));
   };
 
@@ -542,7 +541,7 @@ export default function EditProfilePage() {
       }
     }
 
-    // 'ways_i_spend_time' fields ke liye h
+    // ✅ FIX: 'ways_i_spend_time' se data load karein
     let interestsCategories = {};
 
     // Pehle ways_i_spend_time check karein
@@ -571,21 +570,21 @@ export default function EditProfilePage() {
         interestsCategories = profile.interests_categories;
       }
     }
-    //  CORRECTED & SIMPLIFIED VERSION:
+    // 🔥 CORRECTED & SIMPLIFIED VERSION:
     let profileQuestions = {};
 
     // 1. Pehle check karo "prompts" (backend response me "prompts" hai)
     if (profile.prompts) {
-      console.log(" Prompts data found:", profile.prompts);
+      console.log("🔍 Prompts data found:", profile.prompts);
 
       if (profile.prompts["question-key"]) {
         profileQuestions = profile.prompts["question-key"];
-        console.log("Loaded from prompts.question-key:", profileQuestions);
+        console.log("✅ Loaded from prompts.question-key:", profileQuestions);
       }
       // Agar directly object hai (without question-key wrapper)
       else if (typeof profile.prompts === "object") {
         profileQuestions = profile.prompts;
-        console.log(" Loaded from prompts directly:", profileQuestions);
+        console.log("✅ Loaded from prompts directly:", profileQuestions);
       }
     }
     // 2. Check profile_questions (direct)
@@ -594,19 +593,19 @@ export default function EditProfilePage() {
       typeof profile.profile_questions === "object"
     ) {
       profileQuestions = profile.profile_questions;
-      console.log(" Loaded from profile_questions:", profileQuestions);
+      console.log("✅ Loaded from profile_questions:", profileQuestions);
     }
     // 3. Check profile_prompts array (database se aata hai)
     else if (Array.isArray(profile.profile_prompts)) {
       console.log("📥 profile_prompts array found:", profile.profile_prompts);
 
-      //  FIX: Convert array to object
+      // ✅ FIX: Convert array to object
       profile.profile_prompts.forEach((prompt) => {
         if (prompt.question_key && prompt.answer !== undefined) {
           profileQuestions[prompt.question_key] = prompt.answer;
         }
       });
-      console.log(" Converted from profile_prompts array:", profileQuestions);
+      console.log("✅ Converted from profile_prompts array:", profileQuestions);
     } else {
       console.log(
         "❌ No prompts found in profile. Available keys:",
@@ -674,7 +673,9 @@ export default function EditProfilePage() {
       zodiac_sign: profile.zodiac_sign || "",
       interested_in: profile.interested_in || "",
       relationship_goal: profile.relationship_goal || "",
-
+      profile_questions: profile.profile_questions || {},
+      profile_questions: questions,
+      profile_prompts: profileQuestionsToSend,
       profile_questions: profileQuestions,
       interests_categories: interestsCategories,
 
@@ -702,44 +703,16 @@ export default function EditProfilePage() {
         "preference_of_closeness",
         profile.preference_of_closeness
       ),
-
       love_language_affection: Array.isArray(profile.love_language_affection)
-        ? profile.love_language_affection
-        : profile.love_language_affection
-        ? profile.love_language_affection
-            .split(",")
-            .map((lang) => lang.trim())
-            .filter((lang) => lang)
-        : [],
+        ? profile.love_language_affection.join(", ")
+        : profile.love_language_affection || "",
+      life_rhythms: profile.life_rhythms || {},
     });
 
     if (profile.profile_image) {
       setImagePreview(profile.profile_image);
     }
   }, [profile]);
-
-  //checkbox handler
-  const handleCheckboxChange = (e) => {
-    const { name, value, checked } = e.target;
-
-    setFormData((prev) => {
-      const currentValues = prev[name] || [];
-
-      let newValues;
-      if (checked) {
-        // Add value if checked
-        newValues = [...currentValues, value];
-      } else {
-        // Remove value if unchecked
-        newValues = currentValues.filter((item) => item !== value);
-      }
-
-      return {
-        ...prev,
-        [name]: newValues,
-      };
-    });
-  };
 
   // ================== PROGRESS & STEP HANDLING ==================
   const progressPercentage = (currentStep / totalSteps) * 100;
@@ -767,37 +740,8 @@ export default function EditProfilePage() {
   };
 
   // ================== CHANGE HANDLER ==================
-  // const handleChange = (e) => {
-  //   setFormData({ ...formData, [e.target.name]: e.target.value });
-  // };
-
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    // ✅ FIX: Agar checkbox hai to alag se handle karo
-    if (type === "checkbox" && name === "love_language_affection") {
-      setFormData((prev) => {
-        const currentValues = Array.isArray(prev[name]) ? prev[name] : [];
-
-        let newValues;
-        if (checked) {
-          // Add value if checked
-          newValues = [...currentValues, value];
-        } else {
-          // Remove value if unchecked
-          newValues = currentValues.filter((item) => item !== value);
-        }
-
-        return {
-          ...prev,
-          [name]: newValues,
-        };
-      });
-      return;
-    }
-
-    //  Baaki sab fields ke liye normal handle
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   // ================== SUBMIT HANDLER ==================
@@ -806,32 +750,15 @@ export default function EditProfilePage() {
     setLoading(true);
 
     try {
-      // const handleArrayField = (value) => {
-      //   if (!value) return null;
-      //   if (Array.isArray(value)) return value;
-      //   if (typeof value === "string") {
-      //     return value
-      //       .split(",")
-      //       .map((item) => item.trim())
-      //       .filter((item) => item !== "");
-      //   }
-      //   return null;
-      // };
-
       const handleArrayField = (value) => {
         if (!value) return null;
-
-        if (Array.isArray(value)) {
-          return value.filter((item) => item && item.trim() !== "");
-        }
-
+        if (Array.isArray(value)) return value;
         if (typeof value === "string") {
           return value
             .split(",")
             .map((item) => item.trim())
             .filter((item) => item !== "");
         }
-
         return null;
       };
 
@@ -848,8 +775,11 @@ export default function EditProfilePage() {
 
       //  FIX: दोनों interests को handle करो
       const simpleInterests = handleArrayField(formData.interests);
+      //  CORRECT: Prompts format backend ke hisaab se
 
+      // ✅ FIXED: Direct object bhejna hai, "question-key" wrapper nahi
 
+      // ✅ CORRECT BACKEND FORMAT
       let promptsToSend = null;
 
       if (
@@ -894,13 +824,14 @@ export default function EditProfilePage() {
         about_me: formData.about_me || null,
         skills: handleArrayField(formData.skills),
         interests: simpleInterests,
+        // interests_categories: checkboxInterests,
         ways_i_spend_time: formData.interests_categories,
         // ways_i_spend_time: formData.interests_categories,
         hobbies: handleArrayField(formData.hobbies),
         height_ft: height_ft,
         height_in: height_in,
         life_rhythms: formData.life_rhythms,
-        // profile_prompts: profileQuestionsToSend,
+        profile_prompts: profileQuestionsToSend,
         //  profile_prompts: profilePromptsToSend.length > 0 ? profilePromptsToSend : null,
         company_type: formData.company_type || null,
         education_institution_name: formData.education_institution_name || null,
@@ -974,14 +905,9 @@ export default function EditProfilePage() {
           "preference_of_closeness",
           formData.preference_of_closeness
         ),
-        // love_language_affection: mapToDBEnum(
-        //   "love_language_affection",
-        //   handleArrayField(formData.love_language_affection)
-        // ),
-
         love_language_affection: mapToDBEnum(
           "love_language_affection",
-          formData.love_language_affection
+          handleArrayField(formData.love_language_affection)
         ),
       };
 
@@ -1098,7 +1024,7 @@ export default function EditProfilePage() {
     };
   }, [showCamera]);
 
-  //  Image Upload Handler
+  // ✅ Image Upload Handler
   const handleImageUpload = async (file) => {
     if (!file) return null;
     setImageLoading(true);
@@ -1957,7 +1883,7 @@ export default function EditProfilePage() {
                     )}
                 </div>
 
-                {/*  FIXED: Interests Categories Section */}
+                {/* ✅ FIXED: Interests Categories Section */}
                 <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
                   <h4 className="text-lg font-semibold text-gray-800 mb-2">
                     Interests & Passions (Categories)
@@ -1974,7 +1900,7 @@ export default function EditProfilePage() {
                     🎯 Edit Interests Categories
                   </button>
 
-                  {/* FIXED: Display interests_categories */}
+                  {/* ✅ FIXED: Display interests_categories */}
                   {formData.interests_categories &&
                   typeof formData.interests_categories === "object" &&
                   Object.keys(formData.interests_categories).length > 0 ? (
@@ -2018,7 +1944,7 @@ export default function EditProfilePage() {
                     </div>
                   )}
 
-                  {/*  NEW: Profile Questions Section */}
+                  {/* ✅ NEW: Profile Questions Section */}
                   <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
                     <h4 className="text-lg font-semibold text-gray-800 mb-2">
                       Tell Us More About Yourself
@@ -2514,7 +2440,7 @@ export default function EditProfilePage() {
         />
       )}
 
-      {/*  FIXED: Interests Modal */}
+      {/* ✅ FIXED: Interests Modal */}
       {isInterestsModalOpen && (
         <InterestsForm
           isOpen={isInterestsModalOpen}
@@ -2526,7 +2452,7 @@ export default function EditProfilePage() {
       {isQuestionsModalOpen && (
         <ProfileQuestions
           initialData={formData.profile_questions || {}}
-          onSave={handleQuestionsSave} 
+          onSave={handleQuestionsSave} // ✅ Yahan correct handler use karein
           onClose={() => setIsQuestionsModalOpen(false)}
           isOpen={isQuestionsModalOpen}
         />
