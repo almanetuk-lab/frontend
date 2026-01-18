@@ -11,3 +11,5 @@ export const addPlan = (data) => axios.post(API, data);
 export const updatePlan = (id, data) => axios.put(`${API}/${id}`, data);
 
 export const deletePlan = (id) => axios.delete(`${API}/${id}`);
+
+export const updatePlanStatus = (id) => axios.put(`${API_BASE_URL}/api/admin/plans/${id}/toggle`);

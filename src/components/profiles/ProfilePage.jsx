@@ -905,148 +905,163 @@ export default function ProfilePage() {
                       )}
                     </div>
                   )}
+                </div> 
+ 
+        {/* ✅ NEW: Profile Questions Section */}
+<div className="bg-white border border-gray-200 rounded-lg p-6">
+  <div className="flex items-center gap-3 mb-4">
+    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+      <span className="text-lg">💭</span>
+    </div>
+    <h3 className="text-xl font-semibold text-gray-800">
+      Get to Know Me
+    </h3>
+  </div>
+
+  {(() => {
+    // ✅ IMPORTANT: Display complete profile data for debugging
+    console.log("🔍 DEBUG - Complete displayProfile object:", displayProfile);
+    console.log("🔍 displayProfile.prompts:", displayProfile?.prompts);
+    console.log("🔍 displayProfile.prompts['question-key']:", displayProfile?.prompts?.["question-key"]);
+    console.log("🔍 displayProfile.profile_prompts:", displayProfile?.profile_prompts);
+    
+    // ✅ FIXED: Extract profile questions with priority order
+    let profileQuestions = {};
+    
+    // Priority 1: Check prompts["question-key"] (main source)
+    if (displayProfile?.prompts?.["question-key"]) {
+      console.log("✅ Using prompts['question-key']");
+      profileQuestions = displayProfile.prompts["question-key"];
+    }
+    // Priority 2: Check profile_prompts array
+    else if (Array.isArray(displayProfile?.profile_prompts) && displayProfile.profile_prompts.length > 0) {
+      console.log("✅ Using profile_prompts array");
+      displayProfile.profile_prompts.forEach(prompt => {
+        if (prompt?.question_key && prompt?.answer) {
+          profileQuestions[prompt.question_key] = prompt.answer;
+        }
+      });
+    }
+    // Priority 3: Check profile_questions
+    else if (displayProfile?.profile_questions && typeof displayProfile.profile_questions === 'object') {
+      console.log("✅ Using profile_questions");
+      profileQuestions = displayProfile.profile_questions;
+    }
+    // Priority 4: Check prompts directly
+    else if (displayProfile?.prompts && typeof displayProfile.prompts === 'object') {
+      console.log("✅ Using prompts directly");
+      profileQuestions = displayProfile.prompts;
+    }
+    
+    console.log("🎯 Extracted profileQuestions:", profileQuestions);
+    console.log("🎯 Keys found:", Object.keys(profileQuestions));
+    
+    // Define questions with labels (same as EditProfile)
+    const questionsConfig = {
+      small_habit: { 
+        label: "A small habit that says a lot about me…", 
+        icon: "✨" 
+      },
+      life_goal: { 
+        label: "What I'm genuinely trying to build in my life right now…", 
+        icon: "🏗️" 
+      },
+      home_moment: { 
+        label: "A moment that felt like home to me…", 
+        icon: "🏠" 
+      },
+      belief_that_shapes_life: { 
+        label: "One belief that quietly shapes how I live…", 
+        icon: "🌟" 
+      },
+      appreciate_people: { 
+        label: "Something I always appreciate in people…", 
+        icon: "👥" 
+      },
+      if_someone_knows_me: { 
+        label: "If someone really knows me, they know…", 
+        icon: "🤔" 
+      },
+      what_makes_me_understood: { 
+        label: "What makes me feel truly understood…", 
+        icon: "💬" 
+      },
+      usual_day: { 
+        label: "How my usual day looks like…", 
+        icon: "📅" 
+      }
+    };
+    
+    // ✅ Check if we have any data
+    if (!profileQuestions || Object.keys(profileQuestions).length === 0) {
+      return (
+        <div className="text-center py-8">
+          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span className="text-xl">💭</span>
+          </div>
+          <p className="text-gray-500 italic mb-3">
+            No profile questions answered yet
+          </p>
+          {isCurrentUser && (
+            <button
+              onClick={() => navigate("/edit-profile")}
+              className="mt-2 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
+            >
+              Answer Questions
+            </button>
+          )}
+        </div>
+      );
+    }
+    
+    // ✅ Display ALL questions, even unanswered ones (with placeholder)
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center mb-4">
+          <p className="text-sm text-gray-600">
+            Answered {Object.keys(profileQuestions).filter(key => profileQuestions[key]?.trim()).length} of {Object.keys(questionsConfig).length} questions
+          </p>
+          {isCurrentUser && (
+            <button
+              onClick={() => navigate("/edit-profile")}
+              className="text-sm text-green-600 hover:text-green-800 font-medium"
+            >
+              Edit Answers
+            </button>
+          )}
+        </div>
+        
+        <div className="space-y-4">
+          {Object.entries(questionsConfig).map(([questionKey, config]) => {
+            const answer = profileQuestions[questionKey] || '';
+            const hasAnswer = answer && answer.trim() !== '';
+            
+            return (
+              <div key={questionKey} className={`border-l-4 ${hasAnswer ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-gray-50'} pl-4 py-3 rounded-r-lg`}>
+                <div className="flex items-start gap-2 mb-2">
+                  <span className="text-lg">{config.icon}</span>
+                  <h4 className="font-medium text-gray-800 text-sm">
+                    {config.label}
+                  </h4>
                 </div>
                 
-        {/* ✅ NEW: Profile Questions Section */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-lg">💭</span>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800">
-              Get to Know Me
-            </h3>
-          </div>
-
-          {(() => {
-            // Safely extract profile questions
-            let profileQuestions = {};
-            
-            // Check multiple possible sources
-            if (displayProfile.profile_questions && typeof displayProfile.profile_questions === 'object') {
-              profileQuestions = displayProfile.profile_questions;
-            }
-            else if (displayProfile.prompts && displayProfile.prompts["question-key"]) {
-              profileQuestions = displayProfile.prompts["question-key"];
-            }
-            else if (displayProfile.prompts && typeof displayProfile.prompts === 'object') {
-              profileQuestions = displayProfile.prompts;
-            }
-            else if (Array.isArray(displayProfile.profile_prompts)) {
-              displayProfile.profile_prompts.forEach(prompt => {
-                if (prompt.question_key && prompt.answer) {
-                  profileQuestions[prompt.question_key] = prompt.answer;
-                }
-              });
-            }
-            
-            console.log("📝 Profile Questions for display:", profileQuestions);
-            
-            if (!profileQuestions || Object.keys(profileQuestions).length === 0) {
-              return (
-                <div className="text-center py-8">
-                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-xl">💭</span>
-                  </div>
-                  <p className="text-gray-500 italic mb-3">
-                    No profile questions answered yet
+                {hasAnswer ? (
+                  <p className="text-gray-600 text-sm pl-7">
+                    {answer}
                   </p>
-                  {isCurrentUser && (
-                    <button
-                      onClick={() => navigate("/edit-profile")}
-                      className="mt-2 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
-                    >
-                      Answer Questions
-                    </button>
-                  )}
-                </div>
-              );
-            }
-
-            // Define questions with labels
-            const questionsConfig = {
-              small_habit: { 
-                label: "A small habit that says a lot about me…", 
-                icon: "✨" 
-              },
-              life_goal: { 
-                label: "What I'm genuinely trying to build in my life right now…", 
-                icon: "🏗️" 
-              },
-              home_moment: { 
-                label: "A moment that felt like home to me…", 
-                icon: "🏠" 
-              },
-              belief_that_shapes_life: { 
-                label: "One belief that quietly shapes how I live…", 
-                icon: "🌟" 
-              },
-              appreciate_people: { 
-                label: "Something I always appreciate in people…", 
-                icon: "👥" 
-              },
-              if_someone_knows_me: { 
-                label: "If someone really knows me, they know…", 
-                icon: "🤔" 
-              },
-              what_makes_me_understood: { 
-                label: "What makes me feel truly understood…", 
-                icon: "💬" 
-              },
-              usual_day: { 
-                label: "How my usual day looks like…", 
-                icon: "📅" 
-              }
-            };
-
-            return (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center mb-4">
-                  <p className="text-sm text-gray-600">
-                    Answered {Object.keys(profileQuestions).length} of {Object.keys(questionsConfig).length} questions
+                ) : (
+                  <p className="text-gray-400 text-sm pl-7 italic">
+                    Not answered yet
                   </p>
-                  {isCurrentUser && (
-                    <button
-                      onClick={() => navigate("/edit-profile")}
-                      className="text-sm text-green-600 hover:text-green-800 font-medium"
-                    >
-                      Edit Answers
-                    </button>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  {Object.entries(profileQuestions).map(([questionKey, answer]) => {
-                    const config = questionsConfig[questionKey] || { 
-                      label: questionKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                      icon: "💬"
-                    };
-                    
-                    // ✅ FIX: Ensure answer is a string
-                    const answerText = typeof answer === 'string' 
-                      ? answer 
-                      : (typeof answer === 'object' ? JSON.stringify(answer) : String(answer || ''));
-                    
-                    return (
-                      <div key={questionKey} className="border-l-4 border-green-300 pl-4 py-3 bg-green-50 rounded-r-lg">
-                        <div className="flex items-start gap-2 mb-2">
-                          <span className="text-lg">{config.icon}</span>
-                          <h4 className="font-medium text-gray-800 text-sm">
-                            {config.label}
-                          </h4>
-                        </div>
-                        <p className="text-gray-600 text-sm pl-7">
-                          {answerText}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
+                )}
               </div>
             );
-          })()}
+          })}
         </div>
-
+      </div>
+    );
+  })()}
+</div>
       
       </div>
     </div>

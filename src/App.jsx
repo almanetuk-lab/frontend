@@ -75,6 +75,9 @@ import LifeRhythmsForm from "./components/profiles/LifeRhythmsForm";
 // import FacebookPage from "./components/SocialPages/FacebookPage";
 // import LinkedInPage from "./components/SocialPages/LinkedInPage";
 
+//import AdminReport from "./pages/AdminReport";
+import AdminReport from "./components/pages/AdminReport.jsx";
+
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("accessToken");
@@ -102,6 +105,7 @@ const PlanFormWrapper = () => {
   // Kyunki yeh component HashRouter ke ANDAR hai
   return <AdminAddNewPlan />;
 };
+
 
 export default function App() {
   return (
@@ -202,6 +206,16 @@ export default function App() {
             </UserProtectedRoute>
           }
         />
+         
+         <Route
+          path="/admin-reports"
+          element={
+            <ProtectedRoute>
+              <AdminReport />
+            </ProtectedRoute>
+          }
+        />
+        
 
         <Route
           path="/search"

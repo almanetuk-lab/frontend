@@ -69,28 +69,69 @@ export default function CartItem({ item, handleRemove /* OLD: , handleBuy */ }) 
         <h4 className="uppercase font-bold mb-4">{item.plan.name}</h4>
 
         {/* Details */}
-        <ul className="text-start text-sm space-y-2 mb-5">
+        
+ <ul className="text-start text-sm space-y-2 mb-5">
           <li className="flex items-center gap-2">
-            <i className="fa-solid fa-video text-blue-500"></i>
             Price:  £{item.plan.price}
           </li>
-          <li className="flex items-center gap-2">
-            <i className="fa-solid fa-video text-blue-500"></i>
-            Video Call Limit: {item.plan.video_call_limit}
-          </li>
-          <li className="flex items-center gap-2">
-            <i className="fa-solid fa-magnifying-glass text-blue-500"></i>
-            Search Limit: {item.plan.people_search_limit}
-          </li>
-          <li className="flex items-center gap-2">
-            <i className="fa-solid fa-message text-blue-500"></i>
-            Message Limit: {item.plan.people_message_limit}
-          </li>
-          <li className="flex items-center gap-2">
-            <i className="fa-solid fa-headphones text-blue-500"></i>
-            Audio Call Limit: {item.plan.audio_call_limit}
-          </li>
+          {item.plan.description &&
+            <>
+              <li className="flex items-center gap-2">
+               Description : {item.plan.description}
+              </li>
+            </>
+          }
+
+          {item.plan.duration &&
+            <>
+              <li className="flex items-center gap-2">
+                 Duration : {item.plan.duration} Months
+              </li>
+            </>
+          }
+
+          {item.plan.video_call_limit > 0 &&
+            <>
+              <li className="flex items-center gap-2">
+                <i className="fa-solid fa-video text-blue-500"></i>
+                Video Call Limit: {item.plan.video_call_limit}
+              </li>
+            </>
+          }
+          {item.plan.audio_call_limit > 0 &&
+            <>
+              <li className="flex items-center gap-2">
+               <i className="fa-solid fa-headphones text-blue-500"></i>
+               Audio Call Limit: {item.plan.audio_call_limit}
+              </li>
+            </>
+          }
+          {item.plan.people_search_limit > 0 &&
+            <>
+              <li className="flex items-center gap-2">
+           <i className="fa-solid fa-magnifying-glass text-blue-500"></i>
+           People Search Limit: {item.plan.people_search_limit}
+              </li>
+            </>
+          }
+          {item.plan.people_message_limit > 0 &&
+            <>
+              <li className="flex items-center gap-2">
+                <i className="fa-solid fa-message text-blue-500"></i>
+                Message Limit: {item.plan.people_message_limit}
+              </li>
+            </>
+          }
+         {item.plan.billing_info &&
+            <>
+              <li className="flex items-center gap-2">
+                 Billing Info: {item.plan.billing_info}
+              </li>
+            </>
+          }
         </ul>
+
+
 
         {/* Buttons */}
         <div className="flex gap-3">

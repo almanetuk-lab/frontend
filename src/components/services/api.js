@@ -149,25 +149,56 @@ export const registerUser = async (formData) => {
 };
 
 // Update Profile API - ✅ YEHA SE YAHA TAK KA CODE SAME HAI
+// export const updateUserProfile = async (profileData) => {
+//   try {
+//     const res = await api.put("/api/editProfile", profileData);
+//     return res.data;
+//   } catch (err) {
+//     console.error("Update Profile Error:", err.response?.data || err.message);
+//     throw err;
+//   }
+// };
+
+
+// Update Profile API - SAME (Already correct)
 export const updateUserProfile = async (profileData) => {
   try {
     const res = await api.put("/api/editProfile", profileData);
-    return res.data;
+    return res.data.profile;  // ✅ Already returns {..., prompts: {...}}
   } catch (err) {
     console.error("Update Profile Error:", err.response?.data || err.message);
     throw err;
   }
 };
 
-// Get User Profile API
+// Get User Profile API - FIXED
 export const getUserProfile = async () => {
   try {
     const res = await api.get("/api/me");
-    return res.data;
+    
+    // ✅ FIX: Combine data and prompts like UPDATE API format
+    const normalizedProfile = {
+      ...res.data.data,          // All profile fields
+      prompts: res.data.prompts  // Add prompts inside
+    };
+    
+    console.log("🔄 Normalized Profile:", normalizedProfile);
+    return normalizedProfile;  // Now matches UPDATE API format
   } catch (err) {
+    console.error("GET Profile API Error:", err);
     throw err;
   }
 };
+
+// // Get User Profile API
+// export const getUserProfile = async () => {
+//   try {
+//     const res = await api.get("/api/me");
+//     return res.data;
+//   } catch (err) {
+//     throw err;
+//   }
+// };
 
 //  Image Upload API HAI
 export const uploadImage = (formData) => {
