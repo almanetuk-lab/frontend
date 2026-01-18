@@ -510,13 +510,13 @@ export default function EditProfilePage() {
 const handleQuestionsSave = (questionsData) => {
   console.log("💾 Questions saved in EditProfile:", questionsData);
   
-  // ✅ SIMPLE FIX: Direct set karo
+  //  SIMPLE FIX: Direct set karo
   setFormData(prev => ({
     ...prev,
-    prompts: questionsData  // ✅ Direct assignment
+    prompts: questionsData  // Direct assignment
   }));
   
-  // ✅ Context ko bhi update karo immediately
+  //  Context ko bhi update karo immediately
   updateProfile({
     ...profile,
     prompts: questionsData
@@ -524,10 +524,10 @@ const handleQuestionsSave = (questionsData) => {
   
   setIsQuestionsModalOpen(false);
   
-  console.log("✅ Prompts updated in form and context");
+  console.log(" Prompts updated in form and context");
 };
 
-  // ✅ Life Rhythms save handler
+  //  Life Rhythms save handler
   const handleLifeRhythmsSave = (data) => {
     setFormData((prev) => ({
       ...prev,
@@ -562,12 +562,9 @@ const handleQuestionsSave = (questionsData) => {
       }
     }
 
-    //  let loadedPrompts = profile?.prompts || {};
   
-  // console.log("✅ Loaded prompts for form:", loadedPrompts);
-  // console.log("✅ Number of prompts:", Object.keys(loadedPrompts).length);
 
-    // ✅ FIX: 'ways_i_spend_time' se data load karein
+    //  FIX: 'ways_i_spend_time' se data load karein
     let interestsCategories = {};
 
     // Pehle ways_i_spend_time check karein
@@ -598,49 +595,15 @@ const handleQuestionsSave = (questionsData) => {
     }
 
 
-     // ✅ FIXED: Simplified prompts loading logic
-    // let loadedPrompts = {};
 
-    // 1. First check profile.prompts (from backend response)
-    // if (profile.prompts && typeof profile.prompts === "object") {
-    //   // If it has question-key wrapper
-    //   if (profile.prompts["question-key"]) {
-    //     loadedPrompts = profile.prompts["question-key"];
-    //   }
-    //   // If it's direct prompts object
-    //   else if (profile.prompts.small_habit || profile.prompts.life_goal) {
-    //     loadedPrompts = profile.prompts;
-    //   }
-    //   // If it's empty object
-    //   else {
-    //     loadedPrompts = {};
-    //   }
-    //   console.log("✅ Loaded from profile.prompts:", loadedPrompts);
-    // }
-    // // 2. Check profile_questions (old field)
-    // else if (profile.profile_questions && typeof profile.profile_questions === "object") {
-    //   loadedPrompts = profile.profile_questions;
-    //   console.log("✅ Loaded from profile_questions:", loadedPrompts);
-    // }
-    // // 3. Check profile_prompts array
-    // else if (Array.isArray(profile.profile_prompts) && profile.profile_prompts.length > 0) {
-    //   profile.profile_prompts.forEach((prompt) => {
-    //     if (prompt.question_key && prompt.answer !== undefined) {
-    //       loadedPrompts[prompt.question_key] = prompt.answer;
-    //     }
-    //   });
-    //   console.log("✅ Converted from profile_prompts array:", loadedPrompts);
-    // }
-
-
-     // ✅ SIMPLE PROMPTS LOADING
+     //  SIMPLE PROMPTS LOADING
   let loadedPrompts = {};
   
   // Direct assignment (already cleaned in context)
   if (profile.prompts && typeof profile.prompts === "object") {
     loadedPrompts = profile.prompts;
   }
-  console.log("✅ Clean prompts for form:", loadedPrompts);
+  console.log(" Clean prompts for form:", loadedPrompts);
 
     setFormData({
       first_name: profile.first_name || "",
@@ -670,12 +633,12 @@ const handleQuestionsSave = (questionsData) => {
       about_me: profile.about_me || "",
       skills: Array.isArray(profile.skills) ? profile.skills.join(", ") : "",
 
-      // ✅ Step 4 का simple interests (string)
+      //  Step 4 का simple interests (string)
       interests: Array.isArray(profile.interests)
         ? profile.interests.join(", ")
         : profile.interests || "",
 
-      // ✅ Step 5 का interests_categories (JSON object)
+      //  Step 5 का interests_categories (JSON object)
       interests_categories: interestsCategories,
 
       hobbies: Array.isArray(profile.hobbies) ? profile.hobbies.join(", ") : "",
@@ -797,23 +760,11 @@ const handleQuestionsSave = (questionsData) => {
         }
       }
 
-      //  FIX: दोनों interests को handle करो
       const simpleInterests = handleArrayField(formData.interests);
       //  CORRECT: Prompts format backend ke hisaab se
 
-      // ✅ FIXED: Direct object bhejna hai, "question-key" wrapper nahi
 
-      // ✅ CORRECT BACKEND FORMAT
-      // let promptsToSend = null;
-
-      // if (
-      //   formData.profile_questions &&
-      //   Object.keys(formData.profile_questions).length > 0
-      // ) {
-      //   promptsToSend = {
-      //     "question-key": formData.profile_questions,
-      //   };
-      // }
+     
 
       const payload = {
         first_name: formData.first_name.trim(),
@@ -927,7 +878,7 @@ const handleQuestionsSave = (questionsData) => {
         ),
       };
 
-      console.log("✅ FINAL PAYLOAD:", payload);
+      console.log(" FINAL PAYLOAD:", payload);
 
       await updateUserProfile(payload);
 
@@ -1042,7 +993,7 @@ const handleQuestionsSave = (questionsData) => {
     };
   }, [showCamera]);
 
-  // ✅ Image Upload Handler
+  //  Image Upload Handler
   const handleImageUpload = async (file) => {
     if (!file) return null;
     setImageLoading(true);
@@ -1089,7 +1040,7 @@ const handleQuestionsSave = (questionsData) => {
     handleImageUpload(file);
   };
 
-  // ✅ interests_categories से total interests calculate करो
+  //  interests_categories से total interests calculate करो
   const totalCheckboxInterests =
     formData.interests_categories &&
     typeof formData.interests_categories === "object"
@@ -1901,7 +1852,7 @@ const handleQuestionsSave = (questionsData) => {
                     )}
                 </div>
 
-                {/* ✅ FIXED: Interests Categories Section */}
+                {/*  FIXED: Interests Categories Section */}
                 <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
                   <h4 className="text-lg font-semibold text-gray-800 mb-2">
                     Interests & Passions (Categories)
@@ -1918,7 +1869,7 @@ const handleQuestionsSave = (questionsData) => {
                     🎯 Edit Interests Categories
                   </button>
 
-                  {/* ✅ FIXED: Display interests_categories */}
+                  {/* FIXED: Display interests_categories */}
                   {formData.interests_categories &&
                   typeof formData.interests_categories === "object" &&
                   Object.keys(formData.interests_categories).length > 0 ? (
@@ -1962,91 +1913,9 @@ const handleQuestionsSave = (questionsData) => {
                     </div>
                   )}
 
-                  {/* ✅ NEW: Profile Questions Section */}
-                  {/* <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                      Tell Us More About Yourself
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-3">
-                      Answer these prompts to help others know you better
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={() => setIsQuestionsModalOpen(true)}
-                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-                    >
-                      ✍️ Edit Profile Questions
-                    </button>
-
-                    {/* Display existing questions answers  /}
-                    {formData.profile_questions &&
-                    typeof formData.profile_questions === "object" &&
-                    Object.keys(formData.profile_questions).length > 0 ? (
-                      <div className="mt-4 p-3 bg-white border rounded-md">
-                        <div className="flex justify-between items-center mb-2">
-                          <p className="font-medium text-gray-700">
-                            Answered Questions:
-                          </p>
-                          <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
-                            {Object.keys(formData.profile_questions).length}{" "}
-                            answered
-                          </span>
-                        </div>
-                        <div className="space-y-3">
-                          {Object.entries(formData.profile_questions)
-                            .slice(0, 3)
-                            .map(([question_key, answer]) => {
-                              const question = PROFILE_QUESTIONS.find(
-                                (q) => q.key === question_key
-                              );
-                              const label = question
-                                ? question.label
-                                : question_key;
-
-                              return (
-                                <div
-                                  key={question_key}
-                                  className="border-l-4 border-purple-300 pl-3 py-2"
-                                >
-                                  <p className="font-medium text-sm text-gray-800 mb-1">
-                                    {label}
-                                  </p>
-                                  <p className="text-sm text-gray-600 line-clamp-2">
-                                    {answer}
-                                  </p>
-                                </div>
-                              );
-                            })}
-
-                          {Object.keys(formData.profile_questions).length >
-                            3 && (
-                            <div className="text-center pt-2 border-t">
-                              <p className="text-xs text-purple-600">
-                                +
-                                {Object.keys(formData.profile_questions)
-                                  .length - 3}{" "}
-                                more questions answered
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="mt-4 p-4 bg-white border border-dashed border-gray-300 rounded-md text-center">
-                        <p className="text-gray-500 text-sm italic">
-                          No questions answered yet
-                        </p>
-                        <p className="text-gray-400 text-xs mt-1">
-                          Click above button to answer prompts about yourself
-                        </p>
-                      </div>
-                    )}
-                  </div> */}
-
 
  
-      {/* ✅ FIXED: Profile Questions Section */}
+      {/*  FIXED: Profile Questions Section */}
       <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
         <h4 className="text-lg font-semibold text-gray-800 mb-2">
           Tell Us More About Yourself
@@ -2543,14 +2412,6 @@ const handleQuestionsSave = (questionsData) => {
         />
       )}
 
-      {/* {isQuestionsModalOpen && (
-        <ProfileQuestions
-          initialData={formData.profile_questions || {}}
-          onSave={handleQuestionsSave} // ✅ Yahan correct handler use karein
-          onClose={() => setIsQuestionsModalOpen(false)}
-          isOpen={isQuestionsModalOpen}
-        />
-      )} */}
 
        {/* ✅ FIXED: ProfileQuestions Modal */}
       <ProfileQuestions
