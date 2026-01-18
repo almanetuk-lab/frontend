@@ -20,3 +20,5 @@ export const buyPlan = async (planId) => {
     const res = await axios.put(`${BASE_URL}/cart/buy/${planId}`);
     return res.data;
 };
+
+
