@@ -419,6 +419,7 @@ const PROFILE_QUESTIONS = [
 ];
 
 // ================== COMPONENT ==================
+
 export default function EditProfilePage() {
   const { profile, updateProfile } = useUserProfile();
   const navigate = useNavigate();
@@ -500,16 +501,31 @@ export default function EditProfilePage() {
     preference_of_closeness: "",
     love_language_affection: "",
     life_rhythms: {},
-    profile_questions: {},
+    // profile_questions: {},
+     prompts: {},
   });
 
-  const handleQuestionsSave = (data) => {
-    setFormData((prev) => ({
-      ...prev,
-      profile_questions: data,
-    }));
-    setIsQuestionsModalOpen(false);
-  };
+
+  // ================== QUESTIONS HANDLER ==================
+const handleQuestionsSave = (questionsData) => {
+  console.log("💾 Questions saved in EditProfile:", questionsData);
+  
+  // ✅ SIMPLE FIX: Direct set karo
+  setFormData(prev => ({
+    ...prev,
+    prompts: questionsData  // ✅ Direct assignment
+  }));
+  
+  // ✅ Context ko bhi update karo immediately
+  updateProfile({
+    ...profile,
+    prompts: questionsData
+  });
+  
+  setIsQuestionsModalOpen(false);
+  
+  console.log("✅ Prompts updated in form and context");
+};
 
   // ✅ Life Rhythms save handler
   const handleLifeRhythmsSave = (data) => {
@@ -531,6 +547,11 @@ export default function EditProfilePage() {
   useEffect(() => {
     if (!profile) return;
 
+      console.log("🔍 PROFILE IN EDITPAGE:", profile);
+  console.log("🔍 PROFILE.PROMPTS:", profile.prompts);
+  console.log("🔍 PROMPTS TYPE:", typeof profile.prompts);
+  console.log("🔍 PROMPTS KEYS:", Object.keys(profile.prompts || {}));
+
     let heightDisplay = "";
     if (profile.height) {
       const totalInches = Number(profile.height);
@@ -540,6 +561,11 @@ export default function EditProfilePage() {
         heightDisplay = `${feet}.${inches}`;
       }
     }
+
+    //  let loadedPrompts = profile?.prompts || {};
+  
+  // console.log("✅ Loaded prompts for form:", loadedPrompts);
+  // console.log("✅ Number of prompts:", Object.keys(loadedPrompts).length);
 
     // ✅ FIX: 'ways_i_spend_time' se data load karein
     let interestsCategories = {};
@@ -570,51 +596,51 @@ export default function EditProfilePage() {
         interestsCategories = profile.interests_categories;
       }
     }
-    // 🔥 CORRECTED & SIMPLIFIED VERSION:
-    let profileQuestions = {};
 
-    // 1. Pehle check karo "prompts" (backend response me "prompts" hai)
-    if (profile.prompts) {
-      console.log("🔍 Prompts data found:", profile.prompts);
 
-      if (profile.prompts["question-key"]) {
-        profileQuestions = profile.prompts["question-key"];
-        console.log("✅ Loaded from prompts.question-key:", profileQuestions);
-      }
-      // Agar directly object hai (without question-key wrapper)
-      else if (typeof profile.prompts === "object") {
-        profileQuestions = profile.prompts;
-        console.log("✅ Loaded from prompts directly:", profileQuestions);
-      }
-    }
-    // 2. Check profile_questions (direct)
-    else if (
-      profile.profile_questions &&
-      typeof profile.profile_questions === "object"
-    ) {
-      profileQuestions = profile.profile_questions;
-      console.log("✅ Loaded from profile_questions:", profileQuestions);
-    }
-    // 3. Check profile_prompts array (database se aata hai)
-    else if (Array.isArray(profile.profile_prompts)) {
-      console.log("📥 profile_prompts array found:", profile.profile_prompts);
+     // ✅ FIXED: Simplified prompts loading logic
+    // let loadedPrompts = {};
 
-      // ✅ FIX: Convert array to object
-      profile.profile_prompts.forEach((prompt) => {
-        if (prompt.question_key && prompt.answer !== undefined) {
-          profileQuestions[prompt.question_key] = prompt.answer;
-        }
-      });
-      console.log("✅ Converted from profile_prompts array:", profileQuestions);
-    } else {
-      console.log(
-        "❌ No prompts found in profile. Available keys:",
-        Object.keys(profile || {})
-      );
-    }
+    // 1. First check profile.prompts (from backend response)
+    // if (profile.prompts && typeof profile.prompts === "object") {
+    //   // If it has question-key wrapper
+    //   if (profile.prompts["question-key"]) {
+    //     loadedPrompts = profile.prompts["question-key"];
+    //   }
+    //   // If it's direct prompts object
+    //   else if (profile.prompts.small_habit || profile.prompts.life_goal) {
+    //     loadedPrompts = profile.prompts;
+    //   }
+    //   // If it's empty object
+    //   else {
+    //     loadedPrompts = {};
+    //   }
+    //   console.log("✅ Loaded from profile.prompts:", loadedPrompts);
+    // }
+    // // 2. Check profile_questions (old field)
+    // else if (profile.profile_questions && typeof profile.profile_questions === "object") {
+    //   loadedPrompts = profile.profile_questions;
+    //   console.log("✅ Loaded from profile_questions:", loadedPrompts);
+    // }
+    // // 3. Check profile_prompts array
+    // else if (Array.isArray(profile.profile_prompts) && profile.profile_prompts.length > 0) {
+    //   profile.profile_prompts.forEach((prompt) => {
+    //     if (prompt.question_key && prompt.answer !== undefined) {
+    //       loadedPrompts[prompt.question_key] = prompt.answer;
+    //     }
+    //   });
+    //   console.log("✅ Converted from profile_prompts array:", loadedPrompts);
+    // }
 
-    // Debug log
-    console.log("🎯 Final profileQuestions to set:", profileQuestions);
+
+     // ✅ SIMPLE PROMPTS LOADING
+  let loadedPrompts = {};
+  
+  // Direct assignment (already cleaned in context)
+  if (profile.prompts && typeof profile.prompts === "object") {
+    loadedPrompts = profile.prompts;
+  }
+  console.log("✅ Clean prompts for form:", loadedPrompts);
 
     setFormData({
       first_name: profile.first_name || "",
@@ -673,10 +699,7 @@ export default function EditProfilePage() {
       zodiac_sign: profile.zodiac_sign || "",
       interested_in: profile.interested_in || "",
       relationship_goal: profile.relationship_goal || "",
-      profile_questions: profile.profile_questions || {},
-      profile_questions: questions,
-      profile_prompts: profileQuestionsToSend,
-      profile_questions: profileQuestions,
+    
       interests_categories: interestsCategories,
 
       children_preference: mapToUIEnum(
@@ -707,6 +730,7 @@ export default function EditProfilePage() {
         ? profile.love_language_affection.join(", ")
         : profile.love_language_affection || "",
       life_rhythms: profile.life_rhythms || {},
+        prompts: loadedPrompts,
     });
 
     if (profile.profile_image) {
@@ -780,16 +804,16 @@ export default function EditProfilePage() {
       // ✅ FIXED: Direct object bhejna hai, "question-key" wrapper nahi
 
       // ✅ CORRECT BACKEND FORMAT
-      let promptsToSend = null;
+      // let promptsToSend = null;
 
-      if (
-        formData.profile_questions &&
-        Object.keys(formData.profile_questions).length > 0
-      ) {
-        promptsToSend = {
-          "question-key": formData.profile_questions,
-        };
-      }
+      // if (
+      //   formData.profile_questions &&
+      //   Object.keys(formData.profile_questions).length > 0
+      // ) {
+      //   promptsToSend = {
+      //     "question-key": formData.profile_questions,
+      //   };
+      // }
 
       const payload = {
         first_name: formData.first_name.trim(),
@@ -824,15 +848,11 @@ export default function EditProfilePage() {
         about_me: formData.about_me || null,
         skills: handleArrayField(formData.skills),
         interests: simpleInterests,
-        // interests_categories: checkboxInterests,
         ways_i_spend_time: formData.interests_categories,
-        // ways_i_spend_time: formData.interests_categories,
         hobbies: handleArrayField(formData.hobbies),
         height_ft: height_ft,
         height_in: height_in,
         life_rhythms: formData.life_rhythms,
-        profile_prompts: profileQuestionsToSend,
-        //  profile_prompts: profilePromptsToSend.length > 0 ? profilePromptsToSend : null,
         company_type: formData.company_type || null,
         education_institution_name: formData.education_institution_name || null,
         languages_spoken: handleArrayField(formData.languages_spoken),
@@ -841,12 +861,8 @@ export default function EditProfilePage() {
           "health_activity_level",
           formData.health_activity_level
         ),
-        //       prompts:
-        // formData.profile_questions &&
-        // Object.keys(formData.profile_questions).length > 0
-        //   ? formData.profile_questions
-        //   : null,
-        prompts: promptsToSend,
+       
+          prompts: formData.prompts, // final q
 
         smoking: mapToDBEnum("smoking", formData.smoking),
         drinking: mapToDBEnum("drinking", formData.drinking),
@@ -915,7 +931,9 @@ export default function EditProfilePage() {
 
       await updateUserProfile(payload);
 
-      updateProfile({ ...profile, ...payload });
+      updateProfile({ ...profile, ...payload,
+          prompts: formData.prompts,
+       });
       alert("Profile updated successfully ✅");
       navigate("/dashboard");
     } catch (err) {
@@ -1945,7 +1963,7 @@ export default function EditProfilePage() {
                   )}
 
                   {/* ✅ NEW: Profile Questions Section */}
-                  <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
+                  {/* <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
                     <h4 className="text-lg font-semibold text-gray-800 mb-2">
                       Tell Us More About Yourself
                     </h4>
@@ -1961,7 +1979,7 @@ export default function EditProfilePage() {
                       ✍️ Edit Profile Questions
                     </button>
 
-                    {/* Display existing questions answers */}
+                    {/* Display existing questions answers  /}
                     {formData.profile_questions &&
                     typeof formData.profile_questions === "object" &&
                     Object.keys(formData.profile_questions).length > 0 ? (
@@ -2024,7 +2042,82 @@ export default function EditProfilePage() {
                         </p>
                       </div>
                     )}
-                  </div>
+                  </div> */}
+
+
+ 
+      {/* ✅ FIXED: Profile Questions Section */}
+      <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
+        <h4 className="text-lg font-semibold text-gray-800 mb-2">
+          Tell Us More About Yourself
+        </h4>
+        <p className="text-sm text-gray-600 mb-3">
+          Answer these prompts to help others know you better
+        </p>
+
+        <button
+          type="button"
+          onClick={() => setIsQuestionsModalOpen(true)}
+          className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+        >
+          ✍️ Edit Profile Questions
+        </button>
+
+        {/* Display existing prompts */}
+        {formData.prompts && typeof formData.prompts === "object" && Object.keys(formData.prompts).length > 0 ? (
+          <div className="mt-4 p-3 bg-white border rounded-md">
+            <div className="flex justify-between items-center mb-2">
+              <p className="font-medium text-gray-700">Answered Questions:</p>
+              <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+                {Object.keys(formData.prompts).length} answered
+              </span>
+            </div>
+            <div className="space-y-3">
+              {Object.entries(formData.prompts)
+                .slice(0, 3)
+                .map(([question_key, answer]) => {
+                  const question = PROFILE_QUESTIONS.find(
+                    (q) => q.key === question_key
+                  );
+                  const label = question ? question.label : question_key;
+
+                  return (
+                    <div
+                      key={question_key}
+                      className="border-l-4 border-purple-300 pl-3 py-2"
+                    >
+                      <p className="font-medium text-sm text-gray-800 mb-1">
+                        {label}
+                      </p>
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {answer}
+                      </p>
+                    </div>
+                  );
+                })}
+
+              {Object.keys(formData.prompts).length > 3 && (
+                <div className="text-center pt-2 border-t">
+                  <p className="text-xs text-purple-600">
+                    +{Object.keys(formData.prompts).length - 3} more questions answered
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 p-4 bg-white border border-dashed border-gray-300 rounded-md text-center">
+            <p className="text-gray-500 text-sm italic">
+              No questions answered yet
+            </p>
+            <p className="text-gray-400 text-xs mt-1">
+              Click above button to answer prompts about yourself
+            </p>
+          </div>
+        )}
+      </div>
+
+
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2449,14 +2542,24 @@ export default function EditProfilePage() {
           onSave={handleInterestsSave}
         />
       )}
-      {isQuestionsModalOpen && (
+
+      {/* {isQuestionsModalOpen && (
         <ProfileQuestions
           initialData={formData.profile_questions || {}}
           onSave={handleQuestionsSave} // ✅ Yahan correct handler use karein
           onClose={() => setIsQuestionsModalOpen(false)}
           isOpen={isQuestionsModalOpen}
         />
-      )}
+      )} */}
+
+       {/* ✅ FIXED: ProfileQuestions Modal */}
+      <ProfileQuestions
+        isOpen={isQuestionsModalOpen}
+        onClose={() => setIsQuestionsModalOpen(false)}
+        onSave={handleQuestionsSave}
+        initialData={formData.prompts} // Pass prompts data
+      />
+  
     </div>
   );
 }
