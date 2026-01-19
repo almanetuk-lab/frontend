@@ -89,7 +89,7 @@ const mapToDBEnum = (field, value) => {
       // DONT_WANT: "Don't want",
       DONT_WANT: "Don’t want",
       HAVE_AND_WANT_MORE: "Have and want more",
-      HAVE_AND_DONT_WANT_MORE: "Have and don't want more",
+      HAVE_AND_DONT_WANT_MORE: "Have and don’t want more",
       OPEN_OR_NOT_SURE_YET: "Open / Not Sure yet",
     },
 
@@ -115,7 +115,7 @@ const mapToDBEnum = (field, value) => {
       // DONT_WANT: "Don't want",
       DONT_WANT: "Don’t want",
       "Have and want more": "Have and want more",
-      "Have and don't want more": "Have and don't want more",
+      "Have and don't want more": "Have and don’t want more",
       Open: "Open / Not sure yet",
       "Not Sure yet": "Open / Not sure yet",
     },
@@ -321,7 +321,7 @@ const mapToUIEnum = (field, value) => {
     },
     children_preference: {
       Want: "WANT",
-      "Don't want": "Dont't want",
+      "Don't want": "Don’t want",
       "Have and want more": "HAVE_AND_WANT_MORE",
       "Have and don't want more": "HAVE_AND_DONT_WANT_MORE",
       "Open / Not Sure yet": "OPEN / Not sure yet",
