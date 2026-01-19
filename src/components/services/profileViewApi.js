@@ -68,19 +68,19 @@ const profileViewApi = {
     }
   },
 
-  //  GET MATCHES COUNT (NEW FUNCTION)
-  getMatchesCount: async (userId) => {
-    try {
-      if (!userId) {
-        throw new Error("User ID is required");
-      }
-      const response = await api.get(`/api/matches/count/${userId}`);
-      return response.data?.matches_count || 0;
-    } catch (error) {
-      console.error("❌ Error fetching matches count:", error);
-      return 0;
-    }
-  },
+  // //  GET MATCHES COUNT (NEW FUNCTION)
+  // getMatchesCount: async (userId) => {
+  //   try {
+  //     if (!userId) {
+  //       throw new Error("User ID is required");
+  //     }
+  //     const response = await api.get(`/api/matches/count/${userId}`);
+  //     return response.data?.matches_count || 0;
+  //   } catch (error) {
+  //     console.error("❌ Error fetching matches count:", error);
+  //     return 0;
+  //   }
+  // },
 
   //  DASHBOARD SUMMARY (FIXED VERSION)
   getDashboardSummary: async (userId) => {
