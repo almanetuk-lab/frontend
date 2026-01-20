@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSuggestedMatches } from "../services/chatApi";
+import { adminAPI } from "../services/adminApi"; // ✅ ADD THIS
 
 const SuggestedMatches = () => {
   const navigate = useNavigate();
@@ -16,7 +17,36 @@ const SuggestedMatches = () => {
     fetchMatches();
   }, []);
 
-  // Fetch matches function
+  // // Fetch matches function
+  // const fetchMatches = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setError(null);
+
+  //     console.log("🔄 Fetching matches...");
+
+  //     // API call
+  //     const matches = await getSuggestedMatches();
+  //     console.log("📦 Matches received from API:", matches);
+  //     console.log("📊 Type of matches:", typeof matches);
+  //     console.log("🔢 Is array?", Array.isArray(matches));
+  //     console.log("🔢 Length:", matches?.length || 0);
+
+  //     if (matches && Array.isArray(matches)) {
+  //       console.log(" Setting matches to state:", matches.length);
+  //       setSuggestedMatches(matches);
+  //     } else {
+  //       console.warn(" Matches is not an array:", matches);
+  //       setSuggestedMatches([]);
+  //     }
+  //   } catch (err) {
+  //     console.error(" Error in fetchMatches:", err);
+  //     setError(err.message || "Failed to load matches.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const fetchMatches = async () => {
     try {
       setLoading(true);
@@ -24,102 +54,72 @@ const SuggestedMatches = () => {
 
       console.log("🔄 Fetching matches...");
 
-      // API call
-      const matches = await getSuggestedMatches();
-      console.log("📦 Matches received from API:", matches);
-      console.log("📊 Type of matches:", typeof matches);
-      console.log("🔢 Is array?", Array.isArray(matches));
-      console.log("🔢 Length:", matches?.length || 0);
+      // ✅ OPTION 1: Use SAME API as MemberPage
+      const response = await adminAPI.searchProfiles({
+        search_mode: "basic",
+        first_name: "",
+      });
 
-      if (matches && Array.isArray(matches)) {
-        console.log(" Setting matches to state:", matches.length);
-        setSuggestedMatches(matches);
-      } else {
-        console.warn(" Matches is not an array:", matches);
-        setSuggestedMatches([]);
+      console.log("📦 adminAPI Response:", response.data);
+
+      if (response.data) {
+        const matchesData = Array.isArray(response.data)
+          ? response.data
+          : response.data.data || response.data.users || [];
+
+        console.log("✅ Setting matches to state:", matchesData.length);
+        setSuggestedMatches(matchesData);
       }
     } catch (err) {
-      console.error(" Error in fetchMatches:", err);
-      setError(err.message || "Failed to load matches.");
+      console.error("❌ Error in fetchMatches:", err);
+
+      // ✅ OPTION 2: Fallback to getSuggestedMatches
+      try {
+        console.log("⚠️ Trying fallback API...");
+        const fallbackMatches = await getSuggestedMatches();
+        if (fallbackMatches && Array.isArray(fallbackMatches)) {
+          console.log("✅ Using fallback matches:", fallbackMatches.length);
+          setSuggestedMatches(fallbackMatches);
+        } else {
+          setError("No matches available.");
+        }
+      } catch (fallbackErr) {
+        setError(err.message || "Failed to load matches.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  //  FIXED: View Profile Function with proper data passing
-  const handleViewProfile = (user) => {
-    console.log(" View Profile clicked for user:", user);
+  // ✅ FIXED: View Profile Function - Simple version
+  const handleViewProfile = (userId, userName = "") => {
+    console.log("🎯 View Profile clicked for user:", userId, userName);
 
     try {
-      // Ensure user data exists
-      if (!user) {
-        console.error(" No user data available");
-        navigate(`/dashboard/profile/${user?.user_id || user?.id}`);
-        return;
-      }
+      // Find user from current list
+      const currentUser = suggestedMatches.find(
+        (user) => user.user_id == userId,
+      );
 
-      const userId = user.user_id || user.id;
-      const userName =
-        user.full_name ||
-        `${user.first_name || ""} ${user.last_name || ""}`.trim();
+      if (currentUser) {
+        console.log("✅ User found:", currentUser);
 
-      console.log("📤 Sending user data to profile page:", {
-        userId,
-        userName,
-        userData: user,
-      });
-
-      //  Navigate with COMPLETE user data
-      navigate(`/dashboard/profile/${userId}`, {
-        state: {
-          // Complete user object
-          userProfile: user,
-          // Individual fields for easy access
-          profileData: {
-            id: user.id,
-            user_id: user.user_id,
-            full_name: user.full_name,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            gender: user.gender,
-            age: user.age,
-            dob: user.dob,
-            marital_status: user.marital_status,
-            profession: user.profession,
-            company: user.company,
-            education: user.education,
-            city: user.city,
-            state: user.state,
-            country: user.country,
-            address: user.address,
-            image_url: user.image_url,
-            about: user.about,
-            headline: user.headline,
-            hobbies: user.hobbies || [],
-            interests: user.interests || [],
-            skills: user.skills || [],
-            experience: user.experience,
-            match_score: user.match_score,
-            phone: user.phone,
-            email: user.email,
-            is_active: user.is_active,
-            is_submitted: user.is_submitted,
-            created_at: user.created_at,
-            updated_at: user.updated_at,
+        // ✅ Navigate with user data
+        navigate(`/dashboard/profile/${userId}`, {
+          state: {
+            userProfile: currentUser,
+            memberId: userId,
+            name: userName || getFullName(currentUser),
+            from: "suggested_matches",
           },
-          // Metadata
-          from: "suggested_matches",
-          timestamp: new Date().toISOString(),
-          memberId: userId,
-          name: userName,
-        },
-      });
-
-      console.log(" Navigation successful with data");
+        });
+      } else {
+        console.log("❌ User not found, navigating directly");
+        navigate(`/dashboard/profile/${userId}`);
+      }
     } catch (error) {
       console.error("❌ Navigation error:", error);
-      // Fallback navigation without data
-      navigate(`/dashboard/profile/${user?.user_id || user?.id}`);
+      navigate(`/dashboard/profile/${userId}`);
     }
   };
 
@@ -157,7 +157,6 @@ const SuggestedMatches = () => {
     return "Profession not set";
   };
 
-
   // Handle view all
   const handleViewAll = () => {
     navigate("/dashboard/matches");
@@ -179,8 +178,6 @@ const SuggestedMatches = () => {
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
-   
-
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-xl font-bold text-gray-800">
@@ -310,16 +307,24 @@ const SuggestedMatches = () => {
 
                   <button
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
-                    onClick={() => handleViewProfile(user)}
+                    onClick={() => {
+                      console.log("🟢 View Profile Button Clicked");
+                      console.log("User object:", user);
+                      console.log("User ID:", user.user_id);
+                      console.log("User Name:", getFullName(user));
+
+                      // ✅ CORRECT: Pass user_id and name separately
+                      handleViewProfile(user.user_id, getFullName(user));
+                    }}
                   >
                     View Profile
                   </button>
 
-                  {/* <button 
+                  {/* <button
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
                     onClick={() => handleViewProfile(user)}
                   >
-                  View Profile
+                    View Profile
                   </button> */}
                 </div>
               );
@@ -365,5 +370,3 @@ const SuggestedMatches = () => {
 };
 
 export default SuggestedMatches;
-
-
