@@ -1,3 +1,4 @@
+
 import api from "./axiosConfig";
 
 const profileViewApi = {
@@ -91,7 +92,7 @@ const profileViewApi = {
           profileViewApi.getRecentViewers(userId),
           profileViewApi.getUserProfile(userId),
           profileViewApi.getUnreadMessagesCount(userId),
-          profileViewApi.getMatchesCount(userId), //  Use getMatchesCount instead of getSuggestedMatches
+          // profileViewApi.getMatchesCount(userId), //  Use getMatchesCount instead of getSuggestedMatches
         ]);
 
       const today = new Date().toDateString();
