@@ -26,6 +26,13 @@ export default function MessagesSection() {
   // for open img
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
+  
+  //  yeh plant states add kra
+  const [planStatus, setPlanStatus] = useState({
+    loading: true,
+    active: false,
+    daysLeft: 0,
+  });
 
   const socketRef = useRef(null);
   const fileInputRef = useRef();
@@ -34,27 +41,42 @@ export default function MessagesSection() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state?.selectedUser) {
-      console.log(
-        "📍 User received from location state:",
-        location.state.selectedUser
-      );
-      const userFromState = location.state.selectedUser;
-      setSelectedUser(userFromState);
 
-      // Auto-select and load messages for this user
-      if (userFromState.id && currentUserId) {
-        console.log("🔄 Auto-loading messages for user:", userFromState.name);
-        // Hide sidebar on mobile for better UX
-        if (window.innerWidth < 768) {
-          setShowSidebar(false);
-        }
-        // Load messages for this user
-        loadMessages(userFromState.id);
-        loadReactions(userFromState.id);
+      console.log("🔑 Token check:");
+  console.log("Access Token:", localStorage.getItem("accessToken"));
+  console.log("Token length:", localStorage.getItem("accessToken")?.length);
+  
+  // Token format check
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    console.log("Token starts with:", token.substring(0, 20) + "...");
+  }
+}, []);
+
+//  CORRECT
+useEffect(() => {
+  if (location.state?.selectedUser) {
+    console.log(
+      "📍 User received from location state:",
+      location.state.selectedUser
+    );
+    const userFromState = location.state.selectedUser;
+    setSelectedUser(userFromState);
+
+    // Auto-select and load messages for this user
+    if (userFromState.id && currentUserId) {
+      console.log("🔄 Auto-loading messages for user:", userFromState.name);
+      // Hide sidebar on mobile for better UX
+      if (window.innerWidth < 768) {
+        setShowSidebar(false);
       }
+      // Load messages for this user
+      loadMessages(userFromState.id);
+      loadReactions(userFromState.id);
     }
-  }, [location.state, currentUserId]);
+  }
+}, [location.state, currentUserId]);
+
 
   //  Fetch recent chats
   const fetchRecentChats = async () => {
@@ -63,7 +85,7 @@ export default function MessagesSection() {
       const response = await chatApi.getRecentChats(currentUserId);
       setRecentChats(response.data);
       
-      // ✅ AUTO-SELECT FIRST RECENT CHAT IF NO USER IS SELECTED
+      //  AUTO-SELECT FIRST RECENT CHAT IF NO USER IS SELECTED
       if (response.data && response.data.length > 0 && !selectedUser) {
         const firstChat = response.data[0];
         const user = {
@@ -141,6 +163,29 @@ export default function MessagesSection() {
       console.error("Error getting user:", err);
     }
   }, []);
+
+  //  PLAN STATUS FETCH USEEFFECT
+  useEffect(() => {
+    const fetchPlanStatus = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const res = await fetch(`${API_BASE_URL}/api/me/plan-status`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+
+        setPlanStatus({
+          loading: false,
+          active: !!data?.active,
+          daysLeft: data?.days_left || 0,
+        });
+      } catch {
+        setPlanStatus({ loading: false, active: false, daysLeft: 0 });
+      }
+    };
+
+    if (currentUserId) fetchPlanStatus();
+  }, [currentUserId]);
 
   //  Image Modal Effects
   useEffect(() => {
@@ -260,7 +305,7 @@ export default function MessagesSection() {
     }
   }, [messages]);
 
-  //  ✅ FUNCTION TO REMOVE NUMBERS FROM USERNAME
+  //   FUNCTION TO REMOVE NUMBERS FROM USERNAME
   const cleanUserName = (name) => {
     if (!name) return "User";
     // Remove numbers from the end of the username
@@ -382,6 +427,12 @@ export default function MessagesSection() {
 
   //  DELETE MESSAGE FUNCTION
   const handleDeleteMessage = async (messageId) => {
+    //  if (!plan.loading && !plan.active) {
+    // alert(
+    //   "Your subscription has expired. Please upgrade to use search features."
+    // );
+    // return;
+  // }
     if (!messageId || !currentUserId) {
       console.error("❌ Cannot delete: missing message ID or user ID");
       return;
@@ -419,61 +470,75 @@ export default function MessagesSection() {
     }
   };
 
+
   //  SEND MESSAGE
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedUser || !currentUserId) return;
+const handleSendMessage = async () => {
+  // phale status check karega yha pr
+  if (!planStatus.active) {
+    alert("Your plan has expired. Please upgrade to continue chatting.");
+    return;
+  }
+  
+  if (!newMessage.trim() || !selectedUser || !currentUserId) return;
 
-    const messageContent = newMessage.trim();
-    console.log(`🚀 Sending: "${messageContent}" to ${selectedUser.name}`);
+  const messageContent = newMessage.trim();
+  console.log(`🚀 Sending: "${messageContent}" to ${selectedUser.name}`);
 
-    const tempMsg = {
-      id: `temp-${Date.now()}`,
+  const tempMsg = {
+    id: `temp-${Date.now()}`,
+    sender_id: currentUserId,
+    receiver_id: selectedUser.id,
+    content: messageContent,
+    created_at: new Date().toISOString(),
+    attachment_url: null,
+    isTemporary: true,
+  };
+
+  setMessages((prev) => [...prev, tempMsg]);
+  setNewMessage("");
+
+  try {
+    const response = await chatApi.sendMessage({
       sender_id: currentUserId,
       receiver_id: selectedUser.id,
       content: messageContent,
-      created_at: new Date().toISOString(),
       attachment_url: null,
-      isTemporary: true,
-    };
+    });
 
-    setMessages((prev) => [...prev, tempMsg]);
-    setNewMessage("");
+    console.log(" Message sent successfully");
+    fetchRecentChats();
 
-    try {
-      const response = await chatApi.sendMessage({
-        sender_id: currentUserId,
-        receiver_id: selectedUser.id,
-        content: messageContent,
-        attachment_url: null,
-      });
+    setTimeout(() => {
+      setMessages((prev) => {
+        const realMessageExists = prev.some(
+          (msg) =>
+            !msg.isTemporary &&
+            msg.sender_id === currentUserId &&
+            msg.content === messageContent
+        );
 
-      console.log(" Message sent successfully");
-      fetchRecentChats();
-
-      setTimeout(() => {
-        setMessages((prev) => {
-          const realMessageExists = prev.some(
-            (msg) =>
-              !msg.isTemporary &&
-              msg.sender_id === currentUserId &&
-              msg.content === messageContent
+        if (!realMessageExists && response.data) {
+          console.log("🔄 Replacing temporary with real message");
+          return prev.map((msg) =>
+            msg.id === tempMsg.id ? response.data : msg
           );
-
-          if (!realMessageExists && response.data) {
-            console.log("🔄 Replacing temporary with real message");
-            return prev.map((msg) =>
-              msg.id === tempMsg.id ? response.data : msg
-            );
-          }
-          return prev;
-        });
-      }, 3000);
-    } catch (error) {
-      console.error("❌ Send failed:", error);
-      setMessages((prev) => prev.filter((msg) => msg.id !== tempMsg.id));
+        }
+        return prev;
+      });
+    }, 3000);
+  } catch (error) {
+    console.error("❌ Send failed:", error);
+    setMessages((prev) => prev.filter((msg) => msg.id !== tempMsg.id));
+    
+    //  Specific error message for plan expired
+    if (error.response?.status === 403) {
+      alert("Your plan has expired. Please upgrade to send messages.");
+    } else {
       alert("Failed to send message");
     }
-  };
+  }
+};
+
 
   //  ADD REACTION - PROPER REAL-TIME HANDLING
   const addReaction = async (messageId, emoji) => {
@@ -534,6 +599,7 @@ export default function MessagesSection() {
 
   //  FILE UPLOAD
   const handleFileUpload = async (file) => {
+    
     if (!selectedUser || !currentUserId) return;
 
     setFileUploading(true);
@@ -571,7 +637,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅FILE INPUT
+  // FILE INPUT
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
     if (file && selectedUser && currentUserId) {
@@ -580,7 +646,7 @@ export default function MessagesSection() {
     e.target.value = "";
   };
 
-  // ✅ SEARCH EFFECT
+  //  SEARCH EFFECT
   useEffect(() => {
     if (searchTerm.trim() && currentUserId) {
       const timeoutId = setTimeout(() => {
@@ -592,7 +658,7 @@ export default function MessagesSection() {
     }
   }, [searchTerm, searchUsers, currentUserId]);
 
-  // ✅ ENTER KEY HANDLING
+  //  ENTER KEY HANDLING
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -600,7 +666,7 @@ export default function MessagesSection() {
     }
   };
 
-  // ✅ FORMAT TIME
+  //  FORMAT TIME
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
     return new Date(timestamp).toLocaleTimeString("en-US", {
@@ -610,7 +676,7 @@ export default function MessagesSection() {
     });
   };
 
-  // ✅ RENDER ATTACHMENT
+  //  RENDER ATTACHMENT
   const renderAttachment = (message) => {
     if (!message.attachment_url) return null;
 
@@ -674,8 +740,30 @@ export default function MessagesSection() {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Messages</h2>
+      
+      {/*  PLAN STATUS BANNER - TOP ME ADD KIYA HAI */}
+      {!planStatus.loading && (
+        <div
+          className={`mb-4 p-3 text-sm text-center rounded-lg border ${
+            planStatus.active
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : 'bg-red-50 text-red-700 border-red-200'
+          }`}
+        >
+          {planStatus.active ? (
+            <>
+              ✅ <strong>Plan Active</strong> — {planStatus.daysLeft} day
+              {planStatus.daysLeft !== 1 && 's'} remaining
+            </>
+          ) : (
+            <>
+              ❌ <strong>Plan Expired</strong> — Upgrade to continue chatting
+            </>
+          )}
+        </div>
+      )}
 
-      {/* ✅ RESPONSIVE CHAT CONTAINER - HEIGHT REDUCED */}
+      {/*  RESPONSIVE CHAT CONTAINER - HEIGHT REDUCED */}
       <div className="bg-white rounded-2xl shadow-lg h-[55vh] sm:h-[500px] flex flex-col md:flex-row border border-gray-200 relative">
         {/* ✅ MOBILE HEADER FOR CHAT */}
         {selectedUser && !showSidebar && (
@@ -700,7 +788,7 @@ export default function MessagesSection() {
           </div>
         )}
 
-        {/* ✅ SIDEBAR - Responsive */}
+        {/*  SIDEBAR - Responsive */}
         <div
           className={`
           ${showSidebar ? "flex" : "hidden"} 
@@ -732,7 +820,7 @@ export default function MessagesSection() {
             </div>
           </div>
 
-          {/* ✅ RECENT CHATS SECTION - RESPONSIVE */}
+          {/*  RECENT CHATS SECTION - RESPONSIVE */}
           <div className="border-b border-gray-200">
             <div className="px-4 py-3 bg-gray-50">
               <h3 className="text-sm font-medium text-gray-700">
@@ -832,7 +920,7 @@ export default function MessagesSection() {
           </div>
         </div>
 
-        {/* ✅ CHAT AREA - Responsive with reduced height */}
+        {/*  CHAT AREA - Responsive with reduced height */}
         <div className="flex-1 flex flex-col">
           {selectedUser ? (
             <>
@@ -979,7 +1067,7 @@ export default function MessagesSection() {
                               😊
                             </button>
                           </div>
-                          {/* ✅ REACTIONS DISPLAY */}
+                          {/*  REACTIONS DISPLAY */}
                           <div className="flex flex-wrap gap-1 mt-2">
                             {getMessageReactions(message.id).map(
                               (reaction, index) => (
@@ -1027,13 +1115,21 @@ export default function MessagesSection() {
               {/* Input Area */}
               <div className="p-3 sm:p-4 border-t border-gray-200 bg-white">
                 <div className="flex gap-2">
-                  <button
+                  {/* <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={fileUploading}
                     className="px-3 py-2 sm:px-4 sm:py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:opacity-50 text-sm"
                   >
                     {fileUploading ? "📤" : "📎"}
-                  </button>
+                  </button> */}
+
+                   <button
+  onClick={() => fileInputRef.current?.click()}
+  disabled={fileUploading || !planStatus.active}  //  यहाँ change
+  className="px-3 py-2 sm:px-4 sm:py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:opacity-50 text-sm"
+>
+  {fileUploading ? "📤" : "📎"}
+</button> 
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -1041,21 +1137,43 @@ export default function MessagesSection() {
                     className="hidden"
                     accept="*/*"
                   />
-                  <input
+                  {/* <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder={`Message ${selectedUser.name}...`}
                     onKeyPress={handleKeyPress}
                     className="flex-1 px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
-                  />
-                  <button
+                  /> */}
+
+                   <input
+  type="text"
+  value={newMessage}
+  onChange={(e) => setNewMessage(e.target.value)}
+  placeholder={
+    planStatus.active 
+      ? `Message ${selectedUser.name}...` 
+      : "Upgrade plan to send messages..."
+  }
+  onKeyPress={handleKeyPress}
+  className="flex-1 px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
+  disabled={!planStatus.active}  
+/> 
+                  {/* <button
                     onClick={handleSendMessage}
                     disabled={!newMessage.trim()}
                     className="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 font-medium disabled:opacity-50 text-sm sm:text-base"
                   >
                     Send
-                  </button>
+                  </button> */}
+                  
+                    <button
+  onClick={handleSendMessage}
+  disabled={!newMessage.trim() || !planStatus.active}  //  यहाँ change
+  className="px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 font-medium disabled:opacity-50 text-sm sm:text-base"
+>
+  Send
+</button> 
                 </div>
               </div>
             </>
@@ -1147,14 +1265,88 @@ export default function MessagesSection() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import React, { useState, useEffect, useRef, useCallback } from "react";
 // import { chatApi } from "../services/chatApi";
 // import io from "socket.io-client";
 // import { useLocation } from "react-router-dom";
-
 // const API_BASE_URL =
 //   import.meta.env.VITE_API_BASE_URL || "https://backend-q0wc.onrender.com";
-
 // export default function MessagesSection() {
 //   const [users, setUsers] = useState([]);
 //   const [selectedUser, setSelectedUser] = useState(null);
@@ -1181,6 +1373,8 @@ export default function MessagesSection() {
 //   const messagesEndRef = useRef();
 //   const [socketConnected, setSocketConnected] = useState(false);
 //   const location = useLocation();
+
+
 
 //   useEffect(() => {
 //     if (location.state?.selectedUser) {
@@ -1211,6 +1405,20 @@ export default function MessagesSection() {
 //       setRecentChatsLoading(true);
 //       const response = await chatApi.getRecentChats(currentUserId);
 //       setRecentChats(response.data);
+      
+//       // ✅ AUTO-SELECT FIRST RECENT CHAT IF NO USER IS SELECTED
+//       if (response.data && response.data.length > 0 && !selectedUser) {
+//         const firstChat = response.data[0];
+//         const user = {
+//           id: firstChat.user_id,
+//           name: firstChat.name,
+//           email: firstChat.email,
+//         };
+//         // Small delay to ensure state is set
+//         setTimeout(() => {
+//           handleUserSelect(user);
+//         }, 100);
+//       }
 //     } catch (error) {
 //       console.error("Error fetching recent chats:", error);
 //     } finally {
@@ -1395,6 +1603,13 @@ export default function MessagesSection() {
 //     }
 //   }, [messages]);
 
+//   //  ✅ FUNCTION TO REMOVE NUMBERS FROM USERNAME
+//   const cleanUserName = (name) => {
+//     if (!name) return "User";
+//     // Remove numbers from the end of the username
+//     return name.replace(/\d+$/, '').trim() || name;
+//   };
+
 //   //  Search users
 //   const searchUsers = useCallback(
 //     async (query) => {
@@ -1406,8 +1621,8 @@ export default function MessagesSection() {
 //           .filter((user) => user.id !== currentUserId)
 //           .map((user) => ({
 //             ...user,
-//             name: user.name || user.email?.split("@")[0] || "User",
-//             email: user.email || "No email",
+//             name: cleanUserName(user.name || user.email?.split("@")[0] || "User"),
+//             // Email field removed from display
 //           }));
 //         setUsers(filteredUsers);
 //       } catch (error) {
@@ -1494,7 +1709,7 @@ export default function MessagesSection() {
 //     console.log("👤 Selecting user:", user.name);
 //     const selectedUserData = {
 //       id: user.id,
-//       name: user.name || user.email?.split("@")[0] || "User",
+//       name: cleanUserName(user.name || user.email?.split("@")[0] || "User"),
 //       email: user.email,
 //     };
 
@@ -1803,8 +2018,8 @@ export default function MessagesSection() {
 //     <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
 //       <h2 className="text-2xl font-bold text-gray-800 mb-6">Messages</h2>
 
-//       {/* ✅ RESPONSIVE CHAT CONTAINER */}
-//       <div className="bg-white rounded-2xl shadow-lg h-[70vh] sm:h-[600px] flex flex-col md:flex-row border border-gray-200 relative">
+//       {/* ✅ RESPONSIVE CHAT CONTAINER - HEIGHT REDUCED */}
+//       <div className="bg-white rounded-2xl shadow-lg h-[55vh] sm:h-[500px] flex flex-col md:flex-row border border-gray-200 relative">
 //         {/* ✅ MOBILE HEADER FOR CHAT */}
 //         {selectedUser && !showSidebar && (
 //           <div className="md:hidden p-4 border-b border-gray-200 bg-white flex items-center gap-3">
@@ -1890,12 +2105,12 @@ export default function MessagesSection() {
 //                   >
 //                     <div className="flex items-center gap-3">
 //                       <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">
-//                         {chat.name?.charAt(0)?.toUpperCase() || "U"}
+//                         {cleanUserName(chat.name)?.charAt(0)?.toUpperCase() || "U"}
 //                       </div>
 //                       <div className="flex-1 min-w-0">
 //                         <div className="flex justify-between items-center">
 //                           <p className="font-medium text-gray-800 truncate text-sm">
-//                             {chat.name}
+//                             {cleanUserName(chat.name)}
 //                           </p>
 //                           <span className="text-xs text-gray-500">
 //                             {new Date(
@@ -1951,9 +2166,7 @@ export default function MessagesSection() {
 //                       <p className="font-medium text-gray-800 truncate text-sm sm:text-base">
 //                         {user.name}
 //                       </p>
-//                       <p className="text-xs sm:text-sm text-gray-600 truncate">
-//                         {user.email}
-//                       </p>
+//                       {/* Email removed from display */}
 //                     </div>
 //                   </div>
 //                 </div>
@@ -1962,7 +2175,7 @@ export default function MessagesSection() {
 //           </div>
 //         </div>
 
-//         {/* ✅ CHAT AREA - Responsive */}
+//         {/* ✅ CHAT AREA - Responsive with reduced height */}
 //         <div className="flex-1 flex flex-col">
 //           {selectedUser ? (
 //             <>
@@ -1976,15 +2189,13 @@ export default function MessagesSection() {
 //                     <p className="font-medium text-gray-800">
 //                       {selectedUser.name}
 //                     </p>
-//                     <p className="text-sm text-gray-500">
-//                       {selectedUser.email}
-//                     </p>
+//                     {/* Email line removed */}
 //                   </div>
 //                 </div>
 //               </div>
 
-//               {/* Messages Area */}
-//               <div className="flex-1 p-3 sm:p-4 overflow-y-auto bg-gray-50">
+//               {/* Messages Area - Height reduced */}
+//               <div className="flex-1 p-3 sm:p-4 overflow-y-auto bg-gray-50" style={{ maxHeight: '350px' }}>
 //                 {loading ? (
 //                   <div className="flex items-center justify-center h-32">
 //                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
@@ -2038,7 +2249,7 @@ export default function MessagesSection() {
 //                               className="absolute top-2 right-2 more-options-btn text-white/70 hover:text-white text-sm"
 //                               title="More options"
 //                             >
-//                               ⋮
+//                               <span className="text-sm color-white-500">🗑️</span>
 //                             </button>
 //                           )}
 
@@ -2065,13 +2276,6 @@ export default function MessagesSection() {
 //                                 </button>
 //                               </div>
 //                             )}
-
-//                           {/* Sender name for received messages */}
-//                           {message.sender_id !== currentUserId && (
-//                             <p className="text-xs font-medium text-gray-500 mb-1">
-//                               {selectedUser.name}
-//                             </p>
-//                           )}
 
 //                           {/* Message content */}
 //                           {message.content && (
@@ -2115,7 +2319,7 @@ export default function MessagesSection() {
 //                               } transition`}
 //                               title="Add reaction"
 //                             >
-//                               ⊕
+//                               😊
 //                             </button>
 //                           </div>
 //                           {/* ✅ REACTIONS DISPLAY */}
@@ -2276,3 +2480,12 @@ export default function MessagesSection() {
 //     </div>
 //   );
 // }
+
+
+
+
+
+
+
+
+
