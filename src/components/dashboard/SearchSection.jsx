@@ -24,11 +24,13 @@ export default function AdvancedSearch() {
     lat: "",
     lon: "",
   });
+   //new code added now ik
   const [plan, setPlan] = useState({
     loading: true,
     active: false,
     daysLeft: 0,
   });
+
   /* improved geolocation handling (alert removed earlier, now clean console logging) */
   const getLiveLocation = () => {
     if (!navigator.geolocation) {
@@ -80,6 +82,13 @@ export default function AdvancedSearch() {
   }, [activeTab]);
 
   const handleTabChange = (tabId) => {
+
+    if (!plan.loading && !plan.active) {
+    alert(
+      "Your subscription has expired. Please upgrade to use search features."
+    );
+    return;
+  }
     setActiveTab(tabId);
 
     if (tabId !== "advanced") {
@@ -115,14 +124,108 @@ export default function AdvancedSearch() {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
+
+  // const performSearch = async () => {
+  //   if (activeTab === "advanced" && !plan.active) {
+  //     alert(
+  //       "Your subscription has expired. Please upgrade to use Advanced Search."
+  //     );
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setSearchResults([]);
+
+  //   try {
+  //     let searchParams = {};
+
+  //     const cleanValue = (val) => {
+  //       if (val === undefined || val === null) return "";
+  //       if (typeof val === "string") return val.trim();
+  //       return val;
+  //     };
+
+  //     /*  — updated BASIC search param mapping */
+  //     if (activeTab === "basic") {
+  //       searchParams = { search_mode: "basic" };
+
+  //       if (filters.basicSearch)
+  //         searchParams.first_name = cleanValue(filters.basicSearch);
+
+  //       if (filters.profession)
+  //         searchParams.profession = cleanValue(filters.profession);
+
+  //       if (filters.city) searchParams.city = cleanValue(filters.city);
+  //     }
+
+  //     /* — updated ADVANCED mode mapping */
+  //     if (activeTab === "advanced") {
+  //       searchParams = {
+  //         search_mode: "advanced",
+  //         first_name: cleanValue(filters.first_name),
+  //         last_name: cleanValue(filters.last_name),
+  //         gender: cleanValue(filters.gender),
+  //         marital_status: cleanValue(filters.marital_status),
+  //         profession: cleanValue(filters.profession),
+  //         skills: cleanValue(filters.skills),
+  //         interests: cleanValue(filters.interests),
+  //         city: cleanValue(filters.city),
+  //         state: cleanValue(filters.state),
+  //         min_age: filters.min_age,
+  //         max_age: filters.max_age,
+  //       };
+  //     }
+
+  //     /* — updated NEAR ME (city override + radius fallback) */
+  //     if (activeTab === "nearme") {
+  //       searchParams = {
+  //         search_mode: "nearme",
+  //         radius: Number(filters.radius || filters.distance),
+  //         lat: filters.lat,
+  //         lon: filters.lon,
+  //         city: cleanValue(filters.city),
+  //       };
+  //     }
+
+  //     /*  smart param cleaning (keeps lat/lon always) */
+  //     const cleanParams = Object.fromEntries(
+  //       Object.entries(searchParams).filter(([key, value]) => {
+  //         if (key === "lat" || key === "lon") return true;
+
+  //         if (["min_age", "max_age", "radius"].includes(key)) {
+  //           return value !== "" && value !== null && !isNaN(value);
+  //         }
+
+  //         return (
+  //           value !== "" &&
+  //           value !== null &&
+  //           value !== undefined &&
+  //           !(typeof value === "string" && value.trim() === "")
+  //         );
+  //       })
+  //     );
+
+  //     console.log("Shraddha Final Params:", cleanParams);
+
+  //     const response = await adminAPI.searchProfiles(cleanParams);
+  //     setSearchResults(response.data || []);
+  //   } catch (error) {
+  //     console.error("Search API error:", error);
+  //     alert("Search failed: " + (error.response?.data?.error || error.message));
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  
   const performSearch = async () => {
-    if (activeTab === "advanced" && !plan.active) {
+    if (!plan.loading && !plan.active) {
       alert(
-        "Your subscription has expired. Please upgrade to use Advanced Search."
+        "Your subscription has expired. Please upgrade to use search features."
       );
       return;
     }
-
+  // yeh add kiya h
     setLoading(true);
     setSearchResults([]);
 
@@ -135,20 +238,16 @@ export default function AdvancedSearch() {
         return val;
       };
 
-      /*  — updated BASIC search param mapping */
       if (activeTab === "basic") {
         searchParams = { search_mode: "basic" };
-
         if (filters.basicSearch)
           searchParams.first_name = cleanValue(filters.basicSearch);
-
         if (filters.profession)
           searchParams.profession = cleanValue(filters.profession);
-
-        if (filters.city) searchParams.city = cleanValue(filters.city);
+        if (filters.city)
+          searchParams.city = cleanValue(filters.city);
       }
 
-      /* — updated ADVANCED mode mapping */
       if (activeTab === "advanced") {
         searchParams = {
           search_mode: "advanced",
@@ -166,7 +265,6 @@ export default function AdvancedSearch() {
         };
       }
 
-      /* — updated NEAR ME (city override + radius fallback) */
       if (activeTab === "nearme") {
         searchParams = {
           search_mode: "nearme",
@@ -177,15 +275,12 @@ export default function AdvancedSearch() {
         };
       }
 
-      /*  smart param cleaning (keeps lat/lon always) */
       const cleanParams = Object.fromEntries(
         Object.entries(searchParams).filter(([key, value]) => {
           if (key === "lat" || key === "lon") return true;
-
           if (["min_age", "max_age", "radius"].includes(key)) {
             return value !== "" && value !== null && !isNaN(value);
           }
-
           return (
             value !== "" &&
             value !== null &&
@@ -206,6 +301,7 @@ export default function AdvancedSearch() {
       setLoading(false);
     }
   };
+
 
   const handleSearch = (e) => {
     if (e) e.preventDefault();
@@ -284,7 +380,7 @@ export default function AdvancedSearch() {
                         handleInputChange("basicSearch", e.target.value)
                       }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                   />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -300,7 +396,7 @@ export default function AdvancedSearch() {
                           handleInputChange("profession", e.target.value)
                         }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
+                     />
                     </div>
 
                     <div>
@@ -315,7 +411,7 @@ export default function AdvancedSearch() {
                           handleInputChange("city", e.target.value)
                         }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
+                    />
                     </div>
                   </div>
                 </div>
