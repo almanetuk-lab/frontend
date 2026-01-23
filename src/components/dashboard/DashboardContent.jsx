@@ -180,7 +180,7 @@ export default function DashboardHome({ profile }) {
 
       const currentUserId = profile?.id || profile?.user_id;
       const filteredResults = (response.data || []).filter(
-        (user) => user.id !== currentUserId
+        (user) => user.id !== currentUserId,
       );
 
       setSearchResults(filteredResults);
@@ -228,26 +228,28 @@ export default function DashboardHome({ profile }) {
   // }, []);
 
   // Handle user selection from search
-const handleUserSelectFromSearch = (user) => {
-  console.log("Selected user from search:", user);
-  
-  // ✅ State ke through user data pass karein
-  navigate("/dashboard/messages", { 
-    state: { 
-      selectedUser: {
-        id: user.id,
-        name: user.name || `${user.first_name || ""} ${user.last_name || ""}`.trim(),
-        email: user.email,
-        // Additional fields agar chahiye
-        city: user.city,
-        profession: user.profession
-      }
-    }
-  });
-  
-  setSearchQuery("");
-  setShowSearchResults(false);
-};
+  const handleUserSelectFromSearch = (user) => {
+    console.log("Selected user from search:", user);
+
+    // ✅ State ke through user data pass karein
+    navigate("/dashboard/messages", {
+      state: {
+        selectedUser: {
+          id: user.id,
+          name:
+            user.name ||
+            `${user.first_name || ""} ${user.last_name || ""}`.trim(),
+          email: user.email,
+          // Additional fields agar chahiye
+          city: user.city,
+          profession: user.profession,
+        },
+      },
+    });
+
+    setSearchQuery("");
+    setShowSearchResults(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
@@ -574,10 +576,9 @@ const handleUserSelectFromSearch = (user) => {
                   <StatCard
                     label="Matches"
                     // value={loading ? "..." : matchesCount.toString()}
-                    value={loading ? "..." : (matchesCount || 9 ).toString()}
+                    value={loading ? "..." : (matchesCount || 9).toString()}
                     // trend="+5%"
                   />
-                  
                 </div>
                 <div>
                   <StatCard
@@ -618,10 +619,10 @@ const handleUserSelectFromSearch = (user) => {
                       loading
                         ? "Loading..."
                         : recentViewers.length > 0
-                        ? `Last viewed ${getTimeAgo(
-                            recentViewers[0]?.viewed_at
-                          )}`
-                        : "No views yet"
+                          ? `Last viewed ${getTimeAgo(
+                              recentViewers[0]?.viewed_at,
+                            )}`
+                          : "No views yet"
                     }
                   />
                 </div>
@@ -634,7 +635,7 @@ const handleUserSelectFromSearch = (user) => {
                   <ActivityItem
                     icon="💖"
                     text={`You have ${
-                      loading ? "..." : matchesCount || 155
+                      loading ? "..." : matchesCount || 200
                     } new match${matchesCount !== 1 ? "es" : ""} waiting`}
                     time="Today"
                   />
@@ -666,11 +667,9 @@ const handleUserSelectFromSearch = (user) => {
                 <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
                   Quick Actions
                 </h3>
-                <div
-                 className="space-y-2 sm:space-y-3">
-                  <Link rel="stylesheet" href="/coming-soon" >
-                  <QuickAction icon="⚡" label="Boost Profile" />
-
+                <div className="space-y-2 sm:space-y-3">
+                  <Link rel="stylesheet" href="/coming-soon">
+                    <QuickAction icon="⚡" label="Boost Profile" />
                   </Link>
                   <QuickAction icon="⭐" label="Go Premium" />
                   <QuickAction icon="🔔" label="Notifications" />

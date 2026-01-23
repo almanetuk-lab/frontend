@@ -18,7 +18,8 @@ const mapToDBEnum = (field, value) => {
       BACHELORS: "Bachelors Degree",
       MASTERS: "Masters Degree",
       PHD: "Doctorate",
-      OTHER: "Other",
+      // OTHER: "Other",
+        // Other: "Other",
       "No Formal Education": "No Formal Education",
       "Currently Studying": "Currently Studying",
       "High School": "High School",
@@ -27,6 +28,7 @@ const mapToDBEnum = (field, value) => {
       "Bachelors Degree": "Bachelors Degree",
       "Masters Degree": "Masters Degree",
       Doctorate: "Doctorate",
+      Other:"Other",
     },
 
     // Gender
@@ -34,8 +36,9 @@ const mapToDBEnum = (field, value) => {
       Male: "Male",
       Female: "Female",
       "Non-Binary": "NON_BINARY",
-      Other: "OTHER",
-      "Prefer not to say": "PREFER_NOT_TO_SAY",
+      Other: "Other",
+      // "Prefer not to say": "PREFER_NOT_TO_SAY",
+      "Prefer not to say": "Prefer not to say",
     },
 
     // Marital Status
@@ -54,7 +57,7 @@ const mapToDBEnum = (field, value) => {
       PROFESSIONAL: "Corporate Professional",
       ENTREPRENEUR: "Entrepreneur",
       FREELANCER: "Freelancer",
-      OTHER: "Other",
+      // OTHER: "Other",
       "Corporate Professional": "Corporate Professional",
       Entrepreneur: "Entrepreneur",
       "Startup Founder": "Startup Founder",
@@ -116,7 +119,7 @@ const mapToDBEnum = (field, value) => {
       DONT_WANT: "Don’t want",
       "Have and want more": "Have and want more",
       "Have and don't want more": "Have and don’t want more",
-      Open: "Open / Not sure yet",
+      // Open: "Open / Not sure yet",
       "Not Sure yet": "Open / Not sure yet",
     },
 
@@ -264,12 +267,41 @@ const mapToDBEnum = (field, value) => {
     },
 
     // Love Language - Special handling for array
-    love_language_affection: (value) => {
-      if (!value) return null;
+  //   love_language_affection: (value) => {
+  //     if (!value) return null;
 
-      if (Array.isArray(value)) {
-        return value.map((lang) => {
-          const langMap = {
+  //     if (Array.isArray(value)) {
+  //       return value.map((lang) => {
+  //         const langMap = {
+  //           "Physical Touch": "Physical Touch",
+  //           "Words of Affirmation": "Words of Affirmation",
+  //           "Quality Time": "Quality Time",
+  //           "Acts of Service": "Acts of Service",
+  //           "Thoughtful Gifts": "Thoughtful Gifts",
+  //           urdu: "Words of Affirmation",
+  //           hindi: "Words of Affirmation",
+  //         };
+  //         return langMap[lang] || lang;
+  //       });
+  //     }
+
+  //     if (typeof value === "string") {
+  //       return value
+  //         .split(",")
+  //         .map((lang) => lang.trim())
+  //         .filter((lang) => lang !== "");
+  //     }
+
+  //     return value;
+  //   },
+  // };
+
+  // if (field === "love_language_affection" && MAP[field]) {
+  //   return MAP[field](value);
+  // }
+
+  love_language_affection: {
+       
             "Physical Touch": "Physical Touch",
             "Words of Affirmation": "Words of Affirmation",
             "Quality Time": "Quality Time",
@@ -277,25 +309,8 @@ const mapToDBEnum = (field, value) => {
             "Thoughtful Gifts": "Thoughtful Gifts",
             urdu: "Words of Affirmation",
             hindi: "Words of Affirmation",
-          };
-          return langMap[lang] || lang;
-        });
-      }
-
-      if (typeof value === "string") {
-        return value
-          .split(",")
-          .map((lang) => lang.trim())
-          .filter((lang) => lang !== "");
-      }
-
-      return value;
-    },
+          } 
   };
-
-  if (field === "love_language_affection" && MAP[field]) {
-    return MAP[field](value);
-  }
 
   if (field === "height_ft" || field === "height_in") {
     return MAP[field] ? MAP[field](value) : value;
@@ -312,12 +327,12 @@ const mapToUIEnum = (field, value) => {
       "No Formal Education": "No Formal Education",
       "Currently Studying": "Currently Studying",
       "High School": "HIGH_SCHOOL",
-      "Vocational / Trade School": "OTHER",
-      "Associate Degree": "OTHER",
+      "Vocational / Trade School": "Other",
+      "Associate Degree": "Other",
       "Bachelors Degree": "BACHELORS",
       "Masters Degree": "MASTERS",
       Doctorate: "PHD",
-      Other: "OTHER",
+      Other: "Other",
     },
     children_preference: {
       Want: "WANT",
@@ -341,7 +356,7 @@ const mapToUIEnum = (field, value) => {
       "Public Service": "PROFESSIONAL",
       Government: "PROFESSIONAL",
       Student: "STUDENT",
-      Other: "OTHER",
+      Other: "Other",
     },
     career_decision_style: {
       "Security-focused": "Analytical",
@@ -359,7 +374,8 @@ const mapToUIEnum = (field, value) => {
       "More time together": "High",
       "A mix of space and closeness": "Medium",
       "Regular personal time": "Low",
-      "Not yet sure": "Variable",
+      // "Not yet sure": "Variable",
+      "Open / Not Sure yet": "OPEN / Not sure yet",
     },
     work_rhythm: {
       "Structured routine": "Regular",
@@ -689,9 +705,13 @@ const handleQuestionsSave = (questionsData) => {
         "preference_of_closeness",
         profile.preference_of_closeness
       ),
-      love_language_affection: Array.isArray(profile.love_language_affection)
-        ? profile.love_language_affection.join(", ")
-        : profile.love_language_affection || "",
+
+love_language_affection: profile.love_language_affection || "",
+      
+      // love_language_affection: Array.isArray(profile.love_language_affection)
+      //   ? profile.love_language_affection.join(", ")
+      //   : profile.love_language_affection || "",
+        
       life_rhythms: profile.life_rhythms || {},
         prompts: loadedPrompts,
     });
@@ -872,9 +892,15 @@ const handleQuestionsSave = (questionsData) => {
           "preference_of_closeness",
           formData.preference_of_closeness
         ),
-        love_language_affection: mapToDBEnum(
+
+        // love_language_affection: mapToDBEnum(
+        //   "love_language_affection",
+        //   handleArrayField(formData.love_language_affection)
+        // ),
+
+        love_language_affection:(
           "love_language_affection",
-          handleArrayField(formData.love_language_affection)
+          formData.love_language_affection
         ),
       };
 
@@ -1448,7 +1474,7 @@ const handleQuestionsSave = (questionsData) => {
                       <option value="PROFESSIONAL">Professional</option>
                       <option value="ENTREPRENEUR">Entreprenuer</option>
                       <option value="FREELANCER">Freelancer</option>
-                      <option value="OTHER">Other</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
 
@@ -1543,7 +1569,7 @@ const handleQuestionsSave = (questionsData) => {
                       <option value="BACHELORS">Bachelors</option>
                       <option value="MASTERS">Master</option>
                       <option value="PHD">PHD</option>
-                      <option value="OTHER">Others</option>
+                      <option value="Other">Others</option>
                     </select>
                   </div>
 
@@ -1740,11 +1766,14 @@ const handleQuestionsSave = (questionsData) => {
                         <option value="Have and want more">
                           Have and want more
                         </option>
-                        <option value="Have and don't want more">
+                        <option value="Have and don’t want more">
                           Have and don't want more
                         </option>
-                        <option value="Open">Open</option>
-                        <option value="Not Sure yet">Not Sure yet</option>
+                     <option value="Open or not sure yet">
+                          Open / Not Sure yet
+                        </option>
+                        {/* <option value="Open">Open</option>OPEN_OR_NOT_SURE_YET */}
+                        {/* <option value="Not Sure yet">Not Sure yet</option> */}
                       </select>
                     </div>
 
@@ -2053,9 +2082,10 @@ const handleQuestionsSave = (questionsData) => {
                         <option value="HAVE_AND_DONT_WANT_MORE">
                           Have and don't want more
                         </option>
-                        <option value="OPEN_OR_NOT_SURE_YET">
+                           {/* "Open / Not Sure yet": "OPEN / Not sure yet",  */}
+                        {/* <option value="OPEN_OR_NOT_SURE_YET">
                           Open / Not Sure yet
-                        </option>
+                        </option> */}
                       </select>
                     </div>
 

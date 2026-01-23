@@ -601,7 +601,7 @@ export default function ProfilePage() {
                   value={displayProfile.work_demand_response}
                 />
               </Section>
-
+{/* 
               <Section title="Relationship Styles">
                 <InfoItem
                   label="Love Language"
@@ -610,7 +610,14 @@ export default function ProfilePage() {
                       ? displayProfile.love_language_affection.join(", ")
                       : displayProfile.love_language_affection
                   }
+                /> */}
+
+                <Section title="Relationship Styles">
+                <InfoItem
+                  label="Love Language"
+                  value={displayProfile.love_language_affection}
                 />
+
                 <InfoItem
                   label="Preference of Closeness"
                   value={displayProfile.preference_of_closeness}
