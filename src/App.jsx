@@ -29,8 +29,8 @@ import AdminPage from "./components/admin/AdminPage";
 import AdminLogin from "./components/admin/AdminLogin";
 
 // Chat System
-import ChatModule from "./components/chatsystem/ChatModule";
-import AdvancedSearch from "./components/chatsystem/AdvancedSearch";
+// import ChatModule from "./components/chatsystem/ChatModule";
+// import AdvancedSearch from "./components/chatsystem/AdvancedSearch";
 
 // Match System
 import MatchesPage from "./components/MatchSystem/MatchesPage";
@@ -197,7 +197,7 @@ export default function App() {
           }
         />
 
-        {/* Chat Routes */}
+        {/* Chat Routes
         <Route
           path="/chat"
           element={
@@ -205,6 +205,7 @@ export default function App() {
               <ChatModule />
             </UserProtectedRoute>
           }
+
         />
          
          <Route
@@ -217,6 +218,10 @@ export default function App() {
         />
         
 
+
+        /> */}
+{/* 
+ 
         <Route
           path="/search"
           element={
@@ -224,7 +229,7 @@ export default function App() {
               <AdvancedSearch />
             </UserProtectedRoute>
           }
-        />
+        /> */}
         {/* plan Routes */}
         <Route
           path="/plans"
@@ -320,7 +325,7 @@ export default function App() {
         />
 
         {/* Chat Routes WITH Header & Footer */}
-        <Route
+        {/* <Route
           path="/chat"
           element={
             <MainLayout>
@@ -329,8 +334,8 @@ export default function App() {
               </UserProtectedRoute>
             </MainLayout>
           }
-        />
-
+        /> */}
+{/* 
         <Route
           path="/search"
           element={
@@ -340,7 +345,7 @@ export default function App() {
               </UserProtectedRoute>
             </MainLayout>
           }
-        />
+        /> */}
 
         {/* Matches Routes WITH Header & Footer */}
         <Route
