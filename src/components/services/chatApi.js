@@ -31,6 +31,8 @@ export const chatApi = {
     return api.get(`/api/users?search=${encodeURIComponent(searchQuery)}`);
   },
 
+   getPlanStatus: () => userApi.get("/api/me/plan-status"),
+
   // SEARCH PROFILES
   searchProfiles: (searchParams) =>
     api.get("/search", { params: searchParams }),

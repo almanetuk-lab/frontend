@@ -21,7 +21,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ ADDED: RESPONSE INTERCEPTOR for automatic token refresh
+// ADDED: RESPONSE INTERCEPTOR for automatic token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -46,7 +46,7 @@ api.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        // ✅ ACTUAL REFRESH TOKEN API CALL
+        //  ACTUAL REFRESH TOKEN API CALL
         const refreshResponse = await axios.post(
           `${API_BASE_URL}/api/refreshtoken`,
           {},
@@ -96,7 +96,7 @@ export const normalizeAuthResponse = (data = {}) => {
   const refresh = data?.refreshToken || data?.refresh_token || null;
   const user = data?.user_profile || data?.user || data?.profile_info || null;
   
-  // ✅ Save refresh token if available
+  //  Save refresh token if available
   if (refresh) {
     localStorage.setItem("refreshToken", refresh);
   }
@@ -115,7 +115,7 @@ export const loginUser = async ({ email, password }) => {
       localStorage.setItem("accessToken", data.accessToken || data.token);
     }
     
-    // ✅ Save refresh token
+    //  Save refresh token
     if (data.refreshToken || data.refresh_token) {
       localStorage.setItem("refreshToken", data.refreshToken || data.refresh_token);
     }
@@ -137,7 +137,7 @@ export const registerUser = async (formData) => {
       localStorage.setItem("accessToken", data.accessToken || data.token);
     }
     
-    // ✅ Save refresh token
+    // Save refresh token
     if (data.refreshToken || data.refresh_token) {
       localStorage.setItem("refreshToken", data.refreshToken || data.refresh_token);
     }
@@ -148,7 +148,7 @@ export const registerUser = async (formData) => {
   }
 };
 
-// Update Profile API - ✅ YEHA SE YAHA TAK KA CODE SAME HAI
+// Update Profile API -  YEHA SE YAHA TAK KA CODE SAME HAI
 // export const updateUserProfile = async (profileData) => {
 //   try {
 //     const res = await api.put("/api/editProfile", profileData);
@@ -164,7 +164,7 @@ export const registerUser = async (formData) => {
 export const updateUserProfile = async (profileData) => {
   try {
     const res = await api.put("/api/editProfile", profileData);
-    return res.data.profile;  // ✅ Already returns {..., prompts: {...}}
+    return res.data.profile;  //  Already returns {..., prompts: {...}}
   } catch (err) {
     console.error("Update Profile Error:", err.response?.data || err.message);
     throw err;
@@ -178,7 +178,7 @@ export const getUserProfile = async () => {
   try {
     const res = await api.get("/api/me");
     
-    // ✅ FIX: Combine data and prompts like UPDATE API format
+    //  FIX: Combine data and prompts like UPDATE API format
     const normalizedProfile = {
       ...res.data.data,          // All profile fields
       prompts: res.data.prompts  // Add prompts inside
@@ -226,7 +226,7 @@ export const removeProfileImage = (user_id) => {
   });
 };
 
-// ✅ UPDATED: Refresh Token API (Now actual API call)
+//  UPDATED: Refresh Token API (Now actual API call)
 export const refreshAuthToken = async () => {
   try {
     console.log("🔄 Attempting token refresh...");
@@ -272,6 +272,33 @@ export const adminAPI = {
 };
 
 export default api;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
