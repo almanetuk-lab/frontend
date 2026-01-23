@@ -153,36 +153,83 @@ const NotificationBell = () => {
     };
   }, [profile]);
 
-  // FETCH NOTIFICATIONS
-  const fetchNotifications = async () => {
-    const userId = getUserId();
+  // // FETCH NOTIFICATIONS
+  // const fetchNotifications = async () => {
+  //   const userId = getUserId();
 
-    if (!userId) {
-      console.error("User ID not found");
-      return;
-    }
+  //   if (!userId) {
+  //     console.error("User ID not found");
+  //     return;
+  //   }
 
-    try {
-      setLoading(true);
-      console.log("Fetching notifications for user:", userId);
+  //   try {
+  //     setLoading(true);
+  //     console.log("Fetching notifications for user:", userId);
 
-      const notificationsResponse = await chatApi.getUserNotifications(userId);
+  //     const notificationsResponse = await chatApi.getUserNotifications(userId);
 
-      console.log("Notifications data received:", notificationsResponse.data);
-      setNotifications(notificationsResponse.data || []);
+  //     console.log("Notifications data received:", notificationsResponse.data);
+  //     setNotifications(notificationsResponse.data || []);
 
-      // Calculate unread count
-      const unread = (notificationsResponse.data || []).filter(
-        (notif) => !notif.is_read
-      ).length;
-      setUnreadCount(unread);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      setNotifications([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     // Calculate unread count
+  //     const unread = (notificationsResponse.data || []).filter(
+  //       (notif) => !notif.is_read
+  //     ).length;
+  //     setUnreadCount(unread);
+  //   } catch (error) {
+  //     console.error("Error fetching notifications:", error);
+  //     setNotifications([]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+// FETCH NOTIFICATIONS - FIXED VERSION
+const fetchNotifications = async () => {
+  const userId = getUserId();
+
+  if (!userId) {
+    console.error("User ID not found");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    console.log("Fetching notifications for user:", userId);
+
+    const notificationsResponse = await chatApi.getUserNotifications(userId);
+
+    // ✅ FIX: Check if data exists and is array
+    const notificationsData = notificationsResponse.data || [];
+    console.log("Notifications data received:", notificationsData);
+    
+    // ✅ FIX: Transform data for frontend use
+    const transformedNotifications = notificationsData.map(notif => ({
+      ...notif,
+      // Add 'content' field if not present (using 'message')
+      content: notif.message || notif.content || "No content",
+      // Ensure 'title' field exists
+      title: notif.title || (notif.type === "message" ? "New Message" : 
+              notif.type === "new_match" ? "New Match" : "Notification")
+    }));
+
+    setNotifications(transformedNotifications);
+
+    // Calculate unread count
+    const unread = transformedNotifications.filter(
+      (notif) => !notif.is_read
+    ).length;
+    setUnreadCount(unread);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    // ✅ FIX: Show more detailed error
+    console.error("Error details:", error.response?.data || error.message);
+    setNotifications([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // MARK AS READ
   const markAsRead = async (notificationId) => {
@@ -488,7 +535,7 @@ const NotificationBell = () => {
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                   />
                 </svg>
-                View All Messages
+                View All 
               </button>
             </div>
           </div>

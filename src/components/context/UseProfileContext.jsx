@@ -128,9 +128,13 @@ export const UserProfileProvider = ({ children }) => {
           interested_in: userProfile.interested_in || "",
           relationship_goal: userProfile.relationship_goal || "",
           children_preference: userProfile.children_preference || "",
-          love_language_affection: Array.isArray(userProfile.love_language_affection)
-            ? userProfile.love_language_affection
-            : userProfile.love_language_affection || [],
+
+          love_language_affection: userProfile.love_language_affection || "",
+
+          // love_language_affection: Array.isArray(userProfile.love_language_affection)
+          //   ? userProfile.love_language_affection
+          //   : userProfile.love_language_affection || [],
+
           preference_of_closeness: userProfile.preference_of_closeness || "",
           approach_to_physical_closeness: userProfile.approach_to_physical_closeness || "",
           relationship_values: userProfile.relationship_values || "",
