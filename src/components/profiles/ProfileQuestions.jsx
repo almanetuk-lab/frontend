@@ -55,61 +55,12 @@ const ProfileQuestions = ({
   const [answers, setAnswers] = useState({});
   const [characterCounts, setCharacterCounts] = useState({});
 
-  // // Load initial data
-  // useEffect(() => {
-  //   if (initialData) {
-  //     console.log("📥 ProfileQuestions - Initial Data:", initialData);
-      
-  //     let dataToLoad = initialData;
-
-  //     // ✅ IMPORTANT: Check if data has "question-key" wrapper
-  //     if (initialData["question-key"]) {
-  //       dataToLoad = initialData["question-key"];
-  //       console.log("✅ Found question-key wrapper:", dataToLoad);
-  //     }
-
-  //     if (typeof initialData === "string") {
-  //       try {
-  //         dataToLoad = JSON.parse(initialData);
-  //         // Check for question-key again after parsing
-  //         if (dataToLoad["question-key"]) {
-  //           dataToLoad = dataToLoad["question-key"];
-  //         }
-  //       } catch (error) {
-  //         console.error("Error parsing prompts data:", error);
-  //         dataToLoad = {};
-  //       }
-  //     }
-
-  //     console.log("📥 Data to load:", dataToLoad);
-
-  //     if (dataToLoad && typeof dataToLoad === "object") {
-  //       const newAnswers = {};
-  //       const newCounts = {};
-        
-  //       PROFILE_QUESTIONS.forEach(question => {
-  //         newAnswers[question.key] = dataToLoad[question.key] || '';
-  //         newCounts[question.key] = (dataToLoad[question.key] || '').length;
-  //       });
-        
-  //       console.log("✅ Setting answers:", newAnswers);
-  //       setAnswers(newAnswers);
-  //       setCharacterCounts(newCounts);
-  //     } else {
-  //       console.log("⚠️ No valid data to load");
-  //     }
-  //   }
-  // }, [initialData]);
-
-  // Line ~40-65 in ProfileQuestions.jsx - Change to:
-useEffect(() => {
+  useEffect(() => {
   if (initialData) {
     console.log("📥 ProfileQuestions - Initial Data:", initialData);
     
     let dataToLoad = initialData;
 
-    // ✅ FIXED: Remove "question-key" wrapper check
-    // Backend se direct object aata hai, wrapper nahi
     if (initialData["question-key"]) {
       dataToLoad = initialData["question-key"];
       console.log("⚠️ Found question-key wrapper (legacy):", dataToLoad);
@@ -163,8 +114,6 @@ useEffect(() => {
     
     console.log("💾 Final data to save:", finalData);
     
-    // ✅ IMPORTANT: Direct object bhejna hai, "question-key" wrapper nahi
-    // EditProfile mein hum wrapper add kar denge
     return finalData;
   };
 

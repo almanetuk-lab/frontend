@@ -517,39 +517,57 @@ export default function EditProfilePage() {
     preference_of_closeness: "",
     love_language_affection: "",
     life_rhythms: {},
-    // profile_questions: {},
      prompts: {},
   });
 
 
   // ================== QUESTIONS HANDLER ==================
+
 const handleQuestionsSave = (questionsData) => {
-  console.log("💾 Questions saved in EditProfile:", questionsData);
+  console.log("💾 Updating local formData with questions:", questionsData);
   
-  //  SIMPLE FIX: Direct set karo
   setFormData(prev => ({
     ...prev,
-    prompts: questionsData  // Direct assignment
+    prompts: questionsData  // Sirf local state update karein
   }));
   
-  //  Context ko bhi update karo immediately
-  updateProfile({
-    ...profile,
-    prompts: questionsData
-  });
-  
-  setIsQuestionsModalOpen(false);
-  
-  console.log(" Prompts updated in form and context");
+  setIsQuestionsModalOpen(false); 
+  // updateProfile wala part yahan se hata diya hai taaki useEffect trigger na ho
 };
 
-  //  Life Rhythms save handler
-  const handleLifeRhythmsSave = (data) => {
-    setFormData((prev) => ({
-      ...prev,
-      life_rhythms: data,
-    }));
-  };
+// const handleQuestionsSave = (questionsData) => {
+//   console.log("💾 Questions saved in EditProfile:", questionsData);
+  
+//   //  SIMPLE FIX: Direct set karo
+//   setFormData(prev => ({
+//     ...prev,
+//     prompts: questionsData  // Direct assignment
+//   }));
+  
+//   //  Context ko bhi update karo immediately
+//   updateProfile({
+//     ...profile,
+//     prompts: questionsData
+//   });
+  
+//   setIsQuestionsModalOpen(false);
+  
+//   console.log(" Prompts updated in form and context");
+// };
+
+const handleLifeRhythmsSave = (data) => {
+  setFormData((prev) => ({
+    ...prev,
+    life_rhythms: data,
+  }));
+}; // updateProfile call nahi karna yahan
+  // //  Life Rhythms save handler
+  // const handleLifeRhythmsSave = (data) => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     life_rhythms: data,
+  //   }));
+  // };
 
   const handleInterestsSave = (data) => {
     setFormData((prev) => ({
@@ -719,7 +737,7 @@ love_language_affection: profile.love_language_affection || "",
     if (profile.profile_image) {
       setImagePreview(profile.profile_image);
     }
-  }, [profile]);
+  }, [profile?.user_id]);
 
   // ================== PROGRESS & STEP HANDLING ==================
   const progressPercentage = (currentStep / totalSteps) * 100;
@@ -898,10 +916,11 @@ love_language_affection: profile.love_language_affection || "",
         //   handleArrayField(formData.love_language_affection)
         // ),
 
-        love_language_affection:(
-          "love_language_affection",
-          formData.love_language_affection
-        ),
+        // love_language_affection:(
+        //   "love_language_affection",
+        //   formData.love_language_affection
+        // ),
+        love_language_affection: formData.love_language_affection, 
       };
 
       console.log(" FINAL PAYLOAD:", payload);

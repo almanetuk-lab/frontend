@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { chatApi } from "../services/chatApi";
-import { useUserProfile } from "../context/UseProfileContext";
+// import { useUserProfile } from "../context/UseProfileContext";
+import {useUserProfile} from "../context/UseProfileContext";
 import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { FaBell } from "react-icons/fa";
