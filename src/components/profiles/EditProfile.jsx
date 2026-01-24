@@ -18,8 +18,6 @@ const mapToDBEnum = (field, value) => {
       BACHELORS: "Bachelors Degree",
       MASTERS: "Masters Degree",
       PHD: "Doctorate",
-      // OTHER: "Other",
-        // Other: "Other",
       "No Formal Education": "No Formal Education",
       "Currently Studying": "Currently Studying",
       "High School": "High School",
@@ -35,10 +33,10 @@ const mapToDBEnum = (field, value) => {
     gender: {
       Male: "Male",
       Female: "Female",
-      "Non-Binary": "NON_BINARY",
+      // "Non-Binary": "NON_BINARY",
       Other: "Other",
-      // "Prefer not to say": "PREFER_NOT_TO_SAY",
-      "Prefer not to say": "Prefer not to say",
+     "Non-Binary": "Non-Binary",
+
     },
 
     // Marital Status
@@ -119,8 +117,8 @@ const mapToDBEnum = (field, value) => {
       DONT_WANT: "Don’t want",
       "Have and want more": "Have and want more",
       "Have and don't want more": "Have and don’t want more",
-      // Open: "Open / Not sure yet",
-      "Not Sure yet": "Open / Not sure yet",
+      // "Not Sure yet": "Open / Not sure yet",
+     OPEN_OR_NOT_SURE_YET: "Open / Not sure yet"
     },
 
     // Free Time Style
@@ -339,7 +337,8 @@ const mapToUIEnum = (field, value) => {
       "Don't want": "Don’t want",
       "Have and want more": "HAVE_AND_WANT_MORE",
       "Have and don't want more": "HAVE_AND_DONT_WANT_MORE",
-      "Open / Not Sure yet": "OPEN / Not sure yet",
+      // "Open / Not Sure yet": "OPEN / Not sure yet",
+        "Open / Not sure yet": "OPEN_OR_NOT_SURE_YET"
     },
     professional_identity: {
       "Corporate Professional": "PROFESSIONAL",
@@ -1343,10 +1342,10 @@ love_language_affection: profile.love_language_affection || "",
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                      <option value="Prefer not to say">
-                        Prefer not to say
-                      </option>
+                      <option value="Non-Binary">Non-Binary</option>
+                     <option value="Other">Other</option>
+                  
+                  
                     </select>
                   </div>
 
@@ -1788,9 +1787,10 @@ love_language_affection: profile.love_language_affection || "",
                         <option value="Have and don’t want more">
                           Have and don't want more
                         </option>
-                     <option value="Open or not sure yet">
+                         <option value="OPEN_OR_NOT_SURE_YET">Open / Not sure yet</option>
+                     {/* <option value="Open or not sure yet">
                           Open / Not Sure yet
-                        </option>
+                        </option> */}
                         {/* <option value="Open">Open</option>OPEN_OR_NOT_SURE_YET */}
                         {/* <option value="Not Sure yet">Not Sure yet</option> */}
                       </select>
@@ -2101,10 +2101,9 @@ love_language_affection: profile.love_language_affection || "",
                         <option value="HAVE_AND_DONT_WANT_MORE">
                           Have and don't want more
                         </option>
-                           {/* "Open / Not Sure yet": "OPEN / Not sure yet",  */}
-                        {/* <option value="OPEN_OR_NOT_SURE_YET">
-                          Open / Not Sure yet
-                        </option> */}
+                         <option value="OPEN_OR_NOT_SURE_YET">Open / Not sure yet</option>
+
+            
                       </select>
                     </div>
 
@@ -2376,7 +2375,7 @@ love_language_affection: profile.love_language_affection || "",
                           A mix of space and closeness
                         </option>
                         <option value="Low">Regular personal time</option>
-                        <option value="Variable">Not yet sure</option>
+                        <option value="Variable"> Open / Not yet sure</option>
                       </select>
                     </div>
                   </div>
