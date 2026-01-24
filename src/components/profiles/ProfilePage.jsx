@@ -827,7 +827,6 @@ export default function ProfilePage() {
                       })()}
                     </div>
                   ) : (
-                    /* ✅ Fallback to simple interests (text field wala) */
                     <div>
                       {displayProfile.interests ? (
                         <div>
@@ -913,9 +912,10 @@ export default function ProfilePage() {
                     </div>
                   )}
                 </div> 
+
  
         {/* ✅ NEW: Profile Questions Section */}
-<div className="bg-white border border-gray-200 rounded-lg p-6">
+         <div className="bg-white border border-gray-200 rounded-lg p-6">
   <div className="flex items-center gap-3 mb-4">
     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
       <span className="text-lg">💭</span>
@@ -1068,7 +1068,7 @@ export default function ProfilePage() {
       </div>
     );
   })()}
-</div>
+</div> 
       
       </div>
     </div>

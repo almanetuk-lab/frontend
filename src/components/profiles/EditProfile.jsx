@@ -19,7 +19,7 @@ const mapToDBEnum = (field, value) => {
       MASTERS: "Masters Degree",
       PHD: "Doctorate",
       // OTHER: "Other",
-        // Other: "Other",
+      // Other: "Other",
       "No Formal Education": "No Formal Education",
       "Currently Studying": "Currently Studying",
       "High School": "High School",
@@ -28,7 +28,7 @@ const mapToDBEnum = (field, value) => {
       "Bachelors Degree": "Bachelors Degree",
       "Masters Degree": "Masters Degree",
       Doctorate: "Doctorate",
-      Other:"Other",
+      Other: "Other",
     },
 
     // Gender
@@ -267,49 +267,48 @@ const mapToDBEnum = (field, value) => {
     },
 
     // Love Language - Special handling for array
-  //   love_language_affection: (value) => {
-  //     if (!value) return null;
+    //   love_language_affection: (value) => {
+    //     if (!value) return null;
 
-  //     if (Array.isArray(value)) {
-  //       return value.map((lang) => {
-  //         const langMap = {
-  //           "Physical Touch": "Physical Touch",
-  //           "Words of Affirmation": "Words of Affirmation",
-  //           "Quality Time": "Quality Time",
-  //           "Acts of Service": "Acts of Service",
-  //           "Thoughtful Gifts": "Thoughtful Gifts",
-  //           urdu: "Words of Affirmation",
-  //           hindi: "Words of Affirmation",
-  //         };
-  //         return langMap[lang] || lang;
-  //       });
-  //     }
+    //     if (Array.isArray(value)) {
+    //       return value.map((lang) => {
+    //         const langMap = {
+    //           "Physical Touch": "Physical Touch",
+    //           "Words of Affirmation": "Words of Affirmation",
+    //           "Quality Time": "Quality Time",
+    //           "Acts of Service": "Acts of Service",
+    //           "Thoughtful Gifts": "Thoughtful Gifts",
+    //           urdu: "Words of Affirmation",
+    //           hindi: "Words of Affirmation",
+    //         };
+    //         return langMap[lang] || lang;
+    //       });
+    //     }
 
-  //     if (typeof value === "string") {
-  //       return value
-  //         .split(",")
-  //         .map((lang) => lang.trim())
-  //         .filter((lang) => lang !== "");
-  //     }
+    //     if (typeof value === "string") {
+    //       return value
+    //         .split(",")
+    //         .map((lang) => lang.trim())
+    //         .filter((lang) => lang !== "");
+    //     }
 
-  //     return value;
-  //   },
-  // };
+    //     return value;
+    //   },
+    // };
 
-  // if (field === "love_language_affection" && MAP[field]) {
-  //   return MAP[field](value);
-  // }
+    // if (field === "love_language_affection" && MAP[field]) {
+    //   return MAP[field](value);
+    // }
 
-  love_language_affection: {
-       
-            "Physical Touch": "Physical Touch",
-            "Words of Affirmation": "Words of Affirmation",
-            "Quality Time": "Quality Time",
-            "Acts of Service": "Acts of Service",
-            "Thoughtful Gifts": "Thoughtful Gifts",
-            urdu: "Words of Affirmation",
-            hindi: "Words of Affirmation",
-          } 
+    love_language_affection: {
+      "Physical Touch": "Physical Touch",
+      "Words of Affirmation": "Words of Affirmation",
+      "Quality Time": "Quality Time",
+      "Acts of Service": "Acts of Service",
+      "Thoughtful Gifts": "Thoughtful Gifts",
+      urdu: "Words of Affirmation",
+      hindi: "Words of Affirmation",
+    },
   };
 
   if (field === "height_ft" || field === "height_in") {
@@ -447,6 +446,9 @@ export default function EditProfilePage() {
   const [isQuestionsModalOpen, setIsQuestionsModalOpen] = useState(false);
   const [profilePrompts, setProfilePrompts] = useState({});
 
+  const [tempLifeRhythms, setTempLifeRhythms] = useState({});
+  const [tempInterests, setTempInterests] = useState({});
+
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -518,55 +520,108 @@ export default function EditProfilePage() {
     love_language_affection: "",
     life_rhythms: {},
     // profile_questions: {},
-     prompts: {},
+    prompts: {},
   });
 
-
   // ================== QUESTIONS HANDLER ==================
+
+  // // Life rhythms save handler mein
+  // const handleLifeRhythmsSave = (data) => {
+  //   setTempLifeRhythms(data);
+  //   setFormData((prev) => ({ ...prev, life_rhythms: data }));
+  // };
+
+  // // Interests save handler mein
+  // const handleInterestsSave = (data) => {
+  //   setTempInterests(data);
+  //   setFormData((prev) => ({ ...prev, interests_categories: data }));
+  // };
+
+  // // Questions save handler mein
+  // const handleQuestionsSave = (questionsData) => {
+  //   // ✅ Temporary states ko preserve rakho
+  //   const finalProfile = {
+  //     ...profile,
+  //     life_rhythms: tempLifeRhythms,
+  //     interests_categories: tempInterests,
+  //     prompts: questionsData,
+  //   };
+
+  //   setFormData(finalProfile);
+  //   updateProfile(finalProfile);
+  //   setIsQuestionsModalOpen(false);
+  // };
 const handleQuestionsSave = (questionsData) => {
   console.log("💾 Questions saved in EditProfile:", questionsData);
   
-  //  SIMPLE FIX: Direct set karo
+  // ✅ 1. Sirf formData mein prompts update karo
+  setFormData(prev => ({
+    ...prev,  // Purane data preserve rahenge
+    prompts: questionsData  // Sirf prompts update
+  }));
+
+    // ✅ 2. Context update using functional approach
+    updateProfile((currentProfile) => ({
+      ...currentProfile,             // Current profile state
+      prompts: questionsData         // Update only prompts
+    }));
+
+    setIsQuestionsModalOpen(false);
+  };
+
+    // //  Life Rhythms save handler
+    // const handleLifeRhythmsSave = (data) => {
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     life_rhythms: data,
+    //   }));
+    // };
+
+    // const handleInterestsSave = (data) => {
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     interests_categories: data, // UI ke liye same
+    //   }));
+    // };
+
+
+
+
+    const handleLifeRhythmsSave = (data) => {
+  console.log("🎵 Life rhythms saved:", data);
+  
+  // ✅ Sirf formData update karo
   setFormData(prev => ({
     ...prev,
-    prompts: questionsData  // Direct assignment
+    life_rhythms: data,
   }));
   
-  //  Context ko bhi update karo immediately
-  updateProfile({
-    ...profile,
-    prompts: questionsData
-  });
-  
-  setIsQuestionsModalOpen(false);
-  
-  console.log(" Prompts updated in form and context");
+  // ✅ Context ko update mat karo yahan (IMPORTANT)
+  // updateProfile({ life_rhythms: data }); // ❌ COMMENT OUT KARO
 };
 
-  //  Life Rhythms save handler
-  const handleLifeRhythmsSave = (data) => {
-    setFormData((prev) => ({
-      ...prev,
-      life_rhythms: data,
-    }));
-  };
-
-  const handleInterestsSave = (data) => {
-    setFormData((prev) => ({
-      ...prev,
-      interests_categories: data, // UI ke liye same
-    }));
-  };
-
+const handleInterestsSave = (data) => {
+  console.log("🎯 Interests saved:", data);
+  
+  // ✅ Sirf formData update karo
+  setFormData(prev => ({
+    ...prev,
+    interests_categories: data,
+  }));
+  
+  // ✅ Context ko update mat karo yahan (IMPORTANT)
+  // updateProfile({ ways_i_spend_time: data }); // ❌ COMMENT OUT KARO
+};
   // ================== LOAD PROFILE DATA ==================
 
   useEffect(() => {
+    // if (!profile || loading) return;
     if (!profile) return;
 
-      console.log("🔍 PROFILE IN EDITPAGE:", profile);
-  console.log("🔍 PROFILE.PROMPTS:", profile.prompts);
-  console.log("🔍 PROMPTS TYPE:", typeof profile.prompts);
-  console.log("🔍 PROMPTS KEYS:", Object.keys(profile.prompts || {}));
+    console.log("🔍 PROFILE IN EDITPAGE:", profile);
+    console.log("🔍 PROFILE.PROMPTS:", profile.prompts);
+    console.log("🔍 PROMPTS TYPE:", typeof profile.prompts);
+    console.log("🔍 PROMPTS KEYS:", Object.keys(profile.prompts || {}));
 
     let heightDisplay = "";
     if (profile.height) {
@@ -577,8 +632,6 @@ const handleQuestionsSave = (questionsData) => {
         heightDisplay = `${feet}.${inches}`;
       }
     }
-
-  
 
     //  FIX: 'ways_i_spend_time' se data load karein
     let interestsCategories = {};
@@ -610,16 +663,14 @@ const handleQuestionsSave = (questionsData) => {
       }
     }
 
+    //  SIMPLE PROMPTS LOADING
+    let loadedPrompts = {};
 
-
-     //  SIMPLE PROMPTS LOADING
-  let loadedPrompts = {};
-  
-  // Direct assignment (already cleaned in context)
-  if (profile.prompts && typeof profile.prompts === "object") {
-    loadedPrompts = profile.prompts;
-  }
-  console.log(" Clean prompts for form:", loadedPrompts);
+    // Direct assignment (already cleaned in context)
+    if (profile.prompts && typeof profile.prompts === "object") {
+      loadedPrompts = profile.prompts;
+    }
+    console.log(" Clean prompts for form:", loadedPrompts);
 
     setFormData({
       first_name: profile.first_name || "",
@@ -633,7 +684,7 @@ const handleQuestionsSave = (questionsData) => {
       education: mapToUIEnum("education", profile.education),
       relationship_pace: mapToUIEnum(
         "relationship_pace",
-        profile.relationship_pace
+        profile.relationship_pace,
       ),
       city: profile.city || "",
       country: profile.country || "",
@@ -662,7 +713,7 @@ const handleQuestionsSave = (questionsData) => {
       marital_status: profile.marital_status || "",
       professional_identity: mapToUIEnum(
         "professional_identity",
-        profile.professional_identity
+        profile.professional_identity,
       ),
       company_type: profile.company_type || "",
       education_institution_name: profile.education_institution_name || "",
@@ -678,12 +729,12 @@ const handleQuestionsSave = (questionsData) => {
       zodiac_sign: profile.zodiac_sign || "",
       interested_in: profile.interested_in || "",
       relationship_goal: profile.relationship_goal || "",
-    
+
       interests_categories: interestsCategories,
 
       children_preference: mapToUIEnum(
         "children_preference",
-        profile.children_preference
+        profile.children_preference,
       ),
       self_expression: profile.self_expression || "",
       interaction_style: profile.interaction_style || "",
@@ -691,11 +742,11 @@ const handleQuestionsSave = (questionsData) => {
       work_rhythm: mapToUIEnum("work_rhythm", profile.work_rhythm),
       career_decision_style: mapToUIEnum(
         "career_decision_style",
-        profile.career_decision_style
+        profile.career_decision_style,
       ),
       work_demand_response: mapToUIEnum(
         "work_demand_response",
-        profile.work_demand_response
+        profile.work_demand_response,
       ),
       relationship_values: profile.relationship_values || "",
       values_in_others: profile.values_in_others || "",
@@ -703,17 +754,17 @@ const handleQuestionsSave = (questionsData) => {
         profile.approach_to_physical_closeness || "",
       preference_of_closeness: mapToUIEnum(
         "preference_of_closeness",
-        profile.preference_of_closeness
+        profile.preference_of_closeness,
       ),
 
-love_language_affection: profile.love_language_affection || "",
-      
+      love_language_affection: profile.love_language_affection || "",
+
       // love_language_affection: Array.isArray(profile.love_language_affection)
       //   ? profile.love_language_affection.join(", ")
       //   : profile.love_language_affection || "",
-        
+
       life_rhythms: profile.life_rhythms || {},
-        prompts: loadedPrompts,
+      prompts: loadedPrompts,
     });
 
     if (profile.profile_image) {
@@ -783,9 +834,6 @@ love_language_affection: profile.love_language_affection || "",
       const simpleInterests = handleArrayField(formData.interests);
       //  CORRECT: Prompts format backend ke hisaab se
 
-
-     
-
       const payload = {
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
@@ -799,11 +847,11 @@ love_language_affection: profile.love_language_affection || "",
         marital_status: mapToDBEnum("marital_status", formData.marital_status),
         professional_identity: mapToDBEnum(
           "professional_identity",
-          formData.professional_identity
+          formData.professional_identity,
         ),
         relationship_pace: mapToDBEnum(
           "relationship_pace",
-          formData.relationship_pace
+          formData.relationship_pace,
         ),
         city: formData.city || null,
         country: formData.country || null,
@@ -830,67 +878,72 @@ love_language_affection: profile.love_language_affection || "",
         freetime_style: mapToDBEnum("freetime_style", formData.freetime_style),
         health_activity_level: mapToDBEnum(
           "health_activity_level",
-          formData.health_activity_level
+          formData.health_activity_level,
         ),
-       
-          prompts: formData.prompts, // final q
+
+        prompts: formData.prompts, // final q
+
+             // ✅ YEH 3 LINES IMPORTANT HAI:
+      // life_rhythms: formData.life_rhythms || {},
+      // ways_i_spend_time: formData.interests_categories || {},
+      // prompts: formData.prompts || {},
 
         smoking: mapToDBEnum("smoking", formData.smoking),
         drinking: mapToDBEnum("drinking", formData.drinking),
         pets_preference: mapToDBEnum(
           "pets_preference",
-          formData.pets_preference
+          formData.pets_preference,
         ),
         religious_belief: mapToDBEnum(
           "religious_belief",
-          formData.religious_belief
+          formData.religious_belief,
         ),
         zodiac_sign: formData.zodiac_sign || null,
         interested_in: mapToDBEnum("interested_in", formData.interested_in),
         relationship_goal: mapToDBEnum(
           "relationship_goal",
-          formData.relationship_goal
+          formData.relationship_goal,
         ),
         children_preference: mapToDBEnum(
           "children_preference",
-          formData.children_preference
+          formData.children_preference,
         ),
         self_expression: mapToDBEnum(
           "self_expression",
-          formData.self_expression
+          formData.self_expression,
         ),
         interaction_style: mapToDBEnum(
           "interaction_style",
-          formData.interaction_style
+          formData.interaction_style,
         ),
         work_environment: mapToDBEnum(
           "work_environment",
-          formData.work_environment
+          formData.work_environment,
         ),
         work_rhythm: mapToDBEnum("work_rhythm", formData.work_rhythm),
         career_decision_style: mapToDBEnum(
           "career_decision_style",
-          formData.career_decision_style
+          formData.career_decision_style,
         ),
         work_demand_response: mapToDBEnum(
           "work_demand_response",
-          formData.work_demand_response
+          formData.work_demand_response,
         ),
         relationship_values: mapToDBEnum(
           "relationship_values",
-          formData.relationship_values
+          formData.relationship_values,
         ),
         values_in_others: mapToDBEnum(
           "values_in_others",
-          formData.values_in_others
+          formData.values_in_others,
         ),
         approach_to_physical_closeness: mapToDBEnum(
           "approach_to_physical_closeness",
-          formData.approach_to_physical_closeness
+          formData.approach_to_physical_closeness,
         ),
         preference_of_closeness: mapToDBEnum(
           "preference_of_closeness",
-          formData.preference_of_closeness
+          formData.preference_of_closeness,
         ),
 
         // love_language_affection: mapToDBEnum(
@@ -898,19 +951,15 @@ love_language_affection: profile.love_language_affection || "",
         //   handleArrayField(formData.love_language_affection)
         // ),
 
-        love_language_affection:(
-          "love_language_affection",
-          formData.love_language_affection
-        ),
+        love_language_affection:
+          ("love_language_affection", formData.love_language_affection),
       };
 
       console.log(" FINAL PAYLOAD:", payload);
 
       await updateUserProfile(payload);
 
-      updateProfile({ ...profile, ...payload,
-          prompts: formData.prompts,
-       });
+      updateProfile({ ...profile, ...payload, prompts: formData.prompts });
       alert("Profile updated successfully ✅");
       navigate("/dashboard");
     } catch (err) {
@@ -1029,11 +1078,11 @@ love_language_affection: profile.love_language_affection || "",
       const uploadResponse = await axios.post(
         "https://backend-q0wc.onrender.com/api/upload",
         uploadFormData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { headers: { "Content-Type": "multipart/form-data" } },
       );
       const saveResponse = await axios.post(
         "https://backend-q0wc.onrender.com/api/saveProfileImage",
-        { user_id: profile.user_id, imageUrl: uploadResponse.data.imageUrl }
+        { user_id: profile.user_id, imageUrl: uploadResponse.data.imageUrl },
       );
       updateProfile(saveResponse.data.profiles);
       setImagePreview(uploadResponse.data.imageUrl);
@@ -1114,8 +1163,8 @@ love_language_affection: profile.love_language_affection || "",
                     step === currentStep
                       ? "bg-indigo-600 text-white"
                       : step < currentStep
-                      ? "bg-indigo-100 text-indigo-600"
-                      : "bg-gray-200 text-gray-400"
+                        ? "bg-indigo-100 text-indigo-600"
+                        : "bg-gray-200 text-gray-400"
                   }`}
                 >
                   {step}
@@ -1124,12 +1173,12 @@ love_language_affection: profile.love_language_affection || "",
                   {step === 1
                     ? "Photo"
                     : step === 2
-                    ? "Personal"
-                    : step === 3
-                    ? "Professional"
-                    : step === 4
-                    ? "About"
-                    : "Relationships"}
+                      ? "Personal"
+                      : step === 3
+                        ? "Professional"
+                        : step === 4
+                          ? "About"
+                          : "Relationships"}
                 </span>
               </button>
             ))}
@@ -1769,7 +1818,7 @@ love_language_affection: profile.love_language_affection || "",
                         <option value="Have and don’t want more">
                           Have and don't want more
                         </option>
-                     <option value="Open or not sure yet">
+                        <option value="Open or not sure yet">
                           Open / Not Sure yet
                         </option>
                         {/* <option value="Open">Open</option>OPEN_OR_NOT_SURE_YET */}
@@ -1874,7 +1923,7 @@ love_language_affection: profile.love_language_affection || "",
                                     </span>
                                   </div>
                                 </div>
-                              )
+                              ),
                           )}
                         </div>
                       </div>
@@ -1942,80 +1991,83 @@ love_language_affection: profile.love_language_affection || "",
                     </div>
                   )}
 
+                  {/*  FIXED: Profile Questions Section */}
+                  <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      Tell Us More About Yourself
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Answer these prompts to help others know you better
+                    </p>
 
- 
-      {/*  FIXED: Profile Questions Section */}
-      <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
-        <h4 className="text-lg font-semibold text-gray-800 mb-2">
-          Tell Us More About Yourself
-        </h4>
-        <p className="text-sm text-gray-600 mb-3">
-          Answer these prompts to help others know you better
-        </p>
-
-        <button
-          type="button"
-          onClick={() => setIsQuestionsModalOpen(true)}
-          className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-        >
-          ✍️ Edit Profile Questions
-        </button>
-
-        {/* Display existing prompts */}
-        {formData.prompts && typeof formData.prompts === "object" && Object.keys(formData.prompts).length > 0 ? (
-          <div className="mt-4 p-3 bg-white border rounded-md">
-            <div className="flex justify-between items-center mb-2">
-              <p className="font-medium text-gray-700">Answered Questions:</p>
-              <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
-                {Object.keys(formData.prompts).length} answered
-              </span>
-            </div>
-            <div className="space-y-3">
-              {Object.entries(formData.prompts)
-                .slice(0, 3)
-                .map(([question_key, answer]) => {
-                  const question = PROFILE_QUESTIONS.find(
-                    (q) => q.key === question_key
-                  );
-                  const label = question ? question.label : question_key;
-
-                  return (
-                    <div
-                      key={question_key}
-                      className="border-l-4 border-purple-300 pl-3 py-2"
+                    <button
+                      type="button"
+                      onClick={() => setIsQuestionsModalOpen(true)}
+                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
                     >
-                      <p className="font-medium text-sm text-gray-800 mb-1">
-                        {label}
-                      </p>
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {answer}
-                      </p>
-                    </div>
-                  );
-                })}
+                      ✍️ Edit Profile Questions
+                    </button>
 
-              {Object.keys(formData.prompts).length > 3 && (
-                <div className="text-center pt-2 border-t">
-                  <p className="text-xs text-purple-600">
-                    +{Object.keys(formData.prompts).length - 3} more questions answered
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="mt-4 p-4 bg-white border border-dashed border-gray-300 rounded-md text-center">
-            <p className="text-gray-500 text-sm italic">
-              No questions answered yet
-            </p>
-            <p className="text-gray-400 text-xs mt-1">
-              Click above button to answer prompts about yourself
-            </p>
-          </div>
-        )}
-      </div>
+                    {/* Display existing prompts */}
+                    {formData.prompts &&
+                    typeof formData.prompts === "object" &&
+                    Object.keys(formData.prompts).length > 0 ? (
+                      <div className="mt-4 p-3 bg-white border rounded-md">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="font-medium text-gray-700">
+                            Answered Questions:
+                          </p>
+                          <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+                            {Object.keys(formData.prompts).length} answered
+                          </span>
+                        </div>
+                        <div className="space-y-3">
+                          {Object.entries(formData.prompts)
+                            .slice(0, 3)
+                            .map(([question_key, answer]) => {
+                              const question = PROFILE_QUESTIONS.find(
+                                (q) => q.key === question_key,
+                              );
+                              const label = question
+                                ? question.label
+                                : question_key;
 
+                              return (
+                                <div
+                                  key={question_key}
+                                  className="border-l-4 border-purple-300 pl-3 py-2"
+                                >
+                                  <p className="font-medium text-sm text-gray-800 mb-1">
+                                    {label}
+                                  </p>
+                                  <p className="text-sm text-gray-600 line-clamp-2">
+                                    {answer}
+                                  </p>
+                                </div>
+                              );
+                            })}
 
+                          {Object.keys(formData.prompts).length > 3 && (
+                            <div className="text-center pt-2 border-t">
+                              <p className="text-xs text-purple-600">
+                                +{Object.keys(formData.prompts).length - 3} more
+                                questions answered
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-4 p-4 bg-white border border-dashed border-gray-300 rounded-md text-center">
+                        <p className="text-gray-500 text-sm italic">
+                          No questions answered yet
+                        </p>
+                        <p className="text-gray-400 text-xs mt-1">
+                          Click above button to answer prompts about yourself
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2082,7 +2134,7 @@ love_language_affection: profile.love_language_affection || "",
                         <option value="HAVE_AND_DONT_WANT_MORE">
                           Have and don't want more
                         </option>
-                           {/* "Open / Not Sure yet": "OPEN / Not sure yet",  */}
+                        {/* "Open / Not Sure yet": "OPEN / Not sure yet",  */}
                         {/* <option value="OPEN_OR_NOT_SURE_YET">
                           Open / Not Sure yet
                         </option> */}
@@ -2442,15 +2494,13 @@ love_language_affection: profile.love_language_affection || "",
         />
       )}
 
-
-       {/* ✅ FIXED: ProfileQuestions Modal */}
+      {/* ✅ FIXED: ProfileQuestions Modal */}
       <ProfileQuestions
         isOpen={isQuestionsModalOpen}
         onClose={() => setIsQuestionsModalOpen(false)}
         onSave={handleQuestionsSave}
         initialData={formData.prompts} // Pass prompts data
       />
-  
     </div>
   );
 }
