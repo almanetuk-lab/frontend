@@ -1,5 +1,11 @@
 import React from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  BrowserRouter,
+} from "react-router-dom";
 import { UserProfileProvider } from "./components/context/UseProfileContext";
 import Header from "./components/home/Header";
 import Footer from "./components/home/Footer";
@@ -75,9 +81,15 @@ import LifeRhythmsForm from "./components/profiles/LifeRhythmsForm";
 // import FacebookPage from "./components/SocialPages/FacebookPage";
 // import LinkedInPage from "./components/SocialPages/LinkedInPage";
 
-//import AdminReport from "./pages/AdminReport";
-import AdminReport from "./components/pages/AdminReport.jsx";
-
+import AdminReport from "./pages/AdminReport";
+///
+// import AdminReport from "./components/pages/AdminReport.jsx";
+// import { AdminReportProvider } from "./components/context/AdminReportContext.jsx";
+// import UsersList from "./components/pages/UsersList";
+// import SubscriptionPay from "./components/pages/SubscriptionPay";
+// import MessagesDetails from "./components/pages/MessagesDetails";
+// import NotRenewedUsers from "./components/pages/NotRenewedUsers";
+///
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("accessToken");
@@ -106,7 +118,6 @@ const PlanFormWrapper = () => {
   return <AdminAddNewPlan />;
 };
 
-
 export default function App() {
   return (
     // <HashRouter>
@@ -125,7 +136,7 @@ export default function App() {
           }
         />
 
-        {/* payment result routes */}
+         {/* payment result routes */}
         <Route
           path="/payment-success"
           element={
@@ -220,7 +231,7 @@ export default function App() {
 
 
         /> */}
-{/* 
+        {/* 
  
         <Route
           path="/search"
@@ -335,7 +346,7 @@ export default function App() {
             </MainLayout>
           }
         /> */}
-{/* 
+        {/* 
         <Route
           path="/search"
           element={
@@ -402,7 +413,7 @@ export default function App() {
             </MainLayout>
           }
         />
-           <Route
+        <Route
           path="/security"
           element={
             <MainLayout>
@@ -435,7 +446,7 @@ export default function App() {
 
         {/* <Route path="/life-rhythms" element={<LifeRhythmsPage />} /> */}
 
-         <Route
+        <Route
           path="/life-rhythms"
           element={
             <MainLayout>
