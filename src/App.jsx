@@ -230,6 +230,7 @@ export default function App() {
             </UserProtectedRoute>
           }
         /> */}
+
         {/* plan Routes */}
         <Route
           path="/plans"
@@ -324,28 +325,6 @@ export default function App() {
           }
         />
 
-        {/* Chat Routes WITH Header & Footer */}
-        {/* <Route
-          path="/chat"
-          element={
-            <MainLayout>
-              <UserProtectedRoute>
-                <ChatModule />
-              </UserProtectedRoute>
-            </MainLayout>
-          }
-        /> */}
-{/* 
-        <Route
-          path="/search"
-          element={
-            <MainLayout>
-              <UserProtectedRoute>
-                <AdvancedSearch />
-              </UserProtectedRoute>
-            </MainLayout>
-          }
-        /> */}
 
         {/* Matches Routes WITH Header & Footer */}
         <Route
