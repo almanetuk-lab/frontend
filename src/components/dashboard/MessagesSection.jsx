@@ -1194,7 +1194,7 @@ export default function MessagesSection() {
                     accept="*/*"
                   />
 
-                  <input
+                  {/* <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
@@ -1206,7 +1206,24 @@ export default function MessagesSection() {
                     onKeyPress={handleKeyPress}
                     className="flex-1 px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
                     disabled={!planStatus.active}
-                  />
+                  /> */}
+
+ <input
+  type="text"
+  value={newMessage}
+  onChange={(e) => setNewMessage(e.target.value)}
+  placeholder={
+    planStatus.active
+      ? `Message ${selectedUser.name}...`
+      : "Upgrade plan to send messages..."
+  }
+  onKeyPress={handleKeyPress}
+  disabled={!planStatus.active}
+  className={`flex-1 px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-xl text-sm sm:text-base bg-white ${
+    planStatus.active ? "cursor-text" : "cursor-not-allowed"
+  }`}
+/>
+
 
                   <button
                     onClick={handleSendMessage}

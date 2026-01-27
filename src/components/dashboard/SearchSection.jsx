@@ -699,14 +699,29 @@ export default function AdvancedSearch() {
 
           {/* Search Button */}
           <div className="mt-8 pt-6 border-t border-gray-200">
-            {/* <button
+            {/* 
+            <button
               type="button"
               onClick={handleSearch}
-              disabled={loading}
+              disabled={loading || searchLimitReached}
               className={`w-full py-3 bg-blue-600 text-white rounded-lg font-medium text-lg transition-colors ${
-                loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+                loading || searchLimitReached
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-blue-700"
               }`}
-            > */}
+            >
+              {searchLimitReached
+                ? "🔒 Search limit over"
+                : loading
+                  ? "🔍 Searching..."
+                  : `🔍 Search ${
+                      activeTab === "basic"
+                        ? "Matches"
+                        : activeTab === "advanced"
+                          ? "Advanced"
+                          : "Nearby"
+                    }`}
+            </button> */}
 
             <button
               type="button"
