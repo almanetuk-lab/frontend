@@ -81,15 +81,14 @@ import LifeRhythmsForm from "./components/profiles/LifeRhythmsForm";
 // import FacebookPage from "./components/SocialPages/FacebookPage";
 // import LinkedInPage from "./components/SocialPages/LinkedInPage";
 
-import AdminReport from "./pages/AdminReport";
-///
-// import AdminReport from "./components/pages/AdminReport.jsx";
-// import { AdminReportProvider } from "./components/context/AdminReportContext.jsx";
+
+// import AdminReport from "./components/pages/AdminReport";
 // import UsersList from "./components/pages/UsersList";
 // import SubscriptionPay from "./components/pages/SubscriptionPay";
 // import MessagesDetails from "./components/pages/MessagesDetails";
-// import NotRenewedUsers from "./components/pages/NotRenewedUsers";
-///
+// import NotRenewedUsers  from "./components/pages/NotRenewedUsers";
+
+
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("accessToken");
@@ -124,7 +123,6 @@ export default function App() {
     <UserProfileProvider>
       <Routes>
         <Route path="/admin-plans-new" element={<PlanFormWrapper />} />
-
         {/* Admin Routes - SEPARATE (No Header/Footer) */}
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route
@@ -136,7 +134,51 @@ export default function App() {
           }
         />
 
-         {/* payment result routes */}
+
+        {/* // admin routes for reports  */}
+        {/* <Route
+          path="/admin-reports"
+          element={
+            <ProtectedRoute>
+              <AdminReport />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users/:type"
+          element={
+            <ProtectedRoute>
+              <UsersList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/subscribe"
+          element={
+            <ProtectedRoute>
+              <SubscriptionPay />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/messages"
+          element={
+            <ProtectedRoute>
+              <MessagesDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users/not-renewed"
+          element={
+            <ProtectedRoute>
+              <NotRenewedUsers />
+            </ProtectedRoute>
+          }
+        /> */}
+
+
+        {/* payment result routes */}
         <Route
           path="/payment-success"
           element={
@@ -145,9 +187,7 @@ export default function App() {
             </MainLayout>
           }
         />
-
         {/* payment result routes */}
-
         <Route
           path="/payment-failed"
           element={
@@ -156,15 +196,12 @@ export default function App() {
             </MainLayout>
           }
         />
-
         {/* lindin callbackek route  */}
         <Route path="/linkedin-callback" element={<LinkedInCallback />} />
         {/* <Route path="/linkedin-callback" element={<LinkedinCallback />} /> */}
-
         <Route path="/admin/blogs/create" element={<CreateArticle />} />
         <Route path="/admin/blogs/edit/:id" element={<EditArticle />} />
         <Route path="/blogs/:id" element={<ArticleDetails />} />
-
         {/* Public Routes WITH Header & Footer */}
         <Route
           path="/"
@@ -174,7 +211,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/login"
           element={
@@ -185,7 +221,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/register"
           element={
@@ -196,7 +231,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/forgot-password"
           element={
@@ -207,7 +241,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         {/* Chat Routes
         <Route
           path="/chat"
@@ -281,7 +314,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/create-profile"
           element={
@@ -292,7 +324,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/edit-profile"
           element={
@@ -303,7 +334,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/contact"
           element={
@@ -314,7 +344,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/about"
           element={
@@ -325,7 +354,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/blog"
           element={
@@ -334,7 +362,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         {/* Chat Routes WITH Header & Footer */}
         {/* <Route
           path="/chat"
@@ -357,7 +384,6 @@ export default function App() {
             </MainLayout>
           }
         /> */}
-
         {/* Matches Routes WITH Header & Footer */}
         <Route
           path="/matches"
@@ -369,7 +395,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         {/* Member Routes WITH Header & Footer */}
         <Route
           path="/privacy-policy"
@@ -379,7 +404,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/accessibility"
           element={
@@ -388,7 +412,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/imprint"
           element={
@@ -421,7 +444,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/members"
           element={
@@ -432,7 +454,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         <Route
           path="/profile-views"
           element={
@@ -443,9 +464,7 @@ export default function App() {
             </MainLayout>
           }
         />
-
         {/* <Route path="/life-rhythms" element={<LifeRhythmsPage />} /> */}
-
         <Route
           path="/life-rhythms"
           element={
@@ -486,7 +505,6 @@ export default function App() {
             </MainLayout>
           }
         />
-
         {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
