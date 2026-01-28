@@ -66,26 +66,61 @@ export default function Cart() {
 //   }
 // };
 
-// Option 2: Even better solution
+// // Option 2: Even better solution
+// const handleRemove = async (id) => {
+//   try {
+//     // 1. Get cart
+//     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+    
+//     // 2. Remove item
+//     const updatedCart = existingCart.filter((item) => item.id !== id);
+    
+//     // 3. Save to localStorage
+//     localStorage.setItem("cart", JSON.stringify(updatedCart));
+    
+//     // 4. UPDATE COUNT IMMEDIATELY - No waiting for events
+//     // Force update header count directly
+//     if (window.updateCartCountImmediately) {
+//       window.updateCartCountImmediately(updatedCart.length);
+//     }
+    
+//     // 5. Trigger events
+//     window.dispatchEvent(new Event("cartUpdated"));
+    
+//     // 6. Update state
+//     setCartItems(updatedCart);
+    
+//     // 7. API call
+//     await removeFromCart(id);
+    
+//   } catch (err) {
+//     console.error("Error removing item:", err);
+//   }
+// };
+
+
 const handleRemove = async (id) => {
   try {
-    // 1. Get cart
+    // 1. Get current cart from localStorage
     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
     
-    // 2. Remove item
-    const updatedCart = existingCart.filter((item) => item.id !== id);
+    // 2. Remove the item
+    const updatedCart = existingCart.filter((item) => item.id != id); // Use != for string/number comparison
     
     // 3. Save to localStorage
     localStorage.setItem("cart", JSON.stringify(updatedCart));
     
-    // 4. UPDATE COUNT IMMEDIATELY - No waiting for events
-    // Force update header count directly
-    if (window.updateCartCountImmediately) {
-      window.updateCartCountImmediately(updatedCart.length);
+    // 4. DIRECT COUNTER UPDATE - YEH LINE ADD KARNA HAI
+    // Update header counter immediately
+    const cartCountElement = document.querySelector('.cart-count, [data-cart-count]');
+    if (cartCountElement) {
+      cartCountElement.textContent = updatedCart.length;
+      cartCountElement.setAttribute('data-count', updatedCart.length);
     }
     
-    // 5. Trigger events
+    // 5. Trigger custom event for other components
     window.dispatchEvent(new Event("cartUpdated"));
+    window.dispatchEvent(new Event("storage")); // For localStorage listeners
     
     // 6. Update state
     setCartItems(updatedCart);

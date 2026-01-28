@@ -6,6 +6,8 @@ export default function AdvancedSearch() {
   const [activeTab, setActiveTab] = useState("basic");
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [searchLimitReached, setSearchLimitReached] = useState(false);
+
   const [filters, setFilters] = useState({
     basicSearch: "",
     first_name: "",
@@ -24,7 +26,7 @@ export default function AdvancedSearch() {
     lat: "",
     lon: "",
   });
-   //new code added now ik
+  //new code added now ik
   const [plan, setPlan] = useState({
     loading: true,
     active: false,
@@ -45,13 +47,13 @@ export default function AdvancedSearch() {
         console.log(
           "GPS location fetched:",
           pos.coords.latitude,
-          pos.coords.longitude
+          pos.coords.longitude,
         );
       },
       () => {
         alert("Location permission denied. Please allow location access.");
       },
-      { enableHighAccuracy: true, maximumAge: 60000, timeout: 10000 }
+      { enableHighAccuracy: true, maximumAge: 60000, timeout: 10000 },
     );
   };
 
@@ -82,13 +84,12 @@ export default function AdvancedSearch() {
   }, [activeTab]);
 
   const handleTabChange = (tabId) => {
-
     if (!plan.loading && !plan.active) {
-    alert(
-      "Your subscription has expired. Please upgrade to use search features."
-    );
-    return;
-  }
+      alert(
+        "Your subscription has expired. Please upgrade to use search features.",
+      );
+      return;
+    }
     setActiveTab(tabId);
 
     if (tabId !== "advanced") {
@@ -124,15 +125,14 @@ export default function AdvancedSearch() {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
-
   // const performSearch = async () => {
-  //   if (activeTab === "advanced" && !plan.active) {
+  //   if (!plan.loading && !plan.active) {
   //     alert(
-  //       "Your subscription has expired. Please upgrade to use Advanced Search."
+  //       "Your subscription has expired. Please upgrade to use search features.",
   //     );
   //     return;
   //   }
-
+  //   // yeh add kiya h
   //   setLoading(true);
   //   setSearchResults([]);
 
@@ -145,20 +145,15 @@ export default function AdvancedSearch() {
   //       return val;
   //     };
 
-  //     /*  — updated BASIC search param mapping */
   //     if (activeTab === "basic") {
   //       searchParams = { search_mode: "basic" };
-
   //       if (filters.basicSearch)
   //         searchParams.first_name = cleanValue(filters.basicSearch);
-
   //       if (filters.profession)
   //         searchParams.profession = cleanValue(filters.profession);
-
   //       if (filters.city) searchParams.city = cleanValue(filters.city);
   //     }
 
-  //     /* — updated ADVANCED mode mapping */
   //     if (activeTab === "advanced") {
   //       searchParams = {
   //         search_mode: "advanced",
@@ -176,7 +171,6 @@ export default function AdvancedSearch() {
   //       };
   //     }
 
-  //     /* — updated NEAR ME (city override + radius fallback) */
   //     if (activeTab === "nearme") {
   //       searchParams = {
   //         search_mode: "nearme",
@@ -187,22 +181,19 @@ export default function AdvancedSearch() {
   //       };
   //     }
 
-  //     /*  smart param cleaning (keeps lat/lon always) */
   //     const cleanParams = Object.fromEntries(
   //       Object.entries(searchParams).filter(([key, value]) => {
   //         if (key === "lat" || key === "lon") return true;
-
   //         if (["min_age", "max_age", "radius"].includes(key)) {
   //           return value !== "" && value !== null && !isNaN(value);
   //         }
-
   //         return (
   //           value !== "" &&
   //           value !== null &&
   //           value !== undefined &&
   //           !(typeof value === "string" && value.trim() === "")
   //         );
-  //       })
+  //       }),
   //     );
 
   //     console.log("Shraddha Final Params:", cleanParams);
@@ -217,49 +208,39 @@ export default function AdvancedSearch() {
   //   }
   // };
 
-  
   const performSearch = async () => {
-    if (!plan.loading && !plan.active) {
-      alert(
-        "Your subscription has expired. Please upgrade to use search features."
-      );
+    if (searchLimitReached) {
+      alert("Your people search limit is over. Please upgrade your plan.");
       return;
     }
-  // yeh add kiya h
+
     setLoading(true);
     setSearchResults([]);
 
     try {
       let searchParams = {};
 
-      const cleanValue = (val) => {
-        if (val === undefined || val === null) return "";
-        if (typeof val === "string") return val.trim();
-        return val;
-      };
-
       if (activeTab === "basic") {
-        searchParams = { search_mode: "basic" };
-        if (filters.basicSearch)
-          searchParams.first_name = cleanValue(filters.basicSearch);
-        if (filters.profession)
-          searchParams.profession = cleanValue(filters.profession);
-        if (filters.city)
-          searchParams.city = cleanValue(filters.city);
+        searchParams = {
+          search_mode: "basic",
+          first_name: filters.basicSearch,
+          profession: filters.profession,
+          city: filters.city,
+        };
       }
 
       if (activeTab === "advanced") {
         searchParams = {
           search_mode: "advanced",
-          first_name: cleanValue(filters.first_name),
-          last_name: cleanValue(filters.last_name),
-          gender: cleanValue(filters.gender),
-          marital_status: cleanValue(filters.marital_status),
-          profession: cleanValue(filters.profession),
-          skills: cleanValue(filters.skills),
-          interests: cleanValue(filters.interests),
-          city: cleanValue(filters.city),
-          state: cleanValue(filters.state),
+          first_name: filters.first_name,
+          last_name: filters.last_name,
+          gender: filters.gender,
+          marital_status: filters.marital_status,
+          profession: filters.profession,
+          skills: filters.skills,
+          interests: filters.interests,
+          city: filters.city,
+          state: filters.state,
           min_age: filters.min_age,
           max_age: filters.max_age,
         };
@@ -271,37 +252,29 @@ export default function AdvancedSearch() {
           radius: Number(filters.radius || filters.distance),
           lat: filters.lat,
           lon: filters.lon,
-          city: cleanValue(filters.city),
+          city: filters.city,
         };
       }
 
-      const cleanParams = Object.fromEntries(
-        Object.entries(searchParams).filter(([key, value]) => {
-          if (key === "lat" || key === "lon") return true;
-          if (["min_age", "max_age", "radius"].includes(key)) {
-            return value !== "" && value !== null && !isNaN(value);
-          }
-          return (
-            value !== "" &&
-            value !== null &&
-            value !== undefined &&
-            !(typeof value === "string" && value.trim() === "")
-          );
-        })
-      );
-
-      console.log("Shraddha Final Params:", cleanParams);
-
-      const response = await adminAPI.searchProfiles(cleanParams);
+      const response = await api.get("/search", { params: searchParams });
       setSearchResults(response.data || []);
     } catch (error) {
-      console.error("Search API error:", error);
-      alert("Search failed: " + (error.response?.data?.error || error.message));
+      console.error("Search error:", error);
+
+      if (
+        error.response?.status === 403 &&
+        error.response?.data?.code === "SEARCH_LIMIT_EXCEEDED"
+      ) {
+        setSearchLimitReached(true);
+        alert("Your people search limit is over. Please upgrade.");
+        return;
+      }
+
+      alert("Search failed");
     } finally {
       setLoading(false);
     }
   };
-
 
   const handleSearch = (e) => {
     if (e) e.preventDefault();
@@ -380,7 +353,7 @@ export default function AdvancedSearch() {
                         handleInputChange("basicSearch", e.target.value)
                       }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                   />
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -396,7 +369,7 @@ export default function AdvancedSearch() {
                           handleInputChange("profession", e.target.value)
                         }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                     />
+                      />
                     </div>
 
                     <div>
@@ -411,7 +384,7 @@ export default function AdvancedSearch() {
                           handleInputChange("city", e.target.value)
                         }
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                      />
                     </div>
                   </div>
                 </div>
@@ -477,7 +450,7 @@ export default function AdvancedSearch() {
                         onClick={() =>
                           handleInputChange(
                             "gender",
-                            filters.gender === "Male" ? "" : "Male"
+                            filters.gender === "Male" ? "" : "Male",
                           )
                         }
                         className={`px-6 py-2 border rounded-md transition-colors ${
@@ -493,7 +466,7 @@ export default function AdvancedSearch() {
                         onClick={() =>
                           handleInputChange(
                             "gender",
-                            filters.gender === "Female" ? "" : "Female"
+                            filters.gender === "Female" ? "" : "Female",
                           )
                         }
                         className={`px-6 py-2 border rounded-md transition-colors ${
@@ -726,23 +699,51 @@ export default function AdvancedSearch() {
 
           {/* Search Button */}
           <div className="mt-8 pt-6 border-t border-gray-200">
+            {/* 
             <button
               type="button"
               onClick={handleSearch}
-              disabled={loading}
+              disabled={loading || searchLimitReached}
               className={`w-full py-3 bg-blue-600 text-white rounded-lg font-medium text-lg transition-colors ${
-                loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+                loading || searchLimitReached
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-blue-700"
               }`}
             >
-              {loading
-                ? "🔍 Searching..."
-                : `🔍 Search ${
-                    activeTab === "basic"
-                      ? "Matches"
-                      : activeTab === "advanced"
-                      ? "Advanced"
-                      : "Nearby"
-                  }`}
+              {searchLimitReached
+                ? "🔒 Search limit over"
+                : loading
+                  ? "🔍 Searching..."
+                  : `🔍 Search ${
+                      activeTab === "basic"
+                        ? "Matches"
+                        : activeTab === "advanced"
+                          ? "Advanced"
+                          : "Nearby"
+                    }`}
+            </button> */}
+
+            <button
+              type="button"
+              onClick={handleSearch}
+              disabled={loading || searchLimitReached}
+              className={`w-full py-3 bg-blue-600 text-white rounded-lg font-medium text-lg transition-colors ${
+                loading || searchLimitReached
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-blue-700"
+              }`}
+            >
+              {searchLimitReached
+                ? "🔒 Search limit over"
+                : loading
+                  ? "🔍 Searching..."
+                  : `🔍 Search ${
+                      activeTab === "basic"
+                        ? "Matches"
+                        : activeTab === "advanced"
+                          ? "Advanced"
+                          : "Nearby"
+                    }`}
             </button>
           </div>
 
@@ -792,5 +793,3 @@ export default function AdvancedSearch() {
     </div>
   );
 }
-
-

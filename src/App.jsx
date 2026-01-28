@@ -233,6 +233,23 @@ export default function App() {
         />
      
         
+<<<<<<< HEAD
+=======
+
+
+        /> */}
+{/* 
+ 
+        <Route
+          path="/search"
+          element={
+            <UserProtectedRoute>
+              <AdvancedSearch />
+            </UserProtectedRoute>
+          }
+        /> */}
+
+>>>>>>> 530637160f8ef6e1cd064e7712c4c2524eecd2ad
         {/* plan Routes */}
         <Route
           path="/plans"
@@ -321,6 +338,7 @@ export default function App() {
             </MainLayout>
           }
         />
+<<<<<<< HEAD
         {/* Chat Routes WITH Header & Footer */}
         {/* <Route
           path="/chat"
@@ -343,6 +361,10 @@ export default function App() {
             </MainLayout>
           }
         /> */}
+=======
+
+
+>>>>>>> 530637160f8ef6e1cd064e7712c4c2524eecd2ad
         {/* Matches Routes WITH Header & Footer */}
         <Route
           path="/matches"
