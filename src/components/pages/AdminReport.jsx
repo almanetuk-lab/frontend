@@ -103,35 +103,38 @@ const AdminReport = () => {
             <StatCard
               title="Total Users"
               value={report.summary.users.total_users}
-              onClick={() => navigate("/users/all")}
+              onClick={() => navigate("/admin/users/all")} 
+              // onClick={() => navigate("/users/all")}
             />
             <StatCard
               title="Approved Users"
               value={report.summary.users.approved_users}
-              onClick={() => navigate("/users/approved")}
+              onClick={() => navigate("/admin/users/approved")}
+              // onClick={() => navigate("/users/approved")}
             />
             <StatCard
               title="Hold Users"
               value={report.summary.users.hold_users}
-              onClick={() => navigate("/users/hold")}
+              // onClick={() => navigate("/users/hold")}
             />
             <StatCard
               title="In-process Users"
               value={report.summary.users.in_process_users}
-              onClick={() => navigate("/users/process")}
+              onClick={() => navigate("/admin/users/process")}
+              // onClick={() => navigate("/users/process")}
             />
 
             <StatCard
               title="Deactivated Users"
               value={report.summary.users.deactivated_users}
-              onClick={() => navigate("/users/deactivated")}
+              onClick={() => navigate("/admin/users/deactivated")}
             />
 
             <StatCard
               title="Subscriptions"
               value={report.summary.subscriptions.total_subscriptions}
               onClick={() =>
-                navigate("/subscribe", {
+                navigate("/admin/subscribe", {
                   state: {
                     val: report.users_activity,
                     expired_not_renewed:
@@ -145,7 +148,7 @@ const AdminReport = () => {
               title="Total Messages"
               value={report.summary.messages.total_messages}
               onClick={() =>
-                navigate("/messages", {
+                navigate("/admin/messages", {
                   state: {
                     total: report.summary.messages.total_messages,
                     val: report.messages_activity || [],
@@ -157,7 +160,7 @@ const AdminReport = () => {
             <StatCard
               title="Not Renewed Users"
               value={notRenewedCount}
-              onClick={() => navigate("/users/not-renewed")}
+              onClick={() => navigate("/admin/users/not-renewed")}
             />
           </div>
 

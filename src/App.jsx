@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Routes,
-  Route,
-  Navigate,
-  useNavigate,
-  BrowserRouter,
-} from "react-router-dom";
+import { Routes,Route, Navigate,useNavigate,BrowserRouter,} from "react-router-dom";
 import { UserProfileProvider } from "./components/context/UseProfileContext";
 import Header from "./components/home/Header";
 import Footer from "./components/home/Footer";
@@ -62,7 +56,6 @@ import EditArticle from "./components/pages/EditArticle";
 import { ToastContainer } from "react-toastify";
 // profile view recent activity
 import ProfileViews from "./components/pages/ProfileViews";
-//import api from "../api/axiosConfig";
 
 // import About from './componets/pages/AboutPage.jsx';
 import About from "./components/pages/AboutPage";
@@ -77,16 +70,13 @@ import OnlineDating from "./components/social/OnlineDating";
 import TermsAndConditions from "./components/social/TermsAndConditions";
 import Securety from "./components/social/Securety";
 import LifeRhythmsForm from "./components/profiles/LifeRhythmsForm";
-// import TwitterPage from "./components/SocialPages/TwitterPage";
-// import FacebookPage from "./components/SocialPages/FacebookPage";
-// import LinkedInPage from "./components/SocialPages/LinkedInPage";
 
 
-// import AdminReport from "./components/pages/AdminReport";
-// import UsersList from "./components/pages/UsersList";
-// import SubscriptionPay from "./components/pages/SubscriptionPay";
-// import MessagesDetails from "./components/pages/MessagesDetails";
-// import NotRenewedUsers  from "./components/pages/NotRenewedUsers";
+import AdminReport from "./components/pages/AdminReport";
+import UsersList from "./components/pages/UsersList";
+import SubscriptionPay from "./components/pages/SubscriptionPay";
+import MessagesDetails from "./components/pages/MessagesDetails";
+import NotRenewedUsers  from "./components/pages/NotRenewedUsers";
 
 
 // Protected Route Component (For regular users)
@@ -136,7 +126,7 @@ export default function App() {
 
 
         {/* // admin routes for reports  */}
-        {/* <Route
+         <Route
           path="/admin-reports"
           element={
             <ProtectedRoute>
@@ -175,7 +165,7 @@ export default function App() {
               <NotRenewedUsers />
             </ProtectedRoute>
           }
-        /> */}
+        /> 
 
 
         {/* payment result routes */}
@@ -241,39 +231,8 @@ export default function App() {
             </MainLayout>
           }
         />
-        {/* Chat Routes
-        <Route
-          path="/chat"
-          element={
-            <UserProtectedRoute>
-              <ChatModule />
-            </UserProtectedRoute>
-          }
-
-        />
-         
-         <Route
-          path="/admin-reports"
-          element={
-            <ProtectedRoute>
-              <AdminReport />
-            </ProtectedRoute>
-          }
-        />
+     
         
-
-
-        /> */}
-        {/* 
- 
-        <Route
-          path="/search"
-          element={
-            <UserProtectedRoute>
-              <AdvancedSearch />
-            </UserProtectedRoute>
-          }
-        /> */}
         {/* plan Routes */}
         <Route
           path="/plans"
