@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // import { adminAPI } from "../services/adminApi";
 import { chatApi, getCurrentUserId } from "../services/chatApi";
-import userApi from "../services/userApi";
+import { userAPI } from "../services/userApi";
 
 const MemberPage = () => {
   const navigate = useNavigate();
@@ -25,9 +25,9 @@ const MemberPage = () => {
   useEffect(() => {
     const checkPlanStatus = async () => {
       try {
-        const res = await userApi.getPlanStatus();
+        const res = await  userAPI .getPlanStatus();
         setPlanActive(res.data?.active === true);
-      } catch {
+      } catch (error) {
         setPlanActive(false);
       } finally {
         setPlanLoading(false);
@@ -80,7 +80,7 @@ const MemberPage = () => {
     try {
       setLoading(true);
 
-      const response = await userApi.searchProfiles({
+      const response = await userAPI.searchProfiles({
         search_mode: "basic",
         first_name: "",
       });
