@@ -37,7 +37,7 @@ import MatchesPage from "./components/MatchSystem/MatchesPage";
 import MembersPage from "./components/pages/MemberPage";
 import Contact from "./components/pages/Contact";
 // Linkde login button
-import LinkedInCallback from "./components/social/LinkedInCallback";
+// import LinkedInCallback from "./components/social/LinkedInCallback";
 import AddNewPlan from "./components/admin/AddPlanForm";
 import UserPlans from "./components/pages/UserPlans";
 import Cart from "./components/pages/cart";
@@ -77,6 +77,7 @@ import UsersList from "./components/pages/UsersList";
 import SubscriptionPay from "./components/pages/SubscriptionPay";
 import MessagesDetails from "./components/pages/MessagesDetails";
 import NotRenewedUsers  from "./components/pages/NotRenewedUsers";
+import LinkedInCallback from "./components/social/LinkedInCallback";
 
 
 // Protected Route Component (For regular users)
@@ -186,8 +187,11 @@ export default function App() {
             </MainLayout>
           }
         />
+        <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
+
+
         {/* lindin callbackek route  */}
-        <Route path="/linkedin-callback" element={<LinkedInCallback />} />
+        {/* <Route path="/linkedin-callback" element={<LinkedInCallback />} /> */}
         {/* <Route path="/linkedin-callback" element={<LinkedinCallback />} /> */}
         <Route path="/admin/blogs/create" element={<CreateArticle />} />
         <Route path="/admin/blogs/edit/:id" element={<EditArticle />} />

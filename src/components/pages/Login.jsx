@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../services/api";
 import { useUserProfile } from "../context/UseProfileContext";
 import { FaLinkedin } from "react-icons/fa";
+import LinkedInLoginButton from "../social/LinkedInLoginButton";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -75,47 +76,45 @@ export default function Login() {
 //     }
 // };
 const handleLinkedInLogin = async () => {
+    setLinkedinLoading(true);
     try {
         console.log('🔗 Getting LinkedIn auth URL...');
         
-        //  CORRECT URL (FULL URL use karo)
         const backendUrl = import.meta.env.VITE_API_BASE_URL || 'https://backend-q0wc.onrender.com';
         const apiUrl = `${backendUrl}/api/linkedin/auth-url`;
         
-        console.log('Calling:', apiUrl);
+        console.log('📞 Calling backend:', apiUrl);
         
         const response = await fetch(apiUrl);
         
-        console.log('Response status:', response.status);
-        
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Server error:', errorText.substring(0, 200));
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Backend error: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('✅ LinkedIn response:', data);
+        console.log('✅ Backend response:', data);
         
-        if (data.success && data.authUrl) {
-            console.log('🚀 Redirecting to LinkedIn...');
-            window.location.href = data.authUrl;
+        // ✅ IMPORTANT: Backend { url: '...' } format में return कर रहा है
+        if (data.url) {
+            console.log('🚀 Redirecting to LinkedIn login...');
+            window.location.href = data.url;
         } else {
-            throw new Error(data.message || 'Failed to get LinkedIn URL');
+            throw new Error('No LinkedIn URL received from backend');
         }
+        
     } catch (error) {
         console.error('❌ LinkedIn login error:', error);
-        alert(`LinkedIn login failed: ${error.message}`);
+        alert(`Login failed: ${error.message}. Please try again.`);
+    } finally {
+        setLinkedinLoading(false);
     }
 };
 
-
-  //  Agar user already logged in hai to directly dashboard redirect karo
+//  Agar user already logged in hai to directly dashboard redirect karo
   React.useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
       console.log("🔄 User already logged in, redirecting to dashboard");
-      navigate("/dashboard");
     }
   }, [navigate]);
 
@@ -200,6 +199,7 @@ const handleLinkedInLogin = async () => {
           </button>
         </form>
         <div className="text-center">
+      
           <button
             onClick={handleLinkedInLogin}
             disabled={linkedinLoading}
@@ -222,6 +222,7 @@ const handleLinkedInLogin = async () => {
             Secure login via LinkedIn. We'll never post without permission.
           </p>
         </div>
+            {/* <LinkedInLoginButton/> */}
 
         {/* UI CHANGE: Create account section with blue text */}
         <div className="mt-8 text-center">
