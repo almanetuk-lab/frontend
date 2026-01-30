@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSuggestedMatches } from "../services/chatApi";
-// import { adminAPI } from "../services/adminApi";
-import  { userAPI } from "../services/userApi";
+// import  { userAPI } from "../services/userApi";
 
 export default function MatchesPage() {
   const navigate = useNavigate();
@@ -45,90 +43,7 @@ export default function MatchesPage() {
     }
   };
 
-  // // API se data fetch karne ke liye function hai yeh
-  // const fetchMatches = async () => {
-  //   try {
-  //     setLoading(true);
-  //     setError(null);
-
-  //     console.log("🔄 Fetching matches from API...");
-  //     const apiData = await getSuggestedMatches();
-  //     console.log("📦 API Response:", apiData);
-
-  //     // API response format check karne k liye
-  //     if (apiData && Array.isArray(apiData)) {
-  //       console.log(` Found ${apiData.length} matches`);
-
-  //       // Log first match details for debugging
-  //       if (apiData.length > 0) {
-  //         console.log("First match details:", {
-  //           id: apiData[0].id,
-  //           user_id: apiData[0].user_id,
-  //           full_name: apiData[0].full_name,
-  //           city: apiData[0].city,
-  //           profession: apiData[0].profession,
-  //           first_name: apiData[0].first_name,
-  //           last_name: apiData[0].last_name,
-  //           image_url: apiData[0].image_url,
-  //           match_score: apiData[0].match_score,
-  //         });
-  //       }
-
-  //       setMatches(apiData);
-  //     } else if (apiData && apiData.matches) {
-  //       // If response has { matches: [...] } format
-  //       console.log(
-  //         ` Found ${apiData.matches.length} matches in matches property`
-  //       );
-  //       setMatches(apiData.matches);
-  //     } else {
-  //       console.warn("⚠️ Unexpected API response format:", apiData);
-  //       setError("Invalid data format from server");
-  //       setMatches([]);
-  //     }
-
-  //     setLoading(false);
-  //   } catch (err) {
-  //     console.error("❌ API Error:", err);
-  //     setError(`Failed to load matches: ${err.message || "Network error"}`);
-  //     setMatches([]);
-  //     setLoading(false);
-  //   }
-  // };
-  const fetchMatches = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      console.log("🔄 Fetching matches using adminAPI...");
-
-      // ✅ Use SAME API as MemberPage
-      const response = await userAPI.searchProfiles({
-        search_mode: "basic", // or "matches" if available
-        first_name: "",
-      });
-
-      console.log("📦 userAPI Response:", response.data);
-
-      if (response.data) {
-        const membersData = Array.isArray(response.data)
-          ? response.data
-          : response.data.data || response.data.users || [];
-
-        console.log(`✅ Found ${membersData.length} matches`);
-        console.log("First match fields:", Object.keys(membersData[0] || {}));
-
-        setMatches(membersData);
-      }
-
-      setLoading(false);
-    } catch (err) {
-      console.error("❌ API Error:", err);
-      setError(`Failed to load matches: ${err.message || "Network error"}`);
-      setMatches([]);
-      setLoading(false);
-    }
-  };
+  
   useEffect(() => {
     fetchMatches();
   }, []);
@@ -141,6 +56,73 @@ export default function MatchesPage() {
       setLoadingMore(false);
     }, 500);
   };
+
+
+  
+  // ✅ CORRECT: Simple getSuggestedMatches call
+  const fetchMatches = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log("🔄 Fetching matches from getSuggestedMatches API...");
+      
+      // ✅ DIRECT CALL - No parameters needed
+      const matchesData = await getSuggestedMatches();
+      console.log("📦 getSuggestedMatches Response:", matchesData);
+
+      // ✅ Handle different response formats
+      if (matchesData && Array.isArray(matchesData)) {
+        console.log(`✅ Found ${matchesData.length} matches`);
+        
+        if (matchesData.length > 0) {
+          console.log("First match:", matchesData[0]);
+        }
+        
+        setMatches(matchesData);
+        
+      } else if (matchesData && matchesData.matches && Array.isArray(matchesData.matches)) {
+        // If response is { matches: [...] }
+        console.log(`✅ Found ${matchesData.matches.length} matches in 'matches' key`);
+        setMatches(matchesData.matches);
+        
+      } else if (matchesData && matchesData.data && Array.isArray(matchesData.data)) {
+        // If response is { data: [...] }
+        console.log(`✅ Found ${matchesData.data.length} matches in 'data' key`);
+        setMatches(matchesData.data);
+        
+      } else if (matchesData && matchesData.data && matchesData.data.data) {
+        // If response is { data: { data: [...] } }
+        const nestedData = matchesData.data.data;
+        console.log(`✅ Found ${nestedData.length} matches in nested 'data.data'`);
+        setMatches(Array.isArray(nestedData) ? nestedData : []);
+        
+      } else {
+        console.warn("⚠️ Unexpected API response format:", matchesData);
+        setMatches([]);
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error("❌ Error fetching matches:", err);
+      setError(err.message || "Failed to load matches");
+      setMatches([]);
+      setLoading(false);
+    }
+  };
+
+  // useEffect(() => {
+  //   fetchMatches();
+  // }, []);
+
+  // // ✅ LOAD MORE FUNCTION - SIMPLE
+  // const loadMore = () => {
+  //   setLoadingMore(true);
+  //   setTimeout(() => {
+  //     setVisibleCount((prev) => prev + 20);
+  //     setLoadingMore(false);
+  //   }, 500);
+  // };
 
   // ✅ RESET TO 20
   const resetTo20 = () => {
@@ -273,6 +255,8 @@ export default function MatchesPage() {
 
     return [];
   };
+
+
   // ✅ FIXED: View Profile Function - MemberPage jaisa
   const handleViewProfile = async (memberId, memberName = "") => {
     try {
@@ -305,6 +289,8 @@ export default function MatchesPage() {
       navigate(`/dashboard/profile/${memberId}`);
     }
   };
+
+  
 
   //   // FIXED: View Profile Function with proper data passing
   // const handleViewProfile = async (user) => {

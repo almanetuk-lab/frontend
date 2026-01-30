@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSuggestedMatches } from "../services/chatApi";
-import { adminAPI } from "../services/adminApi"; // ✅ ADD THIS
+import { adminAPI } from "../services/adminApi"; //  ADD THIS
 
 const SuggestedMatches = () => {
   const navigate = useNavigate();

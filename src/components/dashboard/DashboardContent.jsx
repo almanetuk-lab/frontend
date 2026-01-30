@@ -532,8 +532,8 @@ export default function DashboardHome({ profile }) {
                           "Software Engineer"}
                       </p>
                       <p className="text-gray-500 text-sm sm:text-base flex items-center gap-1 truncate">
-                        📍 {profile?.city || profile?.location || "INDORE"} •
-                        {profile?.age ? ` ${profile.age} years` : " 24 years"}
+                        📍 {profile?.city || profile?.location || "Location"} •
+                        {profile?.age ? ` ${profile.age} years` : " Age"}
                       </p>
                     </div>
 
@@ -576,7 +576,7 @@ export default function DashboardHome({ profile }) {
                   <StatCard
                     label="Matches"
                     // value={loading ? "..." : matchesCount.toString()}
-                    value={loading ? "..." : (matchesCount || 9).toString()}
+                    value={loading ? "..." : (matchesCount || 200).toString()}
                     // trend="+5%"
                   />
                 </div>
