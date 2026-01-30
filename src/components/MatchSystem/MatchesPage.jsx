@@ -1,9 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSuggestedMatches } from "../services/chatApi";
-// import { adminAPI } from "../services/adminApi";
-import  { userAPI } from "../services/userApi";
 
 export default function MatchesPage() {
   const navigate = useNavigate();
@@ -12,7 +9,7 @@ export default function MatchesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ SIMPLE LOAD MORE STATE
+  //  SIMPLE LOAD MORE STATE
   const [visibleCount, setVisibleCount] = useState(20);
   const [loadingMore, setLoadingMore] = useState(false);
 
@@ -45,95 +42,92 @@ export default function MatchesPage() {
     }
   };
 
-  // // API se data fetch karne ke liye function hai yeh
-  // const fetchMatches = async () => {
-  //   try {
-  //     setLoading(true);
-  //     setError(null);
-
-  //     console.log("🔄 Fetching matches from API...");
-  //     const apiData = await getSuggestedMatches();
-  //     console.log("📦 API Response:", apiData);
-
-  //     // API response format check karne k liye
-  //     if (apiData && Array.isArray(apiData)) {
-  //       console.log(` Found ${apiData.length} matches`);
-
-  //       // Log first match details for debugging
-  //       if (apiData.length > 0) {
-  //         console.log("First match details:", {
-  //           id: apiData[0].id,
-  //           user_id: apiData[0].user_id,
-  //           full_name: apiData[0].full_name,
-  //           city: apiData[0].city,
-  //           profession: apiData[0].profession,
-  //           first_name: apiData[0].first_name,
-  //           last_name: apiData[0].last_name,
-  //           image_url: apiData[0].image_url,
-  //           match_score: apiData[0].match_score,
-  //         });
-  //       }
-
-  //       setMatches(apiData);
-  //     } else if (apiData && apiData.matches) {
-  //       // If response has { matches: [...] } format
-  //       console.log(
-  //         ` Found ${apiData.matches.length} matches in matches property`
-  //       );
-  //       setMatches(apiData.matches);
-  //     } else {
-  //       console.warn("⚠️ Unexpected API response format:", apiData);
-  //       setError("Invalid data format from server");
-  //       setMatches([]);
-  //     }
-
-  //     setLoading(false);
-  //   } catch (err) {
-  //     console.error("❌ API Error:", err);
-  //     setError(`Failed to load matches: ${err.message || "Network error"}`);
-  //     setMatches([]);
-  //     setLoading(false);
-  //   }
-  // };
   const fetchMatches = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log("🔄 Fetching matches using adminAPI...");
+      console.log("🔄 Fetching matches...");
 
-      // ✅ Use SAME API as MemberPage
-      const response = await userAPI.searchProfiles({
-        search_mode: "basic", // or "matches" if available
-        first_name: "",
-      });
+      //  OPTION 1: Use getSuggestedMatches (jo dashboard pe use kar rahe ho)
+      const apiData = await getSuggestedMatches();
+      console.log("📦 getSuggestedMatches Response:", apiData);
 
-      console.log("📦 userAPI Response:", response.data);
+      //  Check response format
+      let matchesData = [];
 
-      if (response.data) {
-        const membersData = Array.isArray(response.data)
-          ? response.data
-          : response.data.data || response.data.users || [];
-
-        console.log(`✅ Found ${membersData.length} matches`);
-        console.log("First match fields:", Object.keys(membersData[0] || {}));
-
-        setMatches(membersData);
+      if (apiData && Array.isArray(apiData)) {
+        matchesData = apiData;
+      } else if (apiData && apiData.data && Array.isArray(apiData.data)) {
+        matchesData = apiData.data;
+      } else if (apiData && apiData.matches && Array.isArray(apiData.matches)) {
+        matchesData = apiData.matches;
       }
 
-      setLoading(false);
+      console.log(` Found ${matchesData.length} matches`);
+
+      //  DEBUG: Check what fields are coming
+      if (matchesData.length > 0) {
+        const firstUser = matchesData[0];
+        console.log("🔍 First user fields:", Object.keys(firstUser));
+        console.log("📍 Location fields:", {
+          city: firstUser.city,
+          state: firstUser.state,
+          country: firstUser.country,
+        });
+      }
+
+      setMatches(matchesData);
     } catch (err) {
-      console.error("❌ API Error:", err);
+      console.error("❌ Error fetching matches:", err);
       setError(`Failed to load matches: ${err.message || "Network error"}`);
-      setMatches([]);
+    } finally {
       setLoading(false);
     }
   };
+
+  // const fetchMatches = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setError(null);
+
+  //     console.log("🔄 Fetching matches using adminAPI...");
+
+  // const response = await getSuggestedMatches();
+
+  // // Use SAME API as MemberPage
+  // const response = await userAPI.searchProfiles({
+  //   search_mode: "basic", // or "matches" if available
+  //   first_name: "",
+  // });
+
+  //       console.log("📦 getSuggestedMatches Response:", response.data);
+
+  //       if (response.data) {
+  //         const membersData = Array.isArray(response.data)
+  //           ? response.data
+  //           : response.data.data || response.data.users || [];
+
+  //         console.log(`Found ${membersData.length} matches`);
+  //         console.log("First match fields:", Object.keys(membersData[0] || {}));
+
+  //         setMatches(membersData);
+  //       }
+
+  //       setLoading(false);
+  //     } catch (err) {
+  //       console.error("❌ API Error:", err);
+  //       setError(`Failed to load matches: ${err.message || "Network error"}`);
+  //       setMatches([]);
+  //       setLoading(false);
+  //     }
+  //  };
+
   useEffect(() => {
     fetchMatches();
   }, []);
 
-  // ✅ LOAD MORE FUNCTION - SIMPLE
+  //  LOAD MORE FUNCTION - SIMPLE
   const loadMore = () => {
     setLoadingMore(true);
     setTimeout(() => {
@@ -142,12 +136,12 @@ export default function MatchesPage() {
     }, 500);
   };
 
-  // ✅ RESET TO 20
+  //  RESET TO 20
   const resetTo20 = () => {
     setVisibleCount(20);
   };
 
-  // ✅ Get only visible matches
+  //  Get only visible matches
   const visibleMatches = matches.slice(0, visibleCount);
   const hasMore = visibleCount < matches.length;
   const remaining = matches.length - visibleCount;
@@ -273,7 +267,8 @@ export default function MatchesPage() {
 
     return [];
   };
-  // ✅ FIXED: View Profile Function - MemberPage jaisa
+
+  //  FIXED: View Profile Function - MemberPage jaisa
   const handleViewProfile = async (memberId, memberName = "") => {
     try {
       console.log("🎯 VIEW PROFILE FUNCTION CALLED");
@@ -286,7 +281,7 @@ export default function MatchesPage() {
       console.log("Found member data:", currentMember);
 
       if (currentMember) {
-        // ✅ Navigate with member data
+        //  Navigate with member data
         navigate(`/dashboard/profile/${memberId}`, {
           state: {
             userProfile: currentMember,
@@ -295,7 +290,7 @@ export default function MatchesPage() {
             from: "matches_page",
           },
         });
-        console.log("✅ Navigation successful");
+        console.log(" Navigation successful");
       } else {
         console.log("❌ Member not found by user_id");
         navigate(`/dashboard/profile/${memberId}`);
@@ -305,182 +300,6 @@ export default function MatchesPage() {
       navigate(`/dashboard/profile/${memberId}`);
     }
   };
-
-  //   // FIXED: View Profile Function with proper data passing
-  // const handleViewProfile = async (user) => {
-  //   console.log("🎯 View Profile clicked for user:", user);
-
-  //   try {
-  //     // Ensure user data exists
-  //     if (!user) {
-  //       console.error("❌ No user data available");
-  //       navigate(`/dashboard/profile/${user?.user_id || user?.id}`);
-  //       return;
-  //     }
-
-  //     const userId = user.user_id || user.id;
-  //     const userName =
-  //       user.full_name ||
-  //       `${user.first_name || ""} ${user.last_name || ""}`.trim();
-
-  //     // ✅ Navigate with COMPLETE user data - ALL FIELDS ADDED
-  //     navigate(`/dashboard/profile/${userId}`, {
-  //       state: {
-  //         // Complete user object
-  //         userProfile: user,
-  //         // Individual fields for easy access - ALL FIELDS ADDED
-  //         profileData: {
-  //           id: user.id,
-  //           user_id: user.user_id,
-  //           full_name: user.full_name,
-  //           first_name: user.first_name,
-  //           last_name: user.last_name,
-  //           username: user.username,
-  //           email: user.email,
-  //           phone: user.phone,
-  //           age: user.age,
-  //           dob: user.dob,
-  //           gender: user.gender,
-  //           education: user.education,
-  //           relationship_pace: user.relationship_pace,
-  //           city: user.city,
-  //           country: user.country,
-  //           state: user.state,
-  //           pincode: user.pincode,
-  //           address: user.address,
-  //           profession: user.profession,
-  //           company: user.company,
-  //           experience: user.experience,
-  //           headline: user.headline,
-  //           position: user.position,
-  //           about: user.about,
-  //           about_me: user.about_me,
-  //           skills: user.skills || [],
-  //           interests: user.interests || [],
-  //           interests_categories: user.interests_categories || {},
-  //           hobbies: user.hobbies || [],
-  //           height: user.height,
-  //           marital_status: user.marital_status,
-  //           professional_identity: user.professional_identity,
-  //           company_type: user.company_type,
-  //           education_institution_name: user.education_institution_name,
-  //           languages_spoken: user.languages_spoken,
-  //           freetime_style: user.freetime_style,
-  //           health_activity_level: user.health_activity_level,
-  //           smoking: user.smoking,
-  //           drinking: user.drinking,
-  //           pets_preference: user.pets_preference,
-  //           religious_belief: user.religious_belief,
-  //           zodiac_sign: user.zodiac_sign,
-  //           interested_in: user.interested_in,
-  //           relationship_goal: user.relationship_goal,
-  //           children_preference: user.children_preference,
-  //           self_expression: user.self_expression,
-  //           interaction_style: user.interaction_style,
-  //           work_environment: user.work_environment,
-  //           work_rhythm: user.work_rhythm,
-  //           career_decision_style: user.career_decision_style,
-  //           work_demand_response: user.work_demand_response,
-  //           relationship_values: user.relationship_values,
-  //           values_in_others: user.values_in_others,
-  //           approach_to_physical_closeness: user.approach_to_physical_closeness,
-  //           preference_of_closeness: user.preference_of_closeness,
-  //           love_language_affection: user.love_language_affection,
-  //           life_rhythms: user.life_rhythms || {},
-  //           // profile_questions: user.profile_questions || {},
-  //           prompts: user.prompts || {},
-  //           image_url: user.image_url,
-  //           match_score: user.match_score,
-  //           is_active: user.is_active,
-  //           is_submitted: user.is_submitted,
-  //           created_at: user.created_at,
-  //           updated_at: user.updated_at,
-  //         },
-  //         // Metadata
-  //         from: "suggested_matches",
-  //         timestamp: new Date().toISOString(),
-  //         memberId: userId,
-  //         name: userName,
-  //       },
-  //     });
-
-  //     console.log("✅ Navigation successful with COMPLETE data");
-  //     console.log("📦 Total fields passed:", Object.keys(user).length);
-  //   } catch (error) {
-  //     console.error("❌ Navigation error:", error);
-  //     navigate(`/dashboard/profile/${user?.user_id || user?.id}`);
-  //   }
-  // };
-
-  // //  FIXED: View Profile Function with proper data passing
-  // const handleViewProfile = async (user) => {
-  //   console.log("🎯 View Profile clicked for user:", user);
-
-  //   try {
-  //     // Ensure user data exists
-  //     if (!user) {
-  //       console.error("❌ No user data available");
-  //       navigate(`/dashboard/profile/${user?.user_id || user?.id}`);
-  //       return;
-  //     }
-
-  //     const userId = user.user_id || user.id;
-  //     const userName =
-  //       user.full_name ||
-  //       `${user.first_name || ""} ${user.last_name || ""}`.trim();
-
-  //     // ✅ Navigate with COMPLETE user data
-  //     navigate(`/dashboard/profile/${userId}`, {
-  //       state: {
-  //         // Complete user object
-  //         userProfile: user,
-  //         // Individual fields for easy access
-  //         profileData: {
-  //           id: user.id,
-  //           user_id: user.user_id,
-  //           full_name: user.full_name,
-  //           first_name: user.first_name,
-  //           last_name: user.last_name,
-  //           gender: user.gender,
-  //           age: user.age,
-  //           dob: user.dob,
-  //           marital_status: user.marital_status,
-  //           profession: user.profession,
-  //           company: user.company,
-  //           education: user.education,
-  //           city: user.city,
-  //           state: user.state,
-  //           country: user.country,
-  //           address: user.address,
-  //           image_url: user.image_url,
-  //           about: user.about,
-  //           headline: user.headline,
-  //           hobbies: user.hobbies || [],
-  //           interests: user.interests || [],
-  //           skills: user.skills || [],
-  //           experience: user.experience,
-  //           match_score: user.match_score,
-  //           phone: user.phone,
-  //           email: user.email,
-  //           is_active: user.is_active,
-  //           is_submitted: user.is_submitted,
-  //           created_at: user.created_at,
-  //           updated_at: user.updated_at,
-  //         },
-  //         // Metadata
-  //         from: "suggested_matches",
-  //         timestamp: new Date().toISOString(),
-  //         memberId: userId,
-  //         name: userName,
-  //       },
-  //     });
-
-  //     console.log("Navigation successful with data");
-  //   } catch (error) {
-  //     console.error("❌ Navigation error:", error);
-  //     navigate(`/dashboard/profile/${user?.user_id || user?.id}`);
-  //   }
-  // };
 
   //  **API DATA से Stats calculation - FIXED**
   const totalMatches = matches.length;
@@ -557,7 +376,7 @@ export default function MatchesPage() {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">My Matches</h1>
           <p className="text-gray-600">Find Your Perfect Match</p>
 
-          {/* ✅ SHOWING INFO */}
+          {/*  SHOWING INFO */}
           <div className="mt-4 p-3 bg-white rounded-lg border shadow-sm">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
               <div className="text-sm">
@@ -948,3 +767,5 @@ export default function MatchesPage() {
     </div>
   );
 }
+
+// export default MatchesPage;
