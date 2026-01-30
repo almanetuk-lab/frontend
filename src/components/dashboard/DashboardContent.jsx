@@ -44,27 +44,73 @@ export default function DashboardHome({ profile }) {
 
   const userId = getUserId();
 
-  // Fetch dashboard data
+  // // Fetch dashboard data
+  // const fetchDashboardData = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const dashboardSummary = await profileViewApi.getDashboardSummary(userId);
+
+  //     console.log("📊 Dashboard summary:", dashboardSummary);
+
+  //     setProfileViews(dashboardSummary.profile_views || 0);
+  //     setRecentViewers(dashboardSummary.recent_viewers || []);
+  //     setTotalViewers(dashboardSummary.today_viewers || 0);
+  //     setMessagesCount(dashboardSummary.messages_count || 0);
+
+  //     if (dashboardSummary.matches_count !== undefined) {
+  //       setMatchesCount(dashboardSummary.matches_count);
+  //     }
+  //     if (dashboardSummary.connections_count !== undefined) {
+  //       setConnectionsCount(dashboardSummary.connections_count);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching dashboard data:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // ✅ UPDATED: Fetch dashboard data
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const dashboardSummary = await profileViewApi.getDashboardSummary(userId);
+      console.log("📊 Fetching dashboard data...");
 
-      console.log("📊 Dashboard summary:", dashboardSummary);
+      // First, fetch matches count (important)
+      await fetchMatchesCount();
 
-      setProfileViews(dashboardSummary.profile_views || 0);
-      setRecentViewers(dashboardSummary.recent_viewers || []);
-      setTotalViewers(dashboardSummary.today_viewers || 0);
-      setMessagesCount(dashboardSummary.messages_count || 0);
+      // Then fetch dashboard summary
+      try {
+        const dashboardSummary =
+          await profileViewApi.getDashboardSummary(userId);
+        console.log("📊 Dashboard summary:", dashboardSummary);
 
-      if (dashboardSummary.matches_count !== undefined) {
-        setMatchesCount(dashboardSummary.matches_count);
-      }
-      if (dashboardSummary.connections_count !== undefined) {
-        setConnectionsCount(dashboardSummary.connections_count);
+        setProfileViews(dashboardSummary.profile_views || 0);
+        setRecentViewers(dashboardSummary.recent_viewers || []);
+        setTotalViewers(dashboardSummary.today_viewers || 0);
+        setMessagesCount(dashboardSummary.messages_count || 0);
+
+        // ✅ Override with dashboard matches count if available
+        if (
+          dashboardSummary.matches_count !== undefined &&
+          dashboardSummary.matches_count !== null &&
+          dashboardSummary.matches_count > 0
+        ) {
+          console.log(
+            `📊 Using matches count from dashboard: ${dashboardSummary.matches_count}`,
+          );
+          setMatchesCount(dashboardSummary.matches_count);
+        }
+
+        if (dashboardSummary.connections_count !== undefined) {
+          setConnectionsCount(dashboardSummary.connections_count);
+        }
+      } catch (dashboardError) {
+        console.error("❌ Dashboard summary error:", dashboardError);
+        // Continue with matches count from fetchMatchesCount
       }
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      console.error("❌ Error in fetchDashboardData:", error);
     } finally {
       setLoading(false);
     }
@@ -128,41 +174,89 @@ export default function DashboardHome({ profile }) {
     }
   }, [userId]);
 
-  // Fetch matches
-  useEffect(() => {
-    fetchMatches();
-  }, []);
+  // // Fetch matches
+  // useEffect(() => {
+  //   fetchMatches();
+  // }, []);
 
-  const fetchMatches = async () => {
+  // const fetchMatches = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setError(null);
+  //     const data = await getSuggestedMatches();
+
+  //     let matchesArray = [];
+  //     if (Array.isArray(data)) {
+  //       matchesArray = data;
+  //     } else if (data && typeof data === "object") {
+  //       if (data.id) {
+  //         matchesArray = [data];
+  //       } else if (data.data) {
+  //         matchesArray = Array.isArray(data.data) ? data.data : [data.data];
+  //       }
+  //     }
+
+  //     const limitedMatches = matchesArray.slice(0, 5);
+  //     setSuggestedMatches(limitedMatches);
+  //   } catch (err) {
+  //     console.error("Error fetching matches:", err);
+  //     setError("Failed to load matches. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // // Retry button ke liye
+  // const handleRetry = () => {
+  //   fetchMatches();
+  // };
+
+  // ✅ NEW FUNCTION: Fetch matches count from getSuggestedMatches
+  const fetchMatchesCount = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const data = await getSuggestedMatches();
+      console.log("🔄 Fetching matches count from getSuggestedMatches...");
+
+      // Get matches data
+      const matchesData = await getSuggestedMatches();
+      console.log("📊 Matches data for count:", matchesData);
 
       let matchesArray = [];
-      if (Array.isArray(data)) {
-        matchesArray = data;
-      } else if (data && typeof data === "object") {
-        if (data.id) {
-          matchesArray = [data];
-        } else if (data.data) {
-          matchesArray = Array.isArray(data.data) ? data.data : [data.data];
-        }
+
+      // Handle different response formats
+      if (Array.isArray(matchesData)) {
+        matchesArray = matchesData;
+      } else if (
+        matchesData &&
+        matchesData.data &&
+        Array.isArray(matchesData.data)
+      ) {
+        matchesArray = matchesData.data;
+      } else if (
+        matchesData &&
+        matchesData.matches &&
+        Array.isArray(matchesData.matches)
+      ) {
+        matchesArray = matchesData.matches;
+      } else if (
+        matchesData &&
+        matchesData.users &&
+        Array.isArray(matchesData.users)
+      ) {
+        matchesArray = matchesData.users;
       }
 
-      const limitedMatches = matchesArray.slice(0, 5);
-      setSuggestedMatches(limitedMatches);
-    } catch (err) {
-      console.error("Error fetching matches:", err);
-      setError("Failed to load matches. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+      const count = matchesArray.length;
+      console.log(`✅ Found ${count} matches`);
 
-  // Retry button ke liye
-  const handleRetry = () => {
-    fetchMatches();
+      // Update state
+      setMatchesCount(count);
+      return count;
+    } catch (error) {
+      console.error("❌ Error fetching matches count:", error);
+      // Fallback to default 20
+      setMatchesCount();
+      return;
+    }
   };
 
   // Search users function
@@ -572,12 +666,27 @@ export default function DashboardHome({ profile }) {
                     // trend="+12%"
                   />
                 </div>
-                <div onClick={() => navigate("/dashboard/matches")}>
+                {/* <div onClick={() => navigate("/dashboard/matches")}>
                   <StatCard
                     label="Matches"
                     // value={loading ? "..." : matchesCount.toString()}
-                    value={loading ? "..." : (matchesCount || 200).toString()}
+                    value={loading ? "..." : matchesCount.toString()}
                     // trend="+5%"
+                  />
+                </div> */}
+
+                <div onClick={() => navigate("/dashboard/matches")}>
+                  <StatCard
+                    label="Matches"
+                    value={
+                      loading
+                        ? "..."
+                        : matchesCount === 0
+                          ? "0"
+                          : matchesCount.toString()
+                    }
+                    // Optional: Add icon or badge
+                    icon="💖"
                   />
                 </div>
                 <div>
@@ -686,7 +795,7 @@ export default function DashboardHome({ profile }) {
               suggestedMatches={suggestedMatches}
               loading={loading}
               error={error}
-              onRetry={handleRetry}
+              // onRetry={handleRetry}
               onViewAll={() => navigate("/dashboard/matches")}
             />
           </div>
