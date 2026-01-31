@@ -78,6 +78,8 @@ import SubscriptionPay from "./components/pages/SubscriptionPay";
 import MessagesDetails from "./components/pages/MessagesDetails";
 import NotRenewedUsers  from "./components/pages/NotRenewedUsers";
 import LinkedInCallback from "./components/social/LinkedInCallback";
+import AdminModelDetails from "./components/admin/AdminModelDetails";
+import ResetPassword from "./components/pages/ResetPassword";
 
 
 // Protected Route Component (For regular users)
@@ -167,7 +169,15 @@ export default function App() {
             </ProtectedRoute>
           }
         /> 
-
+        <Route
+          path="/admin/models/:userId"
+          element={
+            <ProtectedRoute>
+          <AdminModelDetails />
+            </ProtectedRoute>
+          }
+        />  
+{/* <Route path="/admin/models/:userId" element={<AdminModelDetails />} /> */}
 
         {/* payment result routes */}
         <Route
@@ -231,6 +241,16 @@ export default function App() {
             <MainLayout>
               <PublicRoute>
                 <ForgotPassword />
+              </PublicRoute>
+            </MainLayout>
+          }
+        />
+         <Route
+          path="/reset-password/:token"
+          element={
+            <MainLayout>
+              <PublicRoute>
+                <ResetPassword />
               </PublicRoute>
             </MainLayout>
           }
