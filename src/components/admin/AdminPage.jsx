@@ -4,6 +4,8 @@ import AdminPlans from "./AdminAllPlan.jsx";
 import AdminBlog from "../pages/AdminBlog.jsx";
 import AdminFooter from "./AdminFooter.jsx";
 import AdminReport from "../pages/AdminReport.jsx";
+import { Link } from "react-router-dom";
+
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [userStatusFilter, setUserStatusFilter] = useState("all");
@@ -46,7 +48,7 @@ const AdminDashboard = () => {
 
   // Member_approval function end here ----
 
-  // 🔥 FETCH CURRENT SETTING
+  //  FETCH CURRENT SETTING
   const fetchMemberApproval = async () => {
     try {
       const response = await adminAPI.getMemberApproval(); // GET API
@@ -114,7 +116,7 @@ const AdminDashboard = () => {
       console.error("Error fetching users:", error);
       alert(
         "Error fetching users: " +
-          (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message),
       );
     } finally {
       setLoading(false);
@@ -148,7 +150,7 @@ const AdminDashboard = () => {
       console.error("Error fetching user details:", error);
       alert(
         "Error fetching user details: " +
-          (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message),
       );
     } finally {
       setUserDetailsLoading(false);
@@ -161,12 +163,21 @@ const AdminDashboard = () => {
     return user.status === userStatusFilter;
   });
 
-  const handleViewDetails = async (user) => {
-    setSelectedUser(user); // Show basic info immediately
-    setShowUserModal(true);
+  // const handleViewDetails = async (user) => {
+  //   setSelectedUser(user); // Show basic info immediately
+  //   setShowUserModal(true);
 
-    // Fetch detailed information in background
-    await fetchUserDetails(user.user_id || user.id);
+  //   // Fetch detailed information in background
+  //   await fetchUserDetails(user.user_id || user.id);
+  // };
+
+  // 2. handleViewDetails function replace karen
+  const handleViewDetails = (user) => {
+    // Modal ke bajaye direct profile page pe navigate karen
+    const userId = user.user_id || user.id;
+    window.location.href = `/admin/models/${userId}`;
+    // Ya agar React Router use kar rahe hain to:
+    // navigate(`/admin/models/${userId}`);
   };
 
   const handleApprove = async (userId) => {
@@ -184,8 +195,8 @@ const AdminDashboard = () => {
                   status: "approve",
                   current_status: "approve",
                 }
-              : user
-          )
+              : user,
+          ),
         );
 
         // Update selected user if modal is open
@@ -207,7 +218,7 @@ const AdminDashboard = () => {
       console.error("Approve error:", error);
       alert(
         "Error approving user: " +
-          (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message),
       );
     }
   };
@@ -231,8 +242,8 @@ const AdminDashboard = () => {
                   status: "on hold",
                   current_status: "on hold",
                 }
-              : user
-          )
+              : user,
+          ),
         );
 
         if (
@@ -253,7 +264,7 @@ const AdminDashboard = () => {
       console.error("On Hold error:", error);
       alert(
         "Error putting user on hold: " +
-          (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message),
       );
     }
   };
@@ -274,8 +285,8 @@ const AdminDashboard = () => {
                   status: "deactivate",
                   current_status: "deactivate",
                 }
-              : user
-          )
+              : user,
+          ),
         );
 
         if (
@@ -296,7 +307,7 @@ const AdminDashboard = () => {
       console.error("Deactivate error:", error);
       alert(
         "Error deactivating user: " +
-          (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message),
       );
     }
   };
@@ -414,11 +425,11 @@ const AdminDashboard = () => {
                 },
                 {
                   label: "Position",
-                  value: selectedUser.position || "Not specified", // ✅ NEW FIELD
+                  value: selectedUser.position || "Not specified",
                 },
                 {
                   label: "Company Type",
-                  value: selectedUser.company_type || "Not specified", // ✅ NEW FIELD
+                  value: selectedUser.company_type || "Not specified",
                 },
                 {
                   label: "Experience",
@@ -609,11 +620,11 @@ const AdminDashboard = () => {
                   label: "Registration Date",
                   value: selectedUser.registration_date
                     ? new Date(
-                        selectedUser.registration_date
+                        selectedUser.registration_date,
                       ).toLocaleDateString()
                     : selectedUser.createdAt
-                    ? new Date(selectedUser.createdAt).toLocaleDateString()
-                    : "Not available",
+                      ? new Date(selectedUser.createdAt).toLocaleDateString()
+                      : "Not available",
                 },
                 {
                   label: "Last Updated",
@@ -634,10 +645,10 @@ const AdminDashboard = () => {
                           selectedUser.status === "approve"
                             ? "bg-green-100 text-green-800"
                             : selectedUser.status === "in process"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : selectedUser.status === "on hold"
-                            ? "bg-orange-100 text-orange-800"
-                            : "bg-red-100 text-red-800"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : selectedUser.status === "on hold"
+                                ? "bg-orange-100 text-orange-800"
+                                : "bg-red-100 text-red-800"
                         }`}
                       >
                         {selectedUser.status?.toUpperCase() || "IN PROCESS"}
@@ -690,12 +701,12 @@ const AdminDashboard = () => {
   // Stats calculations
   const totalUsers = usersData.length;
   const inProcessUsers = usersData.filter(
-    (u) => u.status === "in process"
+    (u) => u.status === "in process",
   ).length;
   const approvedUsers = usersData.filter((u) => u.status === "approve").length;
   const onHoldUsers = usersData.filter((u) => u.status === "on hold").length;
   const deactivatedUsers = usersData.filter(
-    (u) => u.status === "deactivate"
+    (u) => u.status === "deactivate",
   ).length;
 
   // Main Content Render
@@ -751,7 +762,7 @@ const AdminDashboard = () => {
               </h1>
 
               {/* Status Filter Dropdown */}
-              <div className="flex gap-4">
+              {/* <div className="flex gap-4">
                 <select
                   value={userStatusFilter}
                   onChange={(e) => setUserStatusFilter(e.target.value)}
@@ -763,7 +774,7 @@ const AdminDashboard = () => {
                   <option value="on hold">On Hold</option>
                   <option value="deactivate">Deactivated</option>
                 </select>
-              </div>
+              </div> */}
             </div>
 
             {loading ? (
@@ -796,12 +807,12 @@ const AdminDashboard = () => {
                             user.status === "approve"
                               ? "bg-green-100 text-green-800 border border-green-200"
                               : user.status === "in process"
-                              ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                              : user.status === "on hold"
-                              ? "bg-orange-100 text-orange-800 border border-orange-200"
-                              : user.status === "deactivate"
-                              ? "bg-red-100 text-red-800 border border-red-200"
-                              : "bg-gray-100 text-gray-800 border border-gray-200"
+                                ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                                : user.status === "on hold"
+                                  ? "bg-orange-100 text-orange-800 border border-orange-200"
+                                  : user.status === "deactivate"
+                                    ? "bg-red-100 text-red-800 border border-red-200"
+                                    : "bg-gray-100 text-gray-800 border border-gray-200"
                           }`}
                         >
                           {user.status
@@ -812,12 +823,19 @@ const AdminDashboard = () => {
                       <div className="text-xs text-gray-600 mb-3">
                         Profession: {user.profession || "Not specified"}
                       </div>
-                      <button
+                       {/* <button
                         onClick={() => handleViewDetails(user)}
                         className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
                       >
                         View Details
-                      </button>
+                      </button>  */}
+
+                      {/* <Link
+                        to={`/admin/models/${user.user_id || user.id}`}
+                        className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base"
+                      >
+                        View Details
+                      </Link> */}
                     </div>
                   ))}
 
@@ -879,12 +897,12 @@ const AdminDashboard = () => {
                               user.status === "approve"
                                 ? "bg-green-100 text-green-800 border border-green-200"
                                 : user.status === "in process"
-                                ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                                : user.status === "on hold"
-                                ? "bg-orange-100 text-orange-800 border border-orange-200"
-                                : user.status === "deactivate"
-                                ? "bg-red-100 text-red-800 border border-red-200"
-                                : "bg-gray-100 text-gray-800 border border-gray-200"
+                                  ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                                  : user.status === "on hold"
+                                    ? "bg-orange-100 text-orange-800 border border-orange-200"
+                                    : user.status === "deactivate"
+                                      ? "bg-red-100 text-red-800 border border-red-200"
+                                      : "bg-gray-100 text-gray-800 border border-gray-200"
                             }`}
                           >
                             {user.status
@@ -893,12 +911,19 @@ const AdminDashboard = () => {
                           </span>
                         </td>
                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
+                          {/* <button
                             onClick={() => handleViewDetails(user)}
                             className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base"
                           >
                             View Details
-                          </button>
+                          </button> */}
+
+                           <Link
+                        to={`/admin/models/${user.user_id || user.id}`}
+                        className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base"
+                      >
+                        View Details
+                      </Link>
                         </td>
                       </tr>
                     ))}
@@ -984,7 +1009,7 @@ const AdminDashboard = () => {
                     onChange={(e) =>
                       updateSetting(
                         "check_video_call_limit",
-                        e.target.checked ? 1 : 0
+                        e.target.checked ? 1 : 0,
                       )
                     }
                     disabled={settingsLoading}
@@ -1024,7 +1049,7 @@ const AdminDashboard = () => {
                     onChange={(e) =>
                       updateSetting(
                         "check_search_limit",
-                        e.target.checked ? 1 : 0
+                        e.target.checked ? 1 : 0,
                       )
                     }
                     disabled={settingsLoading}
@@ -1063,7 +1088,7 @@ const AdminDashboard = () => {
                     onChange={(e) =>
                       updateSetting(
                         "check_message_limit",
-                        e.target.checked ? 1 : 0
+                        e.target.checked ? 1 : 0,
                       )
                     }
                     disabled={settingsLoading}
@@ -1100,7 +1125,7 @@ const AdminDashboard = () => {
                     onChange={(e) =>
                       updateSetting(
                         "check_audio_call_limit",
-                        e.target.checked ? 1 : 0
+                        e.target.checked ? 1 : 0,
                       )
                     }
                     disabled={settingsLoading}
@@ -1160,14 +1185,12 @@ const AdminDashboard = () => {
           </div>
         );
 
-
       case "reports":
         return (
           <div className="p-4 sm:p-6">
-             <AdminReport />
+            <AdminReport />
           </div>
         );
-
 
       default:
         return (
@@ -1220,22 +1243,28 @@ const AdminDashboard = () => {
         </div>
 
         <nav className="mt-4 sm:mt-6">
-          {["dashboard", "users", "settings", "logs", "plans", "blogs","reports"].map(
-            (section) => (
-              <div key={section} className="px-4 sm:px-6 py-2 sm:py-3">
-                <button
-                  onClick={() => handleMenuClick(section)}
-                  className={`w-full text-left px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base ${
-                    activeSection === section
-                      ? "bg-blue-100 text-blue-600 font-semibold"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  {section.charAt(0).toUpperCase() + section.slice(1)}
-                </button>
-              </div>
-            )
-          )}
+          {[
+            "dashboard",
+            "users",
+            "settings",
+            "logs",
+            "plans",
+            "blogs",
+            "reports",
+          ].map((section) => (
+            <div key={section} className="px-4 sm:px-6 py-2 sm:py-3">
+              <button
+                onClick={() => handleMenuClick(section)}
+                className={`w-full text-left px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base ${
+                  activeSection === section
+                    ? "bg-blue-100 text-blue-600 font-semibold"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {section.charAt(0).toUpperCase() + section.slice(1)}
+              </button>
+            </div>
+          ))}
         </nav>
       </div>
 
@@ -1292,6 +1321,5 @@ const AdminDashboard = () => {
     </div>
   );
 };
-
 
 export default AdminDashboard;
