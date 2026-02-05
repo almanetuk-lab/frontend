@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { chatApi } from "../services/chatApi";
 import io from "socket.io-client";
@@ -115,6 +116,21 @@ export default function MessagesSection() {
     handleUserSelect(user);
     setShowSidebar(false);
   };
+
+  // Add this function
+const formatNameWithSpace = (name) => {
+  if (!name) return "User";
+  
+  // Add space before capital letters (except first)
+  const formatted = name.replace(/([a-z])([A-Z])/g, '$1 $2');
+  
+  return formatted || name;
+};
+
+// Then use it like:
+<p className="font-medium text-gray-800 truncate text-sm">
+  {formatNameWithSpace(selectedUser?.name || "Unknown User")}
+</p>
 
   //  RECENT CHATS USE EFFECT
   useEffect(() => {
@@ -311,7 +327,7 @@ export default function MessagesSection() {
     if (!name) return "User";
     // Remove numbers from the end of the username
     return name.replace(/\d+$/, "").trim() || name;
-  };
+  }; 
 
   //  Search users
   const searchUsers = useCallback(

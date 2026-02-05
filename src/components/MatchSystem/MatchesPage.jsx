@@ -57,61 +57,134 @@ export default function MatchesPage() {
     }
   };
 
-  // ✅ CORRECT: Fetch COMPLETE user profile using /api/users/{userId}
-  const fetchCompleteProfile = async (userId) => {
-    try {
-      console.log(`🔍 Fetching COMPLETE profile for user ${userId} via /api/users/${userId}...`);
-      
-      // Method 1: Use the CORRECT endpoint /api/users/{userId}
-      const response = await api.get(`/api/users/${userId}`);
-      
-      console.log(`/api/users/${userId} response:`, response.data);
+  // ✅ FIXED: fetchCompleteProfile function
+const fetchCompleteProfile = async (userId, currentUserId) => {
+  try {
+    console.log(`🔍 Fetching profile for user ${userId}, current user: ${currentUserId}`);
+    
+    // CASE 1: अगर user खुद का profile देख रहा है
+    if (userId == currentUserId) {
+      console.log("✅ User viewing own profile, using /api/me");
+      const response = await api.get("/api/me");
       
       if (response.data) {
-        // Check response format
-        let completeProfile = {};
+        const completeProfile = {
+          ...response.data.data,
+          prompts: response.data.prompts || {}
+        };
         
-        // Format 1: Data in response.data.data
-        if (response.data.data) {
-          completeProfile = {
-            ...response.data.data,
-            prompts: response.data.prompts || {}
-          };
-        } 
-        // Format 2: Direct data in response.data
-        else {
-          completeProfile = response.data;
-          
-          // If prompts are separate, combine them
-          if (response.data.prompts && !completeProfile.prompts) {
-            completeProfile.prompts = response.data.prompts;
+        // Process prompts (clean question-key)
+        if (completeProfile.prompts && completeProfile.prompts["question-key"]) {
+          try {
+            const parsed = JSON.parse(completeProfile.prompts["question-key"]);
+            completeProfile.prompts = {
+              ...completeProfile.prompts,
+              ...parsed
+            };
+            delete completeProfile.prompts["question-key"];
+          } catch (error) {
+            console.error("Error parsing question-key:", error);
           }
         }
         
-        console.log("✅ Complete profile fetched:", completeProfile);
-        console.log("Has prompts?", completeProfile.prompts);
-        console.log("Has profile_questions?", completeProfile.profile_questions);
-        console.log("Has life_rhythms?", completeProfile.life_rhythms);
-        console.log("User ID in profile:", completeProfile.user_id || completeProfile.id);
-        
-        // Verify this is the correct user
-        const profileUserId = completeProfile.user_id || completeProfile.id;
-        if (profileUserId == userId) {
-          console.log("✅ CORRECT user profile verified");
-          return completeProfile;
-        } else {
-          console.log(`❌ WRONG user: Expected ${userId}, got ${profileUserId}`);
-          return null;
-        }
+        return completeProfile;
       }
-      
-      return null;
-      
-    } catch (error) {
-      console.error("❌ Error fetching complete profile:", error);
-      return null;
     }
-  };
+    
+    // CASE 2: दूसरे user का profile देख रहा है
+    console.log("🔄 User viewing other's profile");
+    
+    // Step 1: Get basic profile
+    const profileResponse = await api.get(`/api/users/${userId}`);
+    const basicProfile = profileResponse.data.data || profileResponse.data;
+    
+    // Step 2: Try to get prompts (ये tricky है क्योंकि दूसरे users के prompts नहीं मिलते)
+    let promptsData = {};
+    
+    // Option A: शायद कोई public endpoint है
+    try {
+      const promptsResponse = await api.get(`/api/users/${userId}/public-prompts`);
+      if (promptsResponse.data) {
+        promptsData = promptsResponse.data;
+      }
+    } catch (error) {
+      console.log("⚠️ Public prompts API not available");
+    }
+    
+    // Option B: अगर नहीं मिलता, तो empty रहने दें
+    const completeProfile = {
+      ...basicProfile,
+      prompts: promptsData
+    };
+    
+    console.log("✅ Other user profile fetched (may not have prompts):", {
+      userId: completeProfile.user_id || completeProfile.id,
+      hasPrompts: Object.keys(completeProfile.prompts || {}).length > 0
+    });
+    
+    return completeProfile;
+    
+  } catch (error) {
+    console.error("❌ Error fetching profile:", error);
+    return null;
+  }
+};
+
+  // //  CORRECT: Fetch COMPLETE user profile using /api/users/{userId}
+  // const fetchCompleteProfile = async (userId) => {
+  //   try {
+  //     console.log(`🔍 Fetching COMPLETE profile for user ${userId} via /api/users/${userId}...`);
+      
+  //     // Method 1: Use the CORRECT endpoint /api/users/{userId}
+  //     const response = await api.get(`/api/users/${userId}`);
+      
+  //     console.log(`/api/users/${userId} response:`, response.data);
+      
+  //     if (response.data) {
+  //       // Check response format
+  //       let completeProfile = {};
+        
+  //       // Format 1: Data in response.data.data
+  //       if (response.data.data) {
+  //         completeProfile = {
+  //           ...response.data.data,
+  //           prompts: response.data.prompts || {}
+  //         };
+  //       } 
+  //       // Format 2: Direct data in response.data
+  //       else {
+  //         completeProfile = response.data;
+          
+  //         // If prompts are separate, combine them
+  //         if (response.data.prompts && !completeProfile.prompts) {
+  //           completeProfile.prompts = response.data.prompts;
+  //         }
+  //       }
+        
+  //       console.log("✅ Complete profile fetched:", completeProfile);
+  //       console.log("Has prompts?", completeProfile.prompts);
+  //       console.log("Has profile_questions?", completeProfile.profile_questions);
+  //       console.log("Has life_rhythms?", completeProfile.life_rhythms);
+  //       console.log("User ID in profile:", completeProfile.user_id || completeProfile.id);
+        
+  //       // Verify this is the correct user
+  //       const profileUserId = completeProfile.user_id || completeProfile.id;
+  //       if (profileUserId == userId) {
+  //         console.log("✅ CORRECT user profile verified");
+  //         return completeProfile;
+  //       } else {
+  //         console.log(`❌ WRONG user: Expected ${userId}, got ${profileUserId}`);
+  //         return null;
+  //       }
+  //     }
+      
+  //     return null;
+      
+  //   } catch (error) {
+  //     console.error("❌ Error fetching complete profile:", error);
+  //     return null;
+  //   }
+  // };
 
   // ==============================
   // EVENT HANDLERS
