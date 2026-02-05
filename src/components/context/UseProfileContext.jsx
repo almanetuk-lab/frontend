@@ -37,7 +37,7 @@ export const UserProfileProvider = ({ children }) => {
       if (userProfile) {
         console.log("✅ User profile received:", userProfile);
 
-        // ✅ CLEAN PROMPTS: Remove mixed format
+        //   Remove mixed format
         let cleanPrompts = {};
         
         if (userProfile.prompts && typeof userProfile.prompts === "object") {
@@ -101,7 +101,7 @@ export const UserProfileProvider = ({ children }) => {
           headline: userProfile.headline || "",
           education_institution_name: userProfile.education_institution_name || "",
           
-          // ✅ CLEAN PROMPTS
+          //  CLEAN PROMPTS
           prompts: cleanPrompts,
           
           work_environment: userProfile.work_environment || "",

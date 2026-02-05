@@ -4,7 +4,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { adminAPI } from "../services/adminApi";
 import profileViewApi from "../services/profileViewApi";
 
-// ✅ LifeRhythmsDisplay Component - Add kar diya
+//  LifeRhythmsDisplay Component - Add kar diya
 function LifeRhythmsDisplay({ data }) {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
     return (
@@ -226,7 +226,7 @@ export default function ProfilePage() {
     );
   }
 
-  // ✅ Parse life rhythms data if it's a string
+  // Parse life rhythms data if it's a string
   const getLifeRhythmsData = () => {
     if (!displayProfile.life_rhythms) return null;
 
@@ -315,9 +315,15 @@ export default function ProfilePage() {
                 : displayProfile.name || "User"}
             </h1>
 
-            <p className="text-lg md:text-xl text-gray-600 mt-2">
+            {/* <p className="text-lg md:text-xl text-gray-600 mt-2">
               {displayProfile.headline ||
                 displayProfile.profession ||
+                "No Profession"}
+            </p> */}
+
+               <p className="text-lg md:text-xl text-gray-600 mt-2">
+              {displayProfile.profession ||
+                displayProfile.headline ||
                 "No Profession"}
             </p>
 
@@ -349,7 +355,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ✅ UPDATED TABS - NOW 3 PAGES */}
+        {/*  UPDATED TABS - NOW 3 PAGES */}
         <div className="mb-6">
           <div className="flex border-b border-gray-200">
             <button
@@ -400,7 +406,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ✅ PAGE 1: BASIC INFORMATION */}
+        {/*  PAGE 1: BASIC INFORMATION */}
         {activeTab === 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* LEFT COLUMN - Personal Information */}
@@ -531,7 +537,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* ✅ PAGE 2: LIFESTYLE & WORK */}
+        {/*  PAGE 2: LIFESTYLE & WORK */}
         {activeTab === 1 && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* LEFT COLUMN - Lifestyle */}
@@ -643,7 +649,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* ✅ NEW PAGE 3: LIFE RHYTHMS & INTERESTS */}
+        {/*  NEW PAGE 3: LIFE RHYTHMS & INTERESTS */}
         {activeTab === 2 && (
           <div className="space-y-6">
             <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-6">
@@ -662,7 +668,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* ✅ 50-50 Layout for Life Rhythms and Interests */}
+            {/*  50-50 Layout for Life Rhythms and Interests */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* LEFT SIDE - Life Rhythms (50%) */}
               <div className="space-y-6">
@@ -711,7 +717,7 @@ export default function ProfilePage() {
                     </h3>
                   </div>
 
-                  {/* ✅ Interests Categories Display (Checkbox wala) */}
+                  {/*  Interests Categories Display (Checkbox wala) */}
                   {displayProfile.ways_i_spend_time ? (
                     <div>
                       {/* Parse JSON if it's a string */}
@@ -913,7 +919,7 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                {/* ✅ NEW: Profile Questions Section */}
+                {/*  NEW: Profile Questions Section */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -925,7 +931,7 @@ export default function ProfilePage() {
                   </div>
 
                   {(() => {
-                    // ✅ IMPORTANT: Display complete profile data for debugging
+                    //  IMPORTANT: Display complete profile data for debugging
                     console.log(
                       "🔍 DEBUG - Complete displayProfile object:",
                       displayProfile,
@@ -943,7 +949,7 @@ export default function ProfilePage() {
                       displayProfile?.profile_prompts,
                     );
 
-                    // ✅ FIXED: Extract profile questions with priority order
+                    //  FIXED: Extract profile questions with priority order
                     let profileQuestions = {};
 
                     // Priority 1: Check prompts["question-key"] (main source)
@@ -1026,7 +1032,7 @@ export default function ProfilePage() {
                       },
                     };
 
-                    // ✅ Check if we have any data
+                    // Check if we have any data
                     if (
                       !profileQuestions ||
                       Object.keys(profileQuestions).length === 0
@@ -1051,7 +1057,7 @@ export default function ProfilePage() {
                       );
                     }
 
-                    // ✅ Display ALL questions, even unanswered ones (with placeholder)
+                    //  Display ALL questions, even unanswered ones (with placeholder)
                     return (
                       <div className="space-y-4">
                         <div className="flex justify-between items-center mb-4">
@@ -1217,3 +1223,5 @@ function Section({ title, children }) {
     </div>
   );
 }
+
+

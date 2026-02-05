@@ -263,7 +263,7 @@ const SuggestedMatches = () => {
             </h3>
             <p className="text-sm text-gray-500 mt-1">People you might like</p>
           </div>
-          <div className="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium">
+          <div className="px-2 py-1 bg-indigo-100 text-indigo-600 rounded-sm text-sm font-medium">
             {suggestedMatches.length} matches
           </div>
         </div>

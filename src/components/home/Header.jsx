@@ -119,7 +119,7 @@ function Header() {
         {/* Main Header Row */}
         <div className="flex justify-between items-center py-5">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center z-50">
             <Link to="/" className="">
               <img
                 src={bglogo}
