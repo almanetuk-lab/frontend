@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
@@ -11,8 +10,6 @@ import ProfileQuestions from "./ProfileQuestions";
 import { FaceCamera } from "../../facekit";
 import { detectAgeGender } from "../../facekit/services/faceDetection";
 import { loadFaceModels } from "../../facekit/services/faceDetection";
-
-
 
 // ================== ENUM HELPERS ==================
 
@@ -34,17 +31,15 @@ const mapToDBEnum = (field, value) => {
       "Bachelors Degree": "Bachelors Degree",
       "Masters Degree": "Masters Degree",
       Doctorate: "Doctorate",
-      Other:"Other",
+      Other: "Other",
     },
 
     // Gender
     gender: {
       Male: "Male",
       Female: "Female",
-      // "Non-Binary": "NON_BINARY",
       Other: "Other",
-     "Non-Binary": "Non-Binary",
-
+      "Non-Binary": "Non-Binary",
     },
 
     // Marital Status
@@ -63,7 +58,6 @@ const mapToDBEnum = (field, value) => {
       PROFESSIONAL: "Corporate Professional",
       ENTREPRENEUR: "Entrepreneur",
       FREELANCER: "Freelancer",
-      // OTHER: "Other",
       "Corporate Professional": "Corporate Professional",
       Entrepreneur: "Entrepreneur",
       "Startup Founder": "Startup Founder",
@@ -95,7 +89,6 @@ const mapToDBEnum = (field, value) => {
 
     children_preference: {
       WANT: "Want",
-      // DONT_WANT: "Don't want",
       DONT_WANT: "Don’t want",
       HAVE_AND_WANT_MORE: "Have and want more",
       HAVE_AND_DONT_WANT_MORE: "Have and don’t want more",
@@ -121,12 +114,10 @@ const mapToDBEnum = (field, value) => {
     // Pets Preference
     pets_preference: {
       Want: "Want",
-      // DONT_WANT: "Don't want",
       DONT_WANT: "Don’t want",
       "Have and want more": "Have and want more",
       "Have and don't want more": "Have and don’t want more",
-      // "Not Sure yet": "Open / Not sure yet",
-     OPEN_OR_NOT_SURE_YET: "Open / Not sure yet"
+      OPEN_OR_NOT_SURE_YET: "Open / Not sure yet",
     },
 
     // Free Time Style
@@ -273,49 +264,48 @@ const mapToDBEnum = (field, value) => {
     },
 
     // Love Language - Special handling for array
-  //   love_language_affection: (value) => {
-  //     if (!value) return null;
+    //   love_language_affection: (value) => {
+    //     if (!value) return null;
 
-  //     if (Array.isArray(value)) {
-  //       return value.map((lang) => {
-  //         const langMap = {
-  //           "Physical Touch": "Physical Touch",
-  //           "Words of Affirmation": "Words of Affirmation",
-  //           "Quality Time": "Quality Time",
-  //           "Acts of Service": "Acts of Service",
-  //           "Thoughtful Gifts": "Thoughtful Gifts",
-  //           urdu: "Words of Affirmation",
-  //           hindi: "Words of Affirmation",
-  //         };
-  //         return langMap[lang] || lang;
-  //       });
-  //     }
+    //     if (Array.isArray(value)) {
+    //       return value.map((lang) => {
+    //         const langMap = {
+    //           "Physical Touch": "Physical Touch",
+    //           "Words of Affirmation": "Words of Affirmation",
+    //           "Quality Time": "Quality Time",
+    //           "Acts of Service": "Acts of Service",
+    //           "Thoughtful Gifts": "Thoughtful Gifts",
+    //           urdu: "Words of Affirmation",
+    //           hindi: "Words of Affirmation",
+    //         };
+    //         return langMap[lang] || lang;
+    //       });
+    //     }
 
-  //     if (typeof value === "string") {
-  //       return value
-  //         .split(",")
-  //         .map((lang) => lang.trim())
-  //         .filter((lang) => lang !== "");
-  //     }
+    //     if (typeof value === "string") {
+    //       return value
+    //         .split(",")
+    //         .map((lang) => lang.trim())
+    //         .filter((lang) => lang !== "");
+    //     }
 
-  //     return value;
-  //   },
-  // };
+    //     return value;
+    //   },
+    // };
 
-  // if (field === "love_language_affection" && MAP[field]) {
-  //   return MAP[field](value);
-  // }
+    // if (field === "love_language_affection" && MAP[field]) {
+    //   return MAP[field](value);
+    // }
 
-  love_language_affection: {
-       
-            "Physical Touch": "Physical Touch",
-            "Words of Affirmation": "Words of Affirmation",
-            "Quality Time": "Quality Time",
-            "Acts of Service": "Acts of Service",
-            "Thoughtful Gifts": "Thoughtful Gifts",
-            urdu: "Words of Affirmation",
-            hindi: "Words of Affirmation",
-          } 
+    love_language_affection: {
+      "Physical Touch": "Physical Touch",
+      "Words of Affirmation": "Words of Affirmation",
+      "Quality Time": "Quality Time",
+      "Acts of Service": "Acts of Service",
+      "Thoughtful Gifts": "Thoughtful Gifts",
+      urdu: "Words of Affirmation",
+      hindi: "Words of Affirmation",
+    },
   };
 
   if (field === "height_ft" || field === "height_in") {
@@ -345,8 +335,7 @@ const mapToUIEnum = (field, value) => {
       "Don't want": "Don’t want",
       "Have and want more": "HAVE_AND_WANT_MORE",
       "Have and don't want more": "HAVE_AND_DONT_WANT_MORE",
-      // "Open / Not Sure yet": "OPEN / Not sure yet",
-        "Open / Not sure yet": "OPEN_OR_NOT_SURE_YET"
+      "Open / Not sure yet": "OPEN_OR_NOT_SURE_YET",
     },
     professional_identity: {
       "Corporate Professional": "PROFESSIONAL",
@@ -381,7 +370,6 @@ const mapToUIEnum = (field, value) => {
       "More time together": "High",
       "A mix of space and closeness": "Medium",
       "Regular personal time": "Low",
-      // "Not yet sure": "Variable",
       "Open / Not Sure yet": "OPEN / Not sure yet",
     },
     work_rhythm: {
@@ -446,7 +434,7 @@ const PROFILE_QUESTIONS = [
 export default function EditProfilePage() {
   const { profile, updateProfile } = useUserProfile();
   const navigate = useNavigate();
-const [finalProfileImage, setFinalProfileImage] = useState(null);
+  const [finalProfileImage, setFinalProfileImage] = useState(null);
 
   const [showLifeRhythms, setShowLifeRhythms] = useState(false);
   const [isInterestsModalOpen, setIsInterestsModalOpen] = useState(false);
@@ -466,6 +454,7 @@ const [finalProfileImage, setFinalProfileImage] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const [capturedImage, setCapturedImage] = useState(null);
+  const [removedImage, setRemovedImage] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -525,57 +514,52 @@ const [finalProfileImage, setFinalProfileImage] = useState(null);
     preference_of_closeness: "",
     love_language_affection: "",
     life_rhythms: {},
-     prompts: {},
+    prompts: {},
   });
-
 
   // ================== QUESTIONS HANDLER ==================
 
-const handleQuestionsSave = (questionsData) => {
-  console.log("💾 Updating local formData with questions:", questionsData);
-  
-  setFormData(prev => ({
-    ...prev,
-    prompts: questionsData  // Sirf local state update karein
-  }));
-  
-  setIsQuestionsModalOpen(false); 
-  // updateProfile wala part yahan se hata diya hai taaki useEffect trigger na ho
-};
+  const handleQuestionsSave = (questionsData) => {
+    console.log("💾 Updating local formData with questions:", questionsData);
 
-// const handleQuestionsSave = (questionsData) => {
-//   console.log("💾 Questions saved in EditProfile:", questionsData);
-  
-//   //  SIMPLE FIX: Direct set karo
-//   setFormData(prev => ({
-//     ...prev,
-//     prompts: questionsData  // Direct assignment
-//   }));
-  
-//   //  Context ko bhi update karo immediately
-//   updateProfile({
-//     ...profile,
-//     prompts: questionsData
-//   });
-  
-//   setIsQuestionsModalOpen(false);
-  
-//   console.log(" Prompts updated in form and context");
-// };
+    setFormData((prev) => ({
+      ...prev,
+      prompts: questionsData, 
+    }));
 
-const handleLifeRhythmsSave = (data) => {
-  setFormData((prev) => ({
-    ...prev,
-    life_rhythms: data,
-  }));
-}; // updateProfile call nahi karna yahan
-  // //  Life Rhythms save handler
-  // const handleLifeRhythmsSave = (data) => {
-  //   setFormData((prev) => ({
+    setIsQuestionsModalOpen(false);
+    // updateProfile wala part yahan se hata diya hai taaki useEffect trigger na ho
+  };
+
+
+
+  // const handleQuestionsSave = (questionsData) => {
+  //   console.log("💾 Questions saved in EditProfile:", questionsData);
+
+  //   //  SIMPLE FIX: Direct set karo
+  //   setFormData(prev => ({
   //     ...prev,
-  //     life_rhythms: data,
+  //     prompts: questionsData  // Direct assignment
   //   }));
+
+  //   //  Context ko bhi update karo immediately
+  //   updateProfile({
+  //     ...profile,
+  //     prompts: questionsData
+  //   });
+
+  //   setIsQuestionsModalOpen(false);
+
+  //   console.log(" Prompts updated in form and context");
   // };
+
+  const handleLifeRhythmsSave = (data) => {
+    setFormData((prev) => ({
+      ...prev,
+      life_rhythms: data,
+    }));
+  }; 
+  
 
   const handleInterestsSave = (data) => {
     setFormData((prev) => ({
@@ -585,19 +569,19 @@ const handleLifeRhythmsSave = (data) => {
   };
 
   // ================== LOAD PROFILE DATA ==================
-useEffect(() => {
-  loadFaceModels().catch(err =>
-    console.error("❌ Face models failed to load", err)
-  );
-}, []);
+  useEffect(() => {
+    loadFaceModels().catch((err) =>
+      console.error("❌ Face models failed to load", err),
+    );
+  }, []);
 
   useEffect(() => {
     if (!profile) return;
 
-      console.log("🔍 PROFILE IN EDITPAGE:", profile);
-  console.log("🔍 PROFILE.PROMPTS:", profile.prompts);
-  console.log("🔍 PROMPTS TYPE:", typeof profile.prompts);
-  console.log("🔍 PROMPTS KEYS:", Object.keys(profile.prompts || {}));
+    console.log("🔍 PROFILE IN EDITPAGE:", profile);
+    console.log("🔍 PROFILE.PROMPTS:", profile.prompts);
+    console.log("🔍 PROMPTS TYPE:", typeof profile.prompts);
+    console.log("🔍 PROMPTS KEYS:", Object.keys(profile.prompts || {}));
 
     let heightDisplay = "";
     if (profile.height) {
@@ -609,9 +593,16 @@ useEffect(() => {
       }
     }
 
-  
+    if (profile.image_url) {
+      setImagePreview(profile.image_url);
+      setFinalProfileImage(profile.image_url);
+    } else if (profile.profile_image) {
+      // Fallback agar profile_image field ho
+      setImagePreview(profile.profile_image);
+      setFinalProfileImage(profile.profile_image);
+    }
 
-    //  FIX: 'ways_i_spend_time' se data load karein
+    //ways_i_spend_time se data load karein
     let interestsCategories = {};
 
     // Pehle ways_i_spend_time check karein
@@ -641,16 +632,14 @@ useEffect(() => {
       }
     }
 
+    //  SIMPLE PROMPTS LOADING
+    let loadedPrompts = {};
 
-
-     //  SIMPLE PROMPTS LOADING
-  let loadedPrompts = {};
-  
-  // Direct assignment (already cleaned in context)
-  if (profile.prompts && typeof profile.prompts === "object") {
-    loadedPrompts = profile.prompts;
-  }
-  console.log(" Clean prompts for form:", loadedPrompts);
+    // Direct assignment (already cleaned in context)
+    if (profile.prompts && typeof profile.prompts === "object") {
+      loadedPrompts = profile.prompts;
+    }
+    console.log(" Clean prompts for form:", loadedPrompts);
 
     setFormData({
       first_name: profile.first_name || "",
@@ -664,7 +653,7 @@ useEffect(() => {
       education: mapToUIEnum("education", profile.education),
       relationship_pace: mapToUIEnum(
         "relationship_pace",
-        profile.relationship_pace
+        profile.relationship_pace,
       ),
       city: profile.city || "",
       country: profile.country || "",
@@ -680,12 +669,12 @@ useEffect(() => {
       about_me: profile.about_me || "",
       skills: Array.isArray(profile.skills) ? profile.skills.join(", ") : "",
 
-      //  Step 4 का simple interests (string)
+      //  simple interests 
       interests: Array.isArray(profile.interests)
         ? profile.interests.join(", ")
         : profile.interests || "",
 
-      //  Step 5 का interests_categories (JSON object)
+      //  interests_categories 
       interests_categories: interestsCategories,
 
       hobbies: Array.isArray(profile.hobbies) ? profile.hobbies.join(", ") : "",
@@ -693,7 +682,7 @@ useEffect(() => {
       marital_status: profile.marital_status || "",
       professional_identity: mapToUIEnum(
         "professional_identity",
-        profile.professional_identity
+        profile.professional_identity,
       ),
       company_type: profile.company_type || "",
       education_institution_name: profile.education_institution_name || "",
@@ -709,12 +698,12 @@ useEffect(() => {
       zodiac_sign: profile.zodiac_sign || "",
       interested_in: profile.interested_in || "",
       relationship_goal: profile.relationship_goal || "",
-    
+
       interests_categories: interestsCategories,
 
       children_preference: mapToUIEnum(
         "children_preference",
-        profile.children_preference
+        profile.children_preference,
       ),
       self_expression: profile.self_expression || "",
       interaction_style: profile.interaction_style || "",
@@ -722,11 +711,11 @@ useEffect(() => {
       work_rhythm: mapToUIEnum("work_rhythm", profile.work_rhythm),
       career_decision_style: mapToUIEnum(
         "career_decision_style",
-        profile.career_decision_style
+        profile.career_decision_style,
       ),
       work_demand_response: mapToUIEnum(
         "work_demand_response",
-        profile.work_demand_response
+        profile.work_demand_response,
       ),
       relationship_values: profile.relationship_values || "",
       values_in_others: profile.values_in_others || "",
@@ -734,17 +723,13 @@ useEffect(() => {
         profile.approach_to_physical_closeness || "",
       preference_of_closeness: mapToUIEnum(
         "preference_of_closeness",
-        profile.preference_of_closeness
+        profile.preference_of_closeness,
       ),
 
-love_language_affection: profile.love_language_affection || "",
-      
-      // love_language_affection: Array.isArray(profile.love_language_affection)
-      //   ? profile.love_language_affection.join(", ")
-      //   : profile.love_language_affection || "",
-        
+      love_language_affection: profile.love_language_affection || null,
+
       life_rhythms: profile.life_rhythms || {},
-        prompts: loadedPrompts,
+      prompts: loadedPrompts,
     });
 
     if (profile.profile_image) {
@@ -786,6 +771,24 @@ love_language_affection: profile.love_language_affection || "",
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+       if (!formData.email || !formData.first_name || !formData.last_name) {
+  alert("Email, First name and Last name are required");
+  setLoading(false);
+  return;
+}
+
+if (!formData.dob) {
+  alert("Please select Date of Birth");
+  setLoading(false);
+  return;
+}
+
+if (!formData.age) {
+  alert("Please enter your age");
+  setLoading(false);
+  return;
+}
+
 
     try {
       const handleArrayField = (value) => {
@@ -814,11 +817,13 @@ love_language_affection: profile.love_language_affection || "",
       const simpleInterests = handleArrayField(formData.interests);
       //  CORRECT: Prompts format backend ke hisaab se
 
-
-     
-
       const payload = {
-        profile_image: finalProfileImage || profile.profile_image,
+        // profile_image: finalProfileImage || profile.profile_image,
+        //  profile_image: finalProfileImage || profile?.image_url,
+        profile_image:
+          finalProfileImage === null
+            ? ""
+            : finalProfileImage || profile?.profile_image,
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
         username: formData.username.trim(),
@@ -831,11 +836,11 @@ love_language_affection: profile.love_language_affection || "",
         marital_status: mapToDBEnum("marital_status", formData.marital_status),
         professional_identity: mapToDBEnum(
           "professional_identity",
-          formData.professional_identity
+          formData.professional_identity,
         ),
         relationship_pace: mapToDBEnum(
           "relationship_pace",
-          formData.relationship_pace
+          formData.relationship_pace,
         ),
         city: formData.city || null,
         country: formData.country || null,
@@ -862,67 +867,67 @@ love_language_affection: profile.love_language_affection || "",
         freetime_style: mapToDBEnum("freetime_style", formData.freetime_style),
         health_activity_level: mapToDBEnum(
           "health_activity_level",
-          formData.health_activity_level
+          formData.health_activity_level,
         ),
-       
-          prompts: formData.prompts, // final q
+
+        prompts: formData.prompts, // final q
 
         smoking: mapToDBEnum("smoking", formData.smoking),
         drinking: mapToDBEnum("drinking", formData.drinking),
         pets_preference: mapToDBEnum(
           "pets_preference",
-          formData.pets_preference
+          formData.pets_preference,
         ),
         religious_belief: mapToDBEnum(
           "religious_belief",
-          formData.religious_belief
+          formData.religious_belief,
         ),
         zodiac_sign: formData.zodiac_sign || null,
         interested_in: mapToDBEnum("interested_in", formData.interested_in),
         relationship_goal: mapToDBEnum(
           "relationship_goal",
-          formData.relationship_goal
+          formData.relationship_goal,
         ),
         children_preference: mapToDBEnum(
           "children_preference",
-          formData.children_preference
+          formData.children_preference,
         ),
         self_expression: mapToDBEnum(
           "self_expression",
-          formData.self_expression
+          formData.self_expression,
         ),
         interaction_style: mapToDBEnum(
           "interaction_style",
-          formData.interaction_style
+          formData.interaction_style,
         ),
         work_environment: mapToDBEnum(
           "work_environment",
-          formData.work_environment
+          formData.work_environment,
         ),
         work_rhythm: mapToDBEnum("work_rhythm", formData.work_rhythm),
         career_decision_style: mapToDBEnum(
           "career_decision_style",
-          formData.career_decision_style
+          formData.career_decision_style,
         ),
         work_demand_response: mapToDBEnum(
           "work_demand_response",
-          formData.work_demand_response
+          formData.work_demand_response,
         ),
         relationship_values: mapToDBEnum(
           "relationship_values",
-          formData.relationship_values
+          formData.relationship_values,
         ),
         values_in_others: mapToDBEnum(
           "values_in_others",
-          formData.values_in_others
+          formData.values_in_others,
         ),
         approach_to_physical_closeness: mapToDBEnum(
           "approach_to_physical_closeness",
-          formData.approach_to_physical_closeness
+          formData.approach_to_physical_closeness,
         ),
         preference_of_closeness: mapToDBEnum(
           "preference_of_closeness",
-          formData.preference_of_closeness
+          formData.preference_of_closeness,
         ),
 
         // love_language_affection: mapToDBEnum(
@@ -934,17 +939,19 @@ love_language_affection: profile.love_language_affection || "",
         //   "love_language_affection",
         //   formData.love_language_affection
         // ),
-        love_language_affection: formData.love_language_affection, 
+        love_language_affection: formData.love_language_affection,
       };
 
       console.log(" FINAL PAYLOAD:", payload);
 
       await updateUserProfile(payload);
 
-      updateProfile({ ...profile, ...payload,
-          prompts: formData.prompts,
-          profile_image: payload.profile_image,
-       });
+      updateProfile({
+        ...profile,
+        ...payload,
+        prompts: formData.prompts,
+        profile_image: payload.profile_image,
+      });
       alert("Profile updated successfully ✅");
       navigate("/dashboard");
     } catch (err) {
@@ -1063,15 +1070,15 @@ love_language_affection: profile.love_language_affection || "",
       const uploadResponse = await axios.post(
         "https://backend-q0wc.onrender.com/api/upload",
         uploadFormData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { headers: { "Content-Type": "multipart/form-data" } },
       );
       const saveResponse = await axios.post(
         "https://backend-q0wc.onrender.com/api/saveProfileImage",
-        { user_id: profile.user_id, imageUrl: uploadResponse.data.imageUrl }
+        { user_id: profile.user_id, imageUrl: uploadResponse.data.imageUrl },
       );
       updateProfile(saveResponse.data.profiles);
       setImagePreview(uploadResponse.data.imageUrl);
-      setFinalProfileImage(uploadResponse.data.imageUrl); 
+      setFinalProfileImage(uploadResponse.data.imageUrl);
       return uploadResponse.data.imageUrl;
     } catch (error) {
       console.error("❌ Image upload error:", error);
@@ -1083,43 +1090,58 @@ love_language_affection: profile.love_language_affection || "",
   };
 
   const handleImageSelect = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const reader = new FileReader();
+    const reader = new FileReader();
 
-  reader.onload = async () => {
-    const imageSrc = reader.result;
-    setImagePreview(imageSrc);
+    reader.onload = async () => {
+      const imageSrc = reader.result;
+      setImagePreview(imageSrc);
 
-    try {
-      const result = await detectAgeGender(imageSrc);
+      try {
+        const result = await detectAgeGender(imageSrc);
 
-      if (result) {
-        setFormData(prev => ({
-          ...prev,
-          age: result.age,
-          gender: result.gender,
-        }));
+        if (result) {
+          setFormData((prev) => ({
+            ...prev,
+            age: result.age,
+            gender: result.gender,
+          }));
+        }
+      } catch (err) {
+        console.error("❌ Face detection failed on upload", err);
       }
-    } catch (err) {
-      console.error("❌ Face detection failed on upload", err);
+    };
+
+    reader.readAsDataURL(file);
+
+    // upload separately
+    handleImageUpload(file);
+  };
+  const handleRemoveProfilePic = async () => {
+    if (
+      window.confirm("Are you sure you want to remove your profile picture?")
+    ) {
+      try {
+        // ✅ 1. UI se hatao
+        setImagePreview(null);
+
+        // ✅ 2. IMPORTANT: finalProfileImage ko NULL set karo (yeh backend jayega)
+        setFinalProfileImage(null);
+
+        // ✅ 3. Context update karo (taaki ProfilePage mein bhi dikhe)
+        updateProfile({
+          ...profile,
+          image_url: null,
+        });
+
+        alert("Profile picture removed!");
+      } catch (error) {
+        console.error("Error removing profile picture:", error);
+      }
     }
   };
-
-  reader.readAsDataURL(file);
-
-  // upload separately
-  handleImageUpload(file);
-};
-
-// 1. Profile picture remove करने का function
-const handleRemoveProfilePic = () => {
-  if (window.confirm("Remove profile picture?")) {
-    setImagePreview(null);
-    setFinalProfileImage(null);
-  }
-};
 
   //  interests_categories से total interests calculate करो
   const totalCheckboxInterests =
@@ -1169,8 +1191,8 @@ const handleRemoveProfilePic = () => {
                     step === currentStep
                       ? "bg-indigo-600 text-white"
                       : step < currentStep
-                      ? "bg-indigo-100 text-indigo-600"
-                      : "bg-gray-200 text-gray-400"
+                        ? "bg-indigo-100 text-indigo-600"
+                        : "bg-gray-200 text-gray-400"
                   }`}
                 >
                   {step}
@@ -1179,12 +1201,12 @@ const handleRemoveProfilePic = () => {
                   {step === 1
                     ? "Photo"
                     : step === 2
-                    ? "Personal"
-                    : step === 3
-                    ? "Professional"
-                    : step === 4
-                    ? "About"
-                    : "Relationships"}
+                      ? "Personal"
+                      : step === 3
+                        ? "Professional"
+                        : step === 4
+                          ? "About"
+                          : "Relationships"}
                 </span>
               </button>
             ))}
@@ -1193,7 +1215,8 @@ const handleRemoveProfilePic = () => {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* STEP 1: PROFILE PICTURE */}
-           {currentStep === 1 && (
+
+          {currentStep === 1 && (
             <div className="animate-fadeIn">
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">
@@ -1201,10 +1224,37 @@ const handleRemoveProfilePic = () => {
                 </h3>
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
+                    {/* <div className="w-32 h-32 rounded-full border-4 border-gray-300 overflow-hidden bg-gray-200 flex items-center justify-center">
+            {imagePreview || profile?.image_url ? (
+              <img
+                src={imagePreview || profile?.image_url}
+                alt="Profile preview"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-gray-500 text-sm text-center">
+                No Image
+              </span>
+            )}
+          </div>
+          
+          {/*  REMOVE BUTTON - Sirf jab image ho /}
+          {(imagePreview || profile?.image_url) && (
+            <button
+              type="button"
+              onClick={handleRemoveProfilePic}
+              className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+              title="Remove photo"
+            >
+              ✕
+            </button> */}
+
                     <div className="w-32 h-32 rounded-full border-4 border-gray-300 overflow-hidden bg-gray-200 flex items-center justify-center">
-                      {imagePreview ? (
+                      {/*  Bas yeh condition: */}
+                      {imagePreview ||
+                      (profile?.image_url && finalProfileImage !== null) ? (
                         <img
-                          src={imagePreview}
+                          src={imagePreview || profile?.image_url}
                           alt="Profile preview"
                           className="w-full h-full object-cover"
                         />
@@ -1214,10 +1264,23 @@ const handleRemoveProfilePic = () => {
                         </span>
                       )}
                     </div>
+
+                    {/* Remove button */}
+                    {(imagePreview ||
+                      (profile?.image_url && !removedImage)) && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveProfilePic}
+                        className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                        title="Remove photo"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <label className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition cursor-pointer text-center">
+                    <label className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition cursor-pointer text-center relative">
                       Upload Photo
                       <input
                         type="file"
@@ -1226,25 +1289,32 @@ const handleRemoveProfilePic = () => {
                         className="hidden"
                         disabled={imageLoading}
                       />
+                      {imageLoading && (
+                        <div className="absolute inset-0 bg-indigo-600 rounded-lg flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        </div>
+                      )}
                     </label>
 
                     <button
-  type="button"
-  onClick={() => setShowCamera(true)}
-  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
->
-  Take Photo 
-</button>
-
+                      type="button"
+                      onClick={() => setShowCamera(true)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2"
+                    >
+                      📸 Take Photo
+                    </button>
                   </div>
+
+                  {/* Status message */}
+                  {imagePreview && (
+                    <p className="text-sm text-green-600 text-center">
+                      ✓ New photo selected
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
-          )} 
- 
-
-
-
+          )}
 
           {/* STEP 2: PERSONAL INFORMATION */}
           {currentStep === 2 && (
@@ -1338,21 +1408,22 @@ const handleRemoveProfilePic = () => {
                   </div>
 
                   <div>
-  <label className="block text-sm font-semibold text-gray-700 mb-2">
-    Age
-  </label>
-  <input
-    type="number"
-    name="age"
-    value={formData.age}
-    onChange={handleChange}
-    placeholder="25"
-    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-  />
-  <p className="text-xs text-gray-500 mt-1">
-    Age & gender are AI-estimated (±10% tolerance). You can edit them.
-  </p>
-</div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Age
+                    </label>
+                    <input
+                      type="number"
+                      name="age"
+                      value={formData.age}
+                      onChange={handleChange}
+                      placeholder="25"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Age & gender are AI-estimated (±10% tolerance). You can
+                      edit them.
+                    </p>
+                  </div>
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -1388,9 +1459,7 @@ const handleRemoveProfilePic = () => {
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                       <option value="Non-Binary">Non-Binary</option>
-                     <option value="Other">Other</option>
-                  
-                  
+                      <option value="Other">Other</option>
                     </select>
                   </div>
 
@@ -1832,8 +1901,10 @@ const handleRemoveProfilePic = () => {
                         <option value="Have and don’t want more">
                           Have and don't want more
                         </option>
-                         <option value="OPEN_OR_NOT_SURE_YET">Open / Not sure yet</option>
-                     {/* <option value="Open or not sure yet">
+                        <option value="OPEN_OR_NOT_SURE_YET">
+                          Open / Not sure yet
+                        </option>
+                        {/* <option value="Open or not sure yet">
                           Open / Not Sure yet
                         </option> */}
                         {/* <option value="Open">Open</option>OPEN_OR_NOT_SURE_YET */}
@@ -1938,7 +2009,7 @@ const handleRemoveProfilePic = () => {
                                     </span>
                                   </div>
                                 </div>
-                              )
+                              ),
                           )}
                         </div>
                       </div>
@@ -2006,80 +2077,83 @@ const handleRemoveProfilePic = () => {
                     </div>
                   )}
 
+                  {/*  FIXED: Profile Questions Section */}
+                  <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      Tell Us More About Yourself
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Answer these prompts to help others know you better
+                    </p>
 
- 
-      {/*  FIXED: Profile Questions Section */}
-      <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
-        <h4 className="text-lg font-semibold text-gray-800 mb-2">
-          Tell Us More About Yourself
-        </h4>
-        <p className="text-sm text-gray-600 mb-3">
-          Answer these prompts to help others know you better
-        </p>
-
-        <button
-          type="button"
-          onClick={() => setIsQuestionsModalOpen(true)}
-          className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-        >
-          ✍️ Edit Profile Questions
-        </button>
-
-        {/* Display existing prompts */}
-        {formData.prompts && typeof formData.prompts === "object" && Object.keys(formData.prompts).length > 0 ? (
-          <div className="mt-4 p-3 bg-white border rounded-md">
-            <div className="flex justify-between items-center mb-2">
-              <p className="font-medium text-gray-700">Answered Questions:</p>
-              <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
-                {Object.keys(formData.prompts).length} answered
-              </span>
-            </div>
-            <div className="space-y-3">
-              {Object.entries(formData.prompts)
-                .slice(0, 3)
-                .map(([question_key, answer]) => {
-                  const question = PROFILE_QUESTIONS.find(
-                    (q) => q.key === question_key
-                  );
-                  const label = question ? question.label : question_key;
-
-                  return (
-                    <div
-                      key={question_key}
-                      className="border-l-4 border-purple-300 pl-3 py-2"
+                    <button
+                      type="button"
+                      onClick={() => setIsQuestionsModalOpen(true)}
+                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
                     >
-                      <p className="font-medium text-sm text-gray-800 mb-1">
-                        {label}
-                      </p>
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {answer}
-                      </p>
-                    </div>
-                  );
-                })}
+                      ✍️ Edit Profile Questions
+                    </button>
 
-              {Object.keys(formData.prompts).length > 3 && (
-                <div className="text-center pt-2 border-t">
-                  <p className="text-xs text-purple-600">
-                    +{Object.keys(formData.prompts).length - 3} more questions answered
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="mt-4 p-4 bg-white border border-dashed border-gray-300 rounded-md text-center">
-            <p className="text-gray-500 text-sm italic">
-              No questions answered yet
-            </p>
-            <p className="text-gray-400 text-xs mt-1">
-              Click above button to answer prompts about yourself
-            </p>
-          </div>
-        )}
-      </div>
+                    {/* Display existing prompts */}
+                    {formData.prompts &&
+                    typeof formData.prompts === "object" &&
+                    Object.keys(formData.prompts).length > 0 ? (
+                      <div className="mt-4 p-3 bg-white border rounded-md">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="font-medium text-gray-700">
+                            Answered Questions:
+                          </p>
+                          <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+                            {Object.keys(formData.prompts).length} answered
+                          </span>
+                        </div>
+                        <div className="space-y-3">
+                          {Object.entries(formData.prompts)
+                            .slice(0, 3)
+                            .map(([question_key, answer]) => {
+                              const question = PROFILE_QUESTIONS.find(
+                                (q) => q.key === question_key,
+                              );
+                              const label = question
+                                ? question.label
+                                : question_key;
 
+                              return (
+                                <div
+                                  key={question_key}
+                                  className="border-l-4 border-purple-300 pl-3 py-2"
+                                >
+                                  <p className="font-medium text-sm text-gray-800 mb-1">
+                                    {label}
+                                  </p>
+                                  <p className="text-sm text-gray-600 line-clamp-2">
+                                    {answer}
+                                  </p>
+                                </div>
+                              );
+                            })}
 
+                          {Object.keys(formData.prompts).length > 3 && (
+                            <div className="text-center pt-2 border-t">
+                              <p className="text-xs text-purple-600">
+                                +{Object.keys(formData.prompts).length - 3} more
+                                questions answered
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-4 p-4 bg-white border border-dashed border-gray-300 rounded-md text-center">
+                        <p className="text-gray-500 text-sm italic">
+                          No questions answered yet
+                        </p>
+                        <p className="text-gray-400 text-xs mt-1">
+                          Click above button to answer prompts about yourself
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2146,9 +2220,9 @@ const handleRemoveProfilePic = () => {
                         <option value="HAVE_AND_DONT_WANT_MORE">
                           Have and don't want more
                         </option>
-                         <option value="OPEN_OR_NOT_SURE_YET">Open / Not sure yet</option>
-
-            
+                        <option value="OPEN_OR_NOT_SURE_YET">
+                          Open / Not sure yet
+                        </option>
                       </select>
                     </div>
 
@@ -2484,41 +2558,41 @@ const handleRemoveProfilePic = () => {
           </div>
         </form>
       </div>
-{showCamera && (
-  <FaceCamera
-    onClose={() => setShowCamera(false)}
-    onResult={async (data) => {
-      console.log("FACE RESULT:", data);
+      {showCamera && (
+        <FaceCamera
+          onClose={() => setShowCamera(false)}
+          onResult={async (data) => {
+            console.log("FACE RESULT:", data);
 
-      // 1️⃣ Preview (UI only)
-      setImagePreview(data.image);
+            // 1️⃣ Preview (UI only)
+            setImagePreview(data.image);
 
-      // 2️⃣ Convert base64 → File
-      const res = await fetch(data.image);
-      const blob = await res.blob();
-      const file = new File([blob], "camera.png", {
-        type: "image/png",
-      });
+            // 2️⃣ Convert base64 → File
+            const res = await fetch(data.image);
+            const blob = await res.blob();
+            const file = new File([blob], "camera.png", {
+              type: "image/png",
+            });
 
-      // 3️⃣ Upload to backend
-      const imageUrl = await handleImageUpload(file);
+            // 3️⃣ Upload to backend
+            const imageUrl = await handleImageUpload(file);
 
-      // 4️⃣ IMPORTANT: save URL for payload
-      if (imageUrl) {
-        setFinalProfileImage(imageUrl);
-      }
+            // 4️⃣ IMPORTANT: save URL for payload
+            if (imageUrl) {
+              setFinalProfileImage(imageUrl);
+            }
 
-      // 5️⃣ Autofill age & gender
-      setFormData((prev) => ({
-        ...prev,
-        age: data.age,
-  gender: data.gender,
-      }));
+            // 5️⃣ Autofill age & gender
+            setFormData((prev) => ({
+              ...prev,
+              age: data.age,
+              gender: data.gender,
+            }));
 
-      setShowCamera(false);
-    }}
-  />
-)}
+            setShowCamera(false);
+          }}
+        />
+      )}
 
       {/* Life Rhythms Modal */}
       {showLifeRhythms && (
@@ -2540,19 +2614,89 @@ const handleRemoveProfilePic = () => {
         />
       )}
 
-
-       {/* ProfileQuestions Modal */}
+      {/* ProfileQuestions Modal */}
       <ProfileQuestions
         isOpen={isQuestionsModalOpen}
         onClose={() => setIsQuestionsModalOpen(false)}
         onSave={handleQuestionsSave}
-        initialData={formData.prompts} 
+        initialData={formData.prompts}
       />
-  
     </div>
-    
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2588,7 +2732,6 @@ const handleRemoveProfilePic = () => {
 // import axios from "axios";
 // import InterestsForm from "./InterestsForm";
 // import ProfileQuestions from "./ProfileQuestions";
-
 
 // import {FaceCamera} from "../../facekit";
 // import { detectAgeGender } from "../../facekit/services/faceDetection";
@@ -3162,13 +3305,12 @@ const handleRemoveProfilePic = () => {
 //     }));
 //   };
 
-//   //face model useeffect 
+//   //face model useeffect
 //   useEffect(() => {
 //     loadFaceModels().catch(err =>
 //       console.error("❌ Face models failed to load", err)
 //     );
 //   }, []);
-
 
 //   // ================== LOAD PROFILE DATA ==================
 
@@ -3671,22 +3813,20 @@ const handleRemoveProfilePic = () => {
 //   //   handleImageUpload(file);
 //   // };
 
-
-  
 //   //shraddha new code
 //     const handleImageSelect = async (e) => {
 //     const file = e.target.files[0];
 //     if (!file) return;
-  
+
 //     const reader = new FileReader();
-  
+
 //     reader.onload = async () => {
 //       const imageSrc = reader.result;
 //       setImagePreview(imageSrc);
-  
+
 //       try {
 //         const result = await detectAgeGender(imageSrc);
-  
+
 //         if (result) {
 //           setFormData(prev => ({
 //             ...prev,
@@ -3698,14 +3838,12 @@ const handleRemoveProfilePic = () => {
 //         console.error("❌ Face detection failed on upload", err);
 //       }
 //     };
-  
+
 //     reader.readAsDataURL(file);
-  
+
 //     // upload separately
 //     handleImageUpload(file);
 //   };
-  
-  
 
 //   //  interests_categories से total interests calculate करो
 //   const totalCheckboxInterests =
@@ -3826,10 +3964,9 @@ const handleRemoveProfilePic = () => {
 //                 </div>
 //               </div>
 //             </div>
-//           )} 
+//           )}
 
 //    */}
-
 
 //    {/* STEP 1: PROFILE PICTURE */}
 // {currentStep === 1 && (
@@ -3860,7 +3997,7 @@ const handleRemoveProfilePic = () => {
 //               </span>
 //             )}
 //           </div>
-          
+
 //           {/* Remove button - सिर्फ तब दिखे जब कोई image हो */}
 //           {(profile.profile_image || imagePreview) && (
 //             <button
@@ -3904,7 +4041,7 @@ const handleRemoveProfilePic = () => {
 //             Take Photo
 //           </button>
 //         </div>
-        
+
 //         {/* Camera capture buttons - same line में */}
 //         {capturedImage && (
 //           <div className="flex gap-2 mt-2">
@@ -3940,7 +4077,7 @@ const handleRemoveProfilePic = () => {
 //             </button>
 //           </div>
 //         )}
-        
+
 //         {/* Skip button */}
 //         <div className="pt-4">
 //           <button
@@ -5236,7 +5373,7 @@ const handleRemoveProfilePic = () => {
 //         isOpen={isQuestionsModalOpen}
 //         onClose={() => setIsQuestionsModalOpen(false)}
 //         onSave={handleQuestionsSave}
-//         initialData={formData.prompts} 
+//         initialData={formData.prompts}
 //       />
 //     </div>
 //   );
