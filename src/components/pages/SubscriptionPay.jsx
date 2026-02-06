@@ -1,40 +1,36 @@
-// import React, { useEffect, useState } from "react";
-// import UserActivityTable from "../components/UserActivityTable";
-// import { useLocation } from "react-router-dom";
-// import BackButton from "../components/BackButton";
-// import { fetchNotRenewedUsers } from "../api/adminReport.api";
-
-import React, { useEffect, useState } from "react";
-import UserActivityTable from "../charts/UserActivityTable";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+//import UserActivityTable from "../components/UserActivityTable";
+import UserActivityTable from "../charts/UserActivityTable";
 import BackButton from "../charts/BackButton";
 import { fetchNotRenewedUsers } from "../services/adminReport.api";
-
+import { useAdminReport } from "../context/AdminReportContext";
 const SubscriptionPay = () => {
   const { state } = useLocation();
   const tableData = state?.val ?? [];
 
-  const [expiredCount, setExpiredCount] = useState(
-    typeof state?.expired_not_renewed === "number" ? state.expired_not_renewed : 0
-  );
+  const { fromDate, toDate } = useAdminReport();
+
+  const [expiredCount, setExpiredCount] = useState(0);
   const [countLoading, setCountLoading] = useState(true);
 
   useEffect(() => {
     const fetchExpiredCount = async () => {
       try {
         setCountLoading(true);
-        const res = await fetchNotRenewedUsers(); // { data: [...] }
+        const res = await fetchNotRenewedUsers(fromDate, toDate);
         const list = res?.data || [];
         setExpiredCount(list.length);
       } catch (e) {
         console.error("Failed to fetch not-renewed count:", e);
+        setExpiredCount(0);
       } finally {
         setCountLoading(false);
       }
     };
 
     fetchExpiredCount();
-  }, []);
+  }, [fromDate, toDate]);
 
   return (
     <div className="mt-10">

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import BackButton from "../components/BackButton";
-import { fetchSubscriptions } from "../api/adminReport.api";
-
+import BackButton from "../charts/BackButton";
+import { fetchSubscriptions } from "../services/adminReport.api";
 const Subscriptions = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);

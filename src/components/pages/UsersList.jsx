@@ -1,29 +1,25 @@
-// import { useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-// import BackButton from "../components/BackButton";
-// import { fetchUsersByType } from "../api/adminReport.api";
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import BackButton from "../charts/BackButton";
 import { fetchUsersByType } from "../services/adminReport.api";
+import { useAdminReport } from "../context/AdminReportContext";
 
 const UsersList = () => {
-  const { type } = useParams(); // all | approved | hold | process | deactivated
+  const { type } = useParams();
+  const { fromDate, toDate } = useAdminReport(); // ✅ selected dates from report
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type]);
+  }, [type, fromDate, toDate]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-
-      const res = await fetchUsersByType(type);
-      // backend response: { success: true, data: [...] }
+      const res = await fetchUsersByType(type, fromDate, toDate);
       setUsers(res?.data || []);
     } catch (error) {
       console.error("Failed to fetch users", error);
@@ -52,27 +48,13 @@ const UsersList = () => {
           <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  S. No.
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Age
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Profession
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Registered Date
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                  Status
-                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">S. No.</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Age</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Profession</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Registered Date</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
               </tr>
             </thead>
 
@@ -80,9 +62,7 @@ const UsersList = () => {
               {users.map((user, index) => (
                 <tr key={user.id ?? index} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm text-gray-800">{index + 1}</td>
-                  <td className="px-6 py-4 text-sm text-gray-800">
-                    {user.name} {user.lname}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-800">{user.name} {user.lname}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
                   <td className="px-6 py-4 text-sm text-gray-800">{user.age}</td>
                   <td className="px-6 py-4 text-sm text-gray-800">{user.profession}</td>
