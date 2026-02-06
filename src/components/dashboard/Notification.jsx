@@ -232,7 +232,7 @@ const Notification = () => {
               onClick={fetchNotifications}
               className="w-full text-center text-sm text-blue-600 hover:text-blue-800 font-medium py-2"
             >
-              View All message
+              View All messages
             </button>
           </div>
         </div>
