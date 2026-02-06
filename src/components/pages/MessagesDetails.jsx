@@ -1,5 +1,4 @@
 import { useLocation } from "react-router-dom";
-//import BackButton from "../components/BackButton";
 import BackButton from "../charts/BackButton";
 const MessagesDetails = () => {
   const { state } = useLocation();
@@ -28,7 +27,6 @@ const MessagesDetails = () => {
                 <th className="p-3 text-left">Time</th>
                 <th className="p-3 text-left">Sender</th>
                 <th className="p-3 text-left">Receiver</th>
-                <th className="p-3 text-left">Topic</th>
                 <th className="p-3 text-left">Content</th>
                 <th className="p-3 text-left">Attachment</th>
               </tr>

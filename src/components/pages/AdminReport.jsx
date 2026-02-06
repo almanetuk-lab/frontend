@@ -21,20 +21,45 @@ const AdminReport = () => {
 
   // ✅ Not Renewed count for StatCard
   const [notRenewedCount, setNotRenewedCount] = useState(0);
+const [notRenewedLoading, setNotRenewedLoading] = useState(false);
+  // useEffect(() => {
+  //   const fetchNotRenewedCount = async () => {
+  //     try {
+  //       const res = await fetchNotRenewedUsers(); // returns response.data
+  //       setNotRenewedCount((res?.data || []).length);
+  //     } catch (e) {
+  //       console.error("Not renewed count error:", e);
+  //       setNotRenewedCount(0);
+  //     }
+  //   };
+
+  //   fetchNotRenewedCount();
+  // }, []);
 
   useEffect(() => {
-    const fetchNotRenewedCount = async () => {
-      try {
-        const res = await fetchNotRenewedUsers(); // returns response.data
-        setNotRenewedCount((res?.data || []).length);
-      } catch (e) {
-        console.error("Not renewed count error:", e);
-        setNotRenewedCount(0);
-      }
-    };
+  const fetchNotRenewedCount = async () => {
+    // ✅ report generate hone ke baad hi count fetch karo
+    if (!report || !fromDate || !toDate) {
+      setNotRenewedCount(0);
+      return;
+    }
 
-    fetchNotRenewedCount();
-  }, []);
+    try {
+      setNotRenewedLoading(true);
+
+      // ✅ IMPORTANT: dates pass karo
+      const res = await fetchNotRenewedUsers(fromDate, toDate);
+      setNotRenewedCount((res?.data || []).length);
+    } catch (e) {
+      console.error("Not renewed count error:", e);
+      setNotRenewedCount(0);
+    } finally {
+      setNotRenewedLoading(false);
+    }
+  };
+
+  fetchNotRenewedCount();
+}, [report, fromDate, toDate]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -104,24 +129,23 @@ const AdminReport = () => {
               title="Total Users"
               value={report.summary.users.total_users}
               onClick={() => navigate("/admin/users/all")} 
-              // onClick={() => navigate("/users/all")}
-            />
+                          />
             <StatCard
               title="Approved Users"
               value={report.summary.users.approved_users}
               onClick={() => navigate("/admin/users/approved")}
-              // onClick={() => navigate("/users/approved")}
+             
             />
             <StatCard
               title="Hold Users"
               value={report.summary.users.hold_users}
-              // onClick={() => navigate("/users/hold")}
+               onClick={() => navigate("/admin/users/hold")}
             />
             <StatCard
               title="In-process Users"
               value={report.summary.users.in_process_users}
               onClick={() => navigate("/admin/users/process")}
-              // onClick={() => navigate("/users/process")}
+              
             />
 
             <StatCard
@@ -157,9 +181,15 @@ const AdminReport = () => {
               }
             />
 
-            <StatCard
+            {/* <StatCard
               title="Not Renewed Users"
               value={notRenewedCount}
+              onClick={() => navigate("/admin/users/not-renewed")}
+            /> */}
+
+            <StatCard
+              title="Not Renewed Users"
+              value={notRenewedLoading ? "..." : notRenewedCount}
               onClick={() => navigate("/admin/users/not-renewed")}
             />
           </div>
