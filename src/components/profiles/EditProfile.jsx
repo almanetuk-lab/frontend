@@ -7,9 +7,9 @@ import axios from "axios";
 import InterestsForm from "./InterestsForm";
 import ProfileQuestions from "./ProfileQuestions";
 
-import { FaceCamera } from "../../facekit";
-import { detectAgeGender } from "../../facekit/services/faceDetection";
-import { loadFaceModels } from "../../facekit/services/faceDetection";
+// import { FaceCamera } from "../../facekit";
+// import { detectAgeGender } from "../../facekit/services/faceDetection";
+// import { loadFaceModels } from "../../facekit/services/faceDetection";
 
 // ================== ENUM HELPERS ==================
 
@@ -569,11 +569,11 @@ export default function EditProfilePage() {
   };
 
   // ================== LOAD PROFILE DATA ==================
-  useEffect(() => {
-    loadFaceModels().catch((err) =>
-      console.error("❌ Face models failed to load", err),
-    );
-  }, []);
+  // useEffect(() => {
+  //   loadFaceModels().catch((err) =>
+  //     console.error("❌ Face models failed to load", err),
+  //   );
+  // }, []);
 
   useEffect(() => {
     if (!profile) return;
