@@ -145,7 +145,7 @@ const [notRenewedLoading, setNotRenewedLoading] = useState(false);
               title="In-process Users"
               value={report.summary.users.in_process_users}
               onClick={() => navigate("/admin/users/process")}
-              // onClick={() => navigate("/users/process")}
+              
             />
 
             <StatCard
