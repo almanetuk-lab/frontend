@@ -1,5 +1,9 @@
 
 
+
+
+
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getUserProfile } from "../services/api";
 
@@ -254,7 +258,7 @@ export const UserProfileProvider = ({ children }) => {
     </UserProfileContext.Provider>
   );
 };
-
+// export default UserProfileContext;
 
 
 
