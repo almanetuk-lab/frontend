@@ -63,6 +63,16 @@ export const chatApi = {
     });
   },
 
+  
+  //  // NOTIFICATION APIS ADDED
+  // getUserNotifications: (userId) => 
+  //   api.get(`/api/notifications/${userId}`),
+  
+  // markNotificationAsRead: (notificationId) => 
+  //   api.put(`/api/notifications/read/${notificationId}`),
+
+
+
   // Add reaction to message
   addReaction: (reactionData) => {
     return api.post("/api/reactions", reactionData);
