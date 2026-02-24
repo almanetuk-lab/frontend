@@ -258,19 +258,19 @@ function Header() {
             ) : (
               <div className="flex items-center gap-3">
                 {/* FIXED: Original login links preserved */}
-                <Link
+               <Link
                   to="/login"
-                  className="text-gray-700 hover:text-[#4D6D9E] font-medium transition-colors duration-200 px-3 py-1"
+                  className="bg-[#727bf1] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#041cfa] transition-all duration-200"
                 >
                   Login
                 </Link>
 
-                <Link
+                {/* <Link
                   to="/admin-login"
                   className="text-gray-700 hover:text-[#4D6D9E] font-medium transition-colors duration-200 px-3 py-1"
                 >
                   Admin Login
-                </Link>
+                </Link> */}
 
                 <Link
                   to="/register"
@@ -494,13 +494,13 @@ function Header() {
               ) : (
                 <div className="space-y-3">
                   {/* FIXED: Original Admin Login preserved */}
-                  <Link
+                  {/* <Link
                     to="/admin-login"
                     className="block py-3 px-4 text-center text-gray-700 hover:text-[#4D6D9E] hover:bg-gray-50 rounded-lg border border-gray-300 transition-colors font-medium"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Admin Login
-                  </Link>
+                  </Link> */}
 
                   <Link
                     to="/login"
