@@ -157,7 +157,7 @@ const ContactPage = () => {
                   </svg>
                 </div>
                 <h3 className="font-semibold text-gray-800 mb-2">Call Us</h3>
-                <p className="text-gray-600">+44-07748697601</p>
+                <p className="text-gray-600">07424 844073</p>
                 <p className="text-sm text-gray-500 mt-1">Mon-Fri from 9am to 6pm</p>
               </div>
 

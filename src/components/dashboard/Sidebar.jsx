@@ -1,3 +1,4 @@
+
 // src/components/dashboard/Sidebar.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -72,7 +73,7 @@ export default function Sidebar({
       {/* Overlay - Only for mobile */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}

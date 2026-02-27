@@ -59,22 +59,6 @@ export default function Login() {
   };
 
 
-//   const handleLinkedInLogin = async () => {
-//     try {
-//         // const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth-url`);
-// const response = await fetch('https://backend-q0wc.onrender.com/api/linkedin/auth-url');
-//         const data = await response.json();
-        
-//         if (data.success && data.authUrl) {
-//             window.location.href = data.authUrl;
-//         } else {
-//             alert('Failed to get LinkedIn URL');
-//         }
-//     } catch (error) {
-//         console.error('LinkedIn login error:', error);
-//         alert('LinkedIn login failed');
-//     }
-// };
 const handleLinkedInLogin = async () => {
     setLinkedinLoading(true);
     try {
@@ -94,7 +78,7 @@ const handleLinkedInLogin = async () => {
         const data = await response.json();
         console.log('✅ Backend LinkedIn response:', data);
         
-        // ✅ IMPORTANT: Backend { url: '...' } format में return कर रहा है
+        //  IMPORTANT: Backend { url: '...' } 
         if (data.url) {
             console.log('🚀 Redirecting to LinkedIn login...');
             window.location.href = data.url;
@@ -125,7 +109,7 @@ const handleLinkedInLogin = async () => {
         {/* UI CHANGE: Header with Intentional Connections - HOME PAGE STYLE */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold">
-            <span className="text-blue-700">Intentional</span>
+            <span className="text-grey-400">Intentional</span>
             <span className="text-pink-500"> Connections</span>
           </h1>
           <p className="text-gray-600 mt-2">Login to continue your journey</p>
@@ -204,17 +188,17 @@ const handleLinkedInLogin = async () => {
           <button
             onClick={handleLinkedInLogin}
             disabled={linkedinLoading}
-            className="w-120  mx-auto mt-5 py-3 px-4 bg-[#0077B5] hover:bg-[#00669C] text-white rounded-lg shadow-sm hover:shadow-md transition duration-200 flex items-center justify-center gap-3 font-medium"
+            className="w-120  mx-auto mt-5 py-3 px-4 bg-blue-600 hover:bg-[#00669C] text-white rounded-lg shadow-sm hover:shadow-md transition duration-200 flex items-center justify-center gap-3 font-medium"
           >
             {linkedinLoading ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                {/* <span>Connecting to LinkedIn...</span> */}
+                <span>Connecting to LinkedIn...</span>
               </>
             ) : (
               <>
                 <FaLinkedin className="text-2xl" />
-                {/* <span>Continue with LinkedIn</span> */}
+                <span>Continue with LinkedIn</span>
               </>
             )}
           </button>
