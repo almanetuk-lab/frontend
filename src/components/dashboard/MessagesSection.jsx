@@ -63,6 +63,13 @@ export default function MessagesSection() {
       console.log("Token starts with:", token.substring(0, 20) + "...");
     }
   }, []);
+  
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'instant'
+    });
+  }, []);
 
   //  IMPROVED PROFILE PICTURES FETCH
   useEffect(() => {

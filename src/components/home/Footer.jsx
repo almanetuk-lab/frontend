@@ -1,10 +1,51 @@
 // src/home/Footer.jsx (Compact Version)
-import React from "react";
+// import React from "react";
+import React, { useState } from "react";
 import { FaLinkedin, FaFacebook, FaTwitter } from "react-icons/fa";
 import logo from "../../assets/logo.png";
 import { Link } from "react-router-dom";
 
+
+
 export default function Footer() {
+  const [linkedinLoading, setLinkedinLoading] = useState(false);
+
+  
+  const handleLinkedInLogin = async () => {
+    setLinkedinLoading(true);
+    try {
+        console.log('🔗 Getting LinkedIn auth URL...');
+        
+        const backendUrl = import.meta.env.VITE_API_BASE_URL || 'https://backend-q0wc.onrender.com';
+        const apiUrl = `${backendUrl}/api/linkedin/auth-url`;
+        
+        console.log('📞 Calling backend for LinkedIn URL:', apiUrl);
+        
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+            throw new Error(`Backend error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('✅ Backend LinkedIn response:', data);
+        
+        //  IMPORTANT: Backend { url: '...' } format में return कर रहा है
+        if (data.url) {
+            console.log('🚀 Redirecting to LinkedIn login...');
+            window.location.href = data.url;
+        } else {
+            throw new Error('No LinkedIn URL received from backend');
+        }
+        
+    } catch (error) {
+        console.error('❌ LinkedIn login error:', error);
+        alert(`Login failed: ${error.message}. Please try again.`);
+    } finally {
+        setLinkedinLoading(false);
+    }
+};
+
   return (
     <footer className="bg-gradient-to-b from-[#F8F9FA] to-[#E3F2FD] border-t border-gray-200 ">
       {" "}
@@ -127,14 +168,25 @@ export default function Footer() {
             </h3>
             <div className="flex space-x-4">
               {/* LinkedIn Link */}
-              <Link
+                <button
+  onClick={handleLinkedInLogin}
+  disabled={linkedinLoading}
+  className="w-10 h-10 rounded-full bg-[#0077B5] text-white hover:opacity-90 transition shadow-sm hover:shadow-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  {linkedinLoading ? (
+    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+  ) : (
+    <FaLinkedin size={20} />
+  )}
+</button>
+              {/* <Link
                 to="/linkedin"
                 className="w-10 h-10 rounded-full bg-[#0077B5] flex items-center justify-center text-white hover:bg-[#0066a0] transition-colors"
                 aria-label="LinkedIn"
                 onClick={() => window.scrollTo(0, 0)}
               >
                 <FaLinkedin size={20} />
-              </Link>
+              </Link> */}
 
               {/* Facebook Link */}
               <Link
