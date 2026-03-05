@@ -70,7 +70,7 @@ export default function DashboardHome({ profile }) {
   //   }
   // };
 
-  // ✅ UPDATED: Fetch dashboard data
+  //  UPDATED: Fetch dashboard data
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
@@ -90,7 +90,7 @@ export default function DashboardHome({ profile }) {
         setTotalViewers(dashboardSummary.today_viewers || 0);
         setMessagesCount(dashboardSummary.messages_count || 0);
 
-        // ✅ Override with dashboard matches count if available
+        //  Override with dashboard matches count if available
         if (
           dashboardSummary.matches_count !== undefined &&
           dashboardSummary.matches_count !== null &&
@@ -211,7 +211,7 @@ export default function DashboardHome({ profile }) {
   //   fetchMatches();
   // };
 
-  // ✅ NEW FUNCTION: Fetch matches count from getSuggestedMatches
+  //  NEW FUNCTION: Fetch matches count from getSuggestedMatches
   const fetchMatchesCount = async () => {
     try {
       console.log("🔄 Fetching matches count from getSuggestedMatches...");
@@ -271,6 +271,7 @@ export default function DashboardHome({ profile }) {
     try {
       const response = await chatApi.searchUsers(query);
       console.log("Search results:", response.data);
+      // console.log("Search API Response:", response.data);
 
       const currentUserId = profile?.id || profile?.user_id;
       const filteredResults = (response.data || []).filter(
@@ -408,9 +409,9 @@ export default function DashboardHome({ profile }) {
                   </button>
                 )}
 
-                {/* Search Results Dropdown */}
-                {/* {showSearchResults && searchQuery.trim() && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50">
+                {/* Search Results Dropdown with Profile Images */}
+                {showSearchResults && searchQuery.trim() && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-96 overflow-y-auto z-50">
                     {searchLoading ? (
                       <div className="p-4 text-center text-gray-500">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto mb-2"></div>
@@ -420,15 +421,37 @@ export default function DashboardHome({ profile }) {
                       <div className="py-2">
                         {searchResults.map((user) => (
                           <div
-                            key={user.id}
+                            key={user.id || user.user_id}
                             onClick={() => handleUserSelectFromSearch(user)}
                             className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-b border-gray-100 last:border-b-0"
                           >
-                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-sm">
-                              {user.name?.charAt(0)?.toUpperCase() ||
-                                user.first_name?.charAt(0)?.toUpperCase() ||
-                                "U"}
+                            {/* Profile Image with Fallback */}
+                            <div className="flex-shrink-0">
+                              <img
+                                src={
+                                  user.image_url && user.image_url !== ""
+                                    ? user.image_url.startsWith("http")
+                                      ? user.image_url
+                                      : `${import.meta.env.VITE_API_BASE_URL}${user.image_url}`
+                                    : `https://ui-avatars.com/api/?name=${
+                                        user.name || user.first_name || "User"
+                                      }+${
+                                        user.last_name || ""
+                                      }&background=6366f1&color=fff&bold=true`
+                                }
+                                onError={(e) => {
+                                  e.target.src = `https://ui-avatars.com/api/?name=${
+                                    user.name || user.first_name || "User"
+                                  }+${
+                                    user.last_name || ""
+                                  }&background=6366f1&color=fff&bold=true`;
+                                }}
+                                alt="profile"
+                                className="w-10 h-10 rounded-xl object-cover"
+                              />
                             </div>
+
+                            {/* User Info */}
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-gray-800 truncate text-sm">
                                 {user.name ||
@@ -457,81 +480,7 @@ export default function DashboardHome({ profile }) {
                         </p>
                       </div>
                     )}
-                  </div> */}
-                  {showSearchResults && searchQuery.trim() && (
-  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50">
-    {searchLoading ? (
-      <div className="p-4 text-center text-gray-500">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto mb-2"></div>
-        Searching...
-      </div>
-    ) : searchResults.length > 0 ? (
-      <div className="py-2">
-        {searchResults.map((user) => (
-          <div
-            key={user.id}
-            onClick={() => handleUserSelectFromSearch(user)}
-            className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition border-b border-gray-100 last:border-b-0"
-          >
-            {/* Profile Image with URL */}
-            <div className="flex-shrink-0">
-              {user.profile_image || user.image || user.avatar ? (
-                <img
-                  src={
-                    user.profile_image?.startsWith('http')
-                      ? user.profile_image
-                      : user.image?.startsWith('http')
-                      ? user.image
-                      : user.avatar?.startsWith('http')
-                      ? user.avatar
-                      : `${import.meta.env.VITE_API_BASE_URL || ''}${user.profile_image || user.image || user.avatar}`
-                  }
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = `https://ui-avatars.com/api/?name=${user.first_name || user.name}+${user.last_name || ''}&background=random`;
-                  }}
-                  alt={user.name || `${user.first_name} ${user.last_name}`}
-                  className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
-                  {user.name?.charAt(0)?.toUpperCase() ||
-                    user.first_name?.charAt(0)?.toUpperCase() ||
-                    "U"}
-                </div>
-              )}
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-800 truncate text-sm">
-                {user.name ||
-                  `${user.first_name || ""} ${
-                    user.last_name || ""
-                  }`.trim() ||
-                  "User"}
-              </p>
-              <p className="text-xs text-gray-600 truncate">
-                {user.profession || user.email || "No info"}
-              </p>
-              {user.city && (
-                <p className="text-xs text-gray-500 truncate">
-                  📍 {user.city}
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <div className="p-4 text-center text-gray-500">
-        <p className="text-sm">No users found</p>
-        <p className="text-xs mt-1">
-          Try different search terms
-        </p>
-      </div>
-    )}
-  </div>
-
+                  </div>
                 )}
               </div>
             </div>

@@ -748,7 +748,7 @@ export default function AdvancedSearch() {
           </div>
 
           {/* Search Results */}
-                    {/* Search Results */}
+          {/* Search Results */}
           {searchResults.length > 0 && (
             <div className="mt-6 border-t pt-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">
@@ -762,22 +762,21 @@ export default function AdvancedSearch() {
                     className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition"
                   >
                     <div className="flex items-start gap-5">
-
                       {/* Profile Image */}
                       <div className="flex-shrink-0">
                         <img
                           src={
-                            profile.profile_image || profile.image || profile.avatar
-                              ? profile.profile_image?.startsWith('http') 
-                                ? profile.profile_image 
-                                : `${import.meta.env.VITE_API_BASE_URL || ''}${profile.profile_image || profile.image || profile.avatar}`
-                              : `https://ui-avatars.com/api/?name=${profile.first_name || profile.name}+${profile.last_name || ''}&background=random`
+                            profile.image_url && profile.image_url !== ""
+                              ? profile.image_url.startsWith("http")
+                                ? profile.image_url
+                                : `${import.meta.env.VITE_API_BASE_URL}${profile.image_url}`
+                              : `https://ui-avatars.com/api/?name=${profile.first_name}+${profile.last_name}`
                           }
                           onError={(e) => {
-                            e.target.src = `https://ui-avatars.com/api/?name=${profile.first_name || profile.name}+${profile.last_name || ''}&background=random`;
+                            e.target.src = `https://ui-avatars.com/api/?name=${profile.first_name}+${profile.last_name}`;
                           }}
-                          alt={`${profile.first_name} ${profile.last_name}`}
-                          className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                          alt="profile"
+                          className="w-24 h-24 rounded-full object-cover border"
                         />
                       </div>
 
@@ -786,27 +785,21 @@ export default function AdvancedSearch() {
                         <h4 className="text-lg font-semibold text-gray-800">
                           {profile.first_name} {profile.last_name}
                         </h4>
-                        
+
                         <p className="text-gray-600 text-sm mt-1">
-                          {profile.profession || profile.title || 'Professional'} • {profile.city || profile.location || 'Location not specified'}
+                          {profile.profession} • {profile.city}
                         </p>
-                        
-                        {profile.about && (
-                          <p className="text-gray-500 text-sm mt-2 line-clamp-2">
-                            {profile.about}
-                          </p>
-                        )}
+
+                        <p className="text-gray-500 text-sm mt-2 line-clamp-2">
+                          {profile.about}
+                        </p>
                       </div>
 
                       {/* Right Side Stats */}
                       <div className="text-right text-sm text-gray-500">
-                        {profile.age && <p>{profile.age} years</p>}
-                        {profile.experience && <p>{profile.experience} yrs exp</p>}
-                        {profile.mutual_connections > 0 && (
-                          <p className="text-xs text-green-600">{profile.mutual_connections} mutual</p>
-                        )}
+                        <p>{profile.age} years</p>
+                        <p>{profile.experience} yrs exp</p>
                       </div>
-
                     </div>
                   </div>
                 ))}
@@ -814,13 +807,20 @@ export default function AdvancedSearch() {
             </div>
           )}
 
+          {/* No Results Message */}
           {!loading && searchResults.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               No results found. Try adjusting your search criteria.
+            </div>
+          )}
+
+          {!loading && searchResults.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              {/* No results found. Try adjusting your search criteria. */}
             </div>
           )}
         </div>
       </div>
     </div>
   );
-} 
+}

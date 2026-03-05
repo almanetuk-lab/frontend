@@ -940,8 +940,8 @@ useEffect(() => {
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6"
-     ref={messagesContainerRef}  // 👈 YEH LINE ADD KARO
-  onScroll={handleScroll}      // 👈 AUR YEH LINE ADD KARO
+     ref={messagesContainerRef} 
+  onScroll={handleScroll}    
   
   style={{ maxHeight: "350px" }}
     >
