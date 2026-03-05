@@ -748,6 +748,7 @@ export default function AdvancedSearch() {
           </div>
 
           {/* Search Results */}
+                    {/* Search Results */}
           {searchResults.length > 0 && (
             <div className="mt-6 border-t pt-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">
@@ -758,24 +759,54 @@ export default function AdvancedSearch() {
                 {searchResults.map((profile) => (
                   <div
                     key={profile.user_id || profile.id}
-                    className="bg-white border border-gray-200 rounded-lg p-4"
+                    className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition"
                   >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-semibold text-gray-800">
+                    <div className="flex items-start gap-5">
+
+                      {/* Profile Image */}
+                      <div className="flex-shrink-0">
+                        <img
+                          src={
+                            profile.profile_image || profile.image || profile.avatar
+                              ? profile.profile_image?.startsWith('http') 
+                                ? profile.profile_image 
+                                : `${import.meta.env.VITE_API_BASE_URL || ''}${profile.profile_image || profile.image || profile.avatar}`
+                              : `https://ui-avatars.com/api/?name=${profile.first_name || profile.name}+${profile.last_name || ''}&background=random`
+                          }
+                          onError={(e) => {
+                            e.target.src = `https://ui-avatars.com/api/?name=${profile.first_name || profile.name}+${profile.last_name || ''}&background=random`;
+                          }}
+                          alt={`${profile.first_name} ${profile.last_name}`}
+                          className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                        />
+                      </div>
+
+                      {/* Profile Info */}
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-gray-800">
                           {profile.first_name} {profile.last_name}
                         </h4>
-                        <p className="text-gray-600 text-sm">
-                          {profile.profession} • {profile.city}
+                        
+                        <p className="text-gray-600 text-sm mt-1">
+                          {profile.profession || profile.title || 'Professional'} • {profile.city || profile.location || 'Location not specified'}
                         </p>
-                        <p className="text-gray-500 text-sm mt-1">
-                          {profile.about}
-                        </p>
+                        
+                        {profile.about && (
+                          <p className="text-gray-500 text-sm mt-2 line-clamp-2">
+                            {profile.about}
+                          </p>
+                        )}
                       </div>
+
+                      {/* Right Side Stats */}
                       <div className="text-right text-sm text-gray-500">
-                        <p>{profile.age} years</p>
-                        <p>{profile.experience} yrs exp</p>
+                        {profile.age && <p>{profile.age} years</p>}
+                        {profile.experience && <p>{profile.experience} yrs exp</p>}
+                        {profile.mutual_connections > 0 && (
+                          <p className="text-xs text-green-600">{profile.mutual_connections} mutual</p>
+                        )}
                       </div>
+
                     </div>
                   </div>
                 ))}
@@ -792,4 +823,4 @@ export default function AdvancedSearch() {
       </div>
     </div>
   );
-}
+} 

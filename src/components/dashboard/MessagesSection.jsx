@@ -1,14 +1,8 @@
-
-
-
-
-
-
-
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { chatApi } from "../services/chatApi";
 import io from "socket.io-client";
 import { useLocation } from "react-router-dom";
+import EmojiPicker from "emoji-picker-react";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://backend-q0wc.onrender.com";
@@ -31,11 +25,20 @@ export default function MessagesSection() {
   const [showDeleteOption, setShowDeleteOption] = useState(null);
   const [deletingMessageId, setDeletingMessageId] = useState(null);
   const [messageLimitReached, setMessageLimitReached] = useState(false);
-  
+
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef(null);
+  const emojiButtonRef = useRef(null);
+
+  // Scroll position maintain 
+const messagesContainerRef = useRef(null);
+const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+const [userScrolled, setUserScrolled] = useState(false);
+
   //  PROFILE PICTURES STATES
   const [userProfilePictures, setUserProfilePictures] = useState({});
   const [profilePicturesLoaded, setProfilePicturesLoaded] = useState(false);
-  
+
   // for open img
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -53,6 +56,46 @@ export default function MessagesSection() {
   const [socketConnected, setSocketConnected] = useState(false);
   const location = useLocation();
 
+  // User ne manually scroll kiya to auto-scroll band karo - YEH NAYA FUNCTION
+const handleScroll = () => {
+  if (messagesContainerRef.current) {
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+    
+    if (!isAtBottom && !userScrolled) {
+      setUserScrolled(true);
+      setShouldAutoScroll(false);
+    } else if (isAtBottom) {
+      setUserScrolled(false);
+      setShouldAutoScroll(true);
+    }
+  }
+};
+
+  // Close emoji picker when clicking outside - NEW
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target) &&
+        !emojiButtonRef.current?.contains(event.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Handle emoji click - NEW
+  const onEmojiClick = (emojiData) => {
+    setNewMessage((prev) => prev + emojiData.emoji);
+    // Keep picker open for multiple emojis (like WhatsApp)
+    // Agar band karna ho to ye line add karo:
+    // setShowEmojiPicker(false);
+  };
+
   useEffect(() => {
     console.log("🔑 Token check:");
     console.log("Access Token:", localStorage.getItem("accessToken"));
@@ -63,11 +106,11 @@ export default function MessagesSection() {
       console.log("Token starts with:", token.substring(0, 20) + "...");
     }
   }, []);
-  
+
   useEffect(() => {
     window.scrollTo({
       top: 0,
-      behavior: 'instant'
+      behavior: "instant",
     });
   }, []);
 
@@ -75,38 +118,43 @@ export default function MessagesSection() {
   useEffect(() => {
     const fetchAllProfilePictures = async () => {
       if (!currentUserId || profilePicturesLoaded) return;
-      
+
       try {
         console.log("🔄 Fetching all profile pictures...");
-        const response = await chatApi.searchUsers('');
-        
+        const response = await chatApi.searchUsers("");
+
         if (response.data && Array.isArray(response.data)) {
           const pictures = {};
-          
-          response.data.forEach(user => {
+
+          response.data.forEach((user) => {
             if (user.id && user.id !== currentUserId) {
               //  Check all possible image fields with priority
-              pictures[user.id] = 
-                user.profile_picture_url || 
+              pictures[user.id] =
+                user.profile_picture_url ||
                 user.profile_picture ||
-                user.image_url || 
-                user.profile_image || 
+                user.image_url ||
+                user.profile_image ||
                 user.avatar_url ||
                 user.avatar ||
                 user.photo_url ||
                 null;
             }
           });
-          
-          console.log(`${Object.keys(pictures).length} profile pictures loaded`);
+
+          console.log(
+            `${Object.keys(pictures).length} profile pictures loaded`,
+          );
           setUserProfilePictures(pictures);
           setProfilePicturesLoaded(true);
-          
+
           // Cache in localStorage for 1 day
-          localStorage.setItem('chat_profile_pictures', JSON.stringify({
-            data: pictures,
-            timestamp: Date.now()
-          }));
+          localStorage.setItem(
+            "chat_profile_pictures",
+            JSON.stringify({
+              data: pictures,
+              timestamp: Date.now(),
+            }),
+          );
         }
       } catch (error) {
         console.error("❌ Error fetching profile pictures:", error);
@@ -114,7 +162,7 @@ export default function MessagesSection() {
     };
 
     // Check cache first
-    const cached = localStorage.getItem('chat_profile_pictures');
+    const cached = localStorage.getItem("chat_profile_pictures");
     if (cached) {
       try {
         const { data, timestamp } = JSON.parse(cached);
@@ -129,7 +177,7 @@ export default function MessagesSection() {
         console.log("Cache invalid, fetching fresh...");
       }
     }
-    
+
     fetchAllProfilePictures();
   }, [currentUserId, profilePicturesLoaded]);
 
@@ -157,6 +205,17 @@ export default function MessagesSection() {
     }
   }, [location.state, currentUserId]);
 
+  // Jab naya user select ho to scroll top se start karo - YEH NAYA EFFECT
+useEffect(() => {
+  if (selectedUser) {
+    setShouldAutoScroll(true);
+    setUserScrolled(false);
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = 0;
+    }
+  }
+}, [selectedUser]);
+
   // Fetch recent chats
   const fetchRecentChats = async () => {
     try {
@@ -171,8 +230,7 @@ export default function MessagesSection() {
           id: firstChat.user_id,
           name: firstChat.name,
           email: firstChat.email,
-          profile_picture_url: firstChat.profile_picture_url
-          
+          profile_picture_url: firstChat.profile_picture_url,
         };
         // Small delay to ensure state is set
         setTimeout(() => {
@@ -192,7 +250,7 @@ export default function MessagesSection() {
       id: chat.user_id,
       name: chat.name,
       email: chat.email,
-      profile_picture_url: chat.profile_picture_url 
+      profile_picture_url: chat.profile_picture_url,
     };
     handleUserSelect(user);
     setShowSidebar(false);
@@ -201,10 +259,10 @@ export default function MessagesSection() {
   // Add this function
   const formatNameWithSpace = (name) => {
     if (!name) return "User";
-    
+
     // Add space before capital letters (except first)
-    const formatted = name.replace(/([a-z])([A-Z])/g, '$1 $2');
-    
+    const formatted = name.replace(/([a-z])([A-Z])/g, "$1 $2");
+
     return formatted || name;
   };
 
@@ -391,19 +449,26 @@ export default function MessagesSection() {
     };
   }, [currentUserId, selectedUser]);
 
-  // Auto-scroll
-  useEffect(() => {
-    if (messagesEndRef.current && messages.length > 0) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
+  // // Auto-scroll
+  // useEffect(() => {
+  //   if (messagesEndRef.current && messages.length > 0) {
+  //     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, [messages]);
+
+  // Auto-scroll - YEH UPDATE KARO (purane ko replace karo)
+useEffect(() => {
+  if (messagesEndRef.current && shouldAutoScroll && messages.length > 0) {
+    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+}, [messages, shouldAutoScroll]);
 
   // FUNCTION TO REMOVE NUMBERS FROM USERNAME
   const cleanUserName = (name) => {
     if (!name) return "User";
     // Remove numbers from the end of the username
     return name.replace(/\d+$/, "").trim() || name;
-  }; 
+  };
 
   // Search users
   const searchUsers = useCallback(
@@ -508,7 +573,7 @@ export default function MessagesSection() {
       id: user.id,
       name: cleanUserName(user.name || user.email?.split("@")[0] || "User"),
       email: user.email,
-      profile_picture_url: user.profile_picture_url 
+      profile_picture_url: user.profile_picture_url,
     };
 
     setSelectedUser(selectedUserData);
@@ -845,13 +910,13 @@ export default function MessagesSection() {
 
   //  SIMPLE FUNCTION FOR GRADIENT COLOR
   const getGradientColor = (name) => {
-    const nameChar = name?.charAt(0) || 'U';
+    const nameChar = name?.charAt(0) || "U";
     const colors = [
-      'bg-gradient-to-br from-indigo-400 to-purple-500',
-      'bg-gradient-to-br from-green-400 to-blue-500',
-      'bg-gradient-to-br from-pink-400 to-red-500',
-      'bg-gradient-to-br from-yellow-400 to-orange-500',
-      'bg-gradient-to-br from-teal-400 to-cyan-500'
+      "bg-gradient-to-br from-indigo-400 to-purple-500",
+      "bg-gradient-to-br from-green-400 to-blue-500",
+      "bg-gradient-to-br from-pink-400 to-red-500",
+      "bg-gradient-to-br from-yellow-400 to-orange-500",
+      "bg-gradient-to-br from-teal-400 to-cyan-500",
     ];
     const index = nameChar.charCodeAt(0) % colors.length;
     return colors[index];
@@ -874,7 +939,12 @@ export default function MessagesSection() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6"
+     ref={messagesContainerRef}  // 👈 YEH LINE ADD KARO
+  onScroll={handleScroll}      // 👈 AUR YEH LINE ADD KARO
+  
+  style={{ maxHeight: "350px" }}
+    >
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Messages</h2>
 
       {/* PLAN STATUS BANNER - TOP ME ADD KIYA HAI */}
@@ -912,35 +982,42 @@ export default function MessagesSection() {
             </button>
             {/*  PROFILE PICTURE WITH FALLBACK */}
             {selectedUser.profile_picture_url ? (
-              <img 
-                src={selectedUser.profile_picture_url} 
+              <img
+                src={selectedUser.profile_picture_url}
                 alt={selectedUser.name}
                 className="w-8 h-8 rounded-full object-cover border-2 border-white shadow"
                 onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.parentElement.querySelector('.mobile-fallback-avatar').style.display = 'flex';
+                  e.target.style.display = "none";
+                  e.target.parentElement.querySelector(
+                    ".mobile-fallback-avatar",
+                  ).style.display = "flex";
                 }}
               />
             ) : userProfilePictures[selectedUser.id] ? (
-              <img 
-                src={userProfilePictures[selectedUser.id]} 
+              <img
+                src={userProfilePictures[selectedUser.id]}
                 alt={selectedUser.name}
                 className="w-8 h-8 rounded-full object-cover border-2 border-white shadow"
                 onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.parentElement.querySelector('.mobile-fallback-avatar').style.display = 'flex';
+                  e.target.style.display = "none";
+                  e.target.parentElement.querySelector(
+                    ".mobile-fallback-avatar",
+                  ).style.display = "flex";
                 }}
               />
             ) : null}
-            
-            <div 
+
+            <div
               className={`mobile-fallback-avatar w-8 h-8 ${getGradientColor(selectedUser.name)} rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                (selectedUser.profile_picture_url || userProfilePictures[selectedUser.id]) ? 'hidden' : 'flex'
+                selectedUser.profile_picture_url ||
+                userProfilePictures[selectedUser.id]
+                  ? "hidden"
+                  : "flex"
               }`}
             >
               {selectedUser.name?.charAt(0)?.toUpperCase() || "U"}
             </div>
-            
+
             <div>
               <p className="font-medium text-gray-800 text-sm">
                 {selectedUser.name}
@@ -1013,35 +1090,43 @@ export default function MessagesSection() {
                     <div className="flex items-center gap-3">
                       {/* ✅ PROFILE PICTURE WITH FALLBACK */}
                       {chat.profile_picture_url ? (
-                        <img 
-                          src={chat.profile_picture_url} 
+                        <img
+                          src={chat.profile_picture_url}
                           alt={chat.name}
                           className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                           onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.parentElement.querySelector('.chat-fallback-avatar').style.display = 'flex';
+                            e.target.style.display = "none";
+                            e.target.parentElement.querySelector(
+                              ".chat-fallback-avatar",
+                            ).style.display = "flex";
                           }}
                         />
                       ) : userProfilePictures[chat.user_id] ? (
-                        <img 
-                          src={userProfilePictures[chat.user_id]} 
+                        <img
+                          src={userProfilePictures[chat.user_id]}
                           alt={chat.name}
                           className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                           onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.parentElement.querySelector('.chat-fallback-avatar').style.display = 'flex';
+                            e.target.style.display = "none";
+                            e.target.parentElement.querySelector(
+                              ".chat-fallback-avatar",
+                            ).style.display = "flex";
                           }}
                         />
                       ) : null}
-                      
-                      <div 
+
+                      <div
                         className={`chat-fallback-avatar w-10 h-10 ${getGradientColor(chat.name)} rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                          (chat.profile_picture_url || userProfilePictures[chat.user_id]) ? 'hidden' : 'flex'
+                          chat.profile_picture_url ||
+                          userProfilePictures[chat.user_id]
+                            ? "hidden"
+                            : "flex"
                         }`}
                       >
-                        {cleanUserName(chat.name)?.charAt(0)?.toUpperCase() || "U"}
+                        {cleanUserName(chat.name)?.charAt(0)?.toUpperCase() ||
+                          "U"}
                       </div>
-                      
+
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center">
                           <p className="font-medium text-gray-800 truncate text-sm">
@@ -1096,35 +1181,41 @@ export default function MessagesSection() {
                   <div className="flex items-center gap-3">
                     {/*  PROFILE PICTURE WITH FALLBACK */}
                     {user.profile_picture_url ? (
-                      <img 
-                        src={user.profile_picture_url} 
+                      <img
+                        src={user.profile_picture_url}
                         alt={user.name}
                         className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
                         onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.parentElement.querySelector('.user-fallback-avatar').style.display = 'flex';
+                          e.target.style.display = "none";
+                          e.target.parentElement.querySelector(
+                            ".user-fallback-avatar",
+                          ).style.display = "flex";
                         }}
                       />
                     ) : userProfilePictures[user.id] ? (
-                      <img 
-                        src={userProfilePictures[user.id]} 
+                      <img
+                        src={userProfilePictures[user.id]}
                         alt={user.name}
                         className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
                         onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.parentElement.querySelector('.user-fallback-avatar').style.display = 'flex';
+                          e.target.style.display = "none";
+                          e.target.parentElement.querySelector(
+                            ".user-fallback-avatar",
+                          ).style.display = "flex";
                         }}
                       />
                     ) : null}
-                    
-                    <div 
+
+                    <div
                       className={`user-fallback-avatar w-12 h-12 ${getGradientColor(user.name)} rounded-full flex items-center justify-center text-white font-bold ${
-                        (user.profile_picture_url || userProfilePictures[user.id]) ? 'hidden' : 'flex'
+                        user.profile_picture_url || userProfilePictures[user.id]
+                          ? "hidden"
+                          : "flex"
                       }`}
                     >
                       {user.name?.charAt(0)?.toUpperCase() || "U"}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-800 truncate">
                         {user.name}
@@ -1145,35 +1236,42 @@ export default function MessagesSection() {
               <div className="hidden md:flex p-4 border-b border-gray-200 bg-white items-center gap-3">
                 {/*  PROFILE PICTURE WITH FALLBACK */}
                 {selectedUser.profile_picture_url ? (
-                  <img 
-                    src={selectedUser.profile_picture_url} 
+                  <img
+                    src={selectedUser.profile_picture_url}
                     alt={selectedUser.name}
                     className="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
                     onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.parentElement.querySelector('.desktop-fallback-avatar').style.display = 'flex';
+                      e.target.style.display = "none";
+                      e.target.parentElement.querySelector(
+                        ".desktop-fallback-avatar",
+                      ).style.display = "flex";
                     }}
                   />
                 ) : userProfilePictures[selectedUser.id] ? (
-                  <img 
-                    src={userProfilePictures[selectedUser.id]} 
+                  <img
+                    src={userProfilePictures[selectedUser.id]}
                     alt={selectedUser.name}
                     className="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
                     onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.parentElement.querySelector('.desktop-fallback-avatar').style.display = 'flex';
+                      e.target.style.display = "none";
+                      e.target.parentElement.querySelector(
+                        ".desktop-fallback-avatar",
+                      ).style.display = "flex";
                     }}
                   />
                 ) : null}
-                
-                <div 
+
+                <div
                   className={`desktop-fallback-avatar w-10 h-10 ${getGradientColor(selectedUser.name)} rounded-full flex items-center justify-center text-white font-bold ${
-                    (selectedUser.profile_picture_url || userProfilePictures[selectedUser.id]) ? 'hidden' : 'flex'
+                    selectedUser.profile_picture_url ||
+                    userProfilePictures[selectedUser.id]
+                      ? "hidden"
+                      : "flex"
                   }`}
                 >
                   {selectedUser.name?.charAt(0)?.toUpperCase() || "U"}
                 </div>
-                
+
                 <div>
                   <p className="font-medium text-gray-800">
                     {selectedUser.name}
@@ -1376,6 +1474,16 @@ export default function MessagesSection() {
                     className="hidden"
                     accept="*/*"
                   />
+                  {/* Emoji Button - NEW */}
+                  <button
+                    ref={emojiButtonRef}
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    disabled={!planStatus.active}
+                    className="px-3 py-2 sm:px-4 sm:py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:opacity-50 text-lg"
+                    title="Add emoji"
+                  >
+                    😊
+                  </button>
 
                   <input
                     type="text"
@@ -1404,6 +1512,23 @@ export default function MessagesSection() {
                   >
                     Send
                   </button>
+                  {/* Emoji Picker Popup - NEW */}
+                  {showEmojiPicker && (
+                    <div
+                      ref={emojiPickerRef}
+                      className="absolute bottom-16 left-0 z-50 shadow-2xl"
+                    >
+                      <EmojiPicker
+                        onEmojiClick={onEmojiClick}
+                        autoFocusSearch={false}
+                        width={300}
+                        height={400}
+                        previewConfig={{ showPreview: false }}
+                        searchPlaceholder="Search emojis..."
+                        skinTonesDisabled={true}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </>
@@ -1485,32 +1610,3 @@ export default function MessagesSection() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
