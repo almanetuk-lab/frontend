@@ -292,7 +292,12 @@ export default function App() {
 
         <Route
        path="/dashboard/settings"
-        element={<Settings/>} 
+        element={
+             <MainLayout>
+  <Settings/>
+             </MainLayout>
+      
+      } 
         />
 
 

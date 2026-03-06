@@ -304,7 +304,6 @@ export default TermsAndConditions;
 
 
 
-// import React from 'react';
 // import { 
 //   FaFileContract,
 //   FaUserShield,

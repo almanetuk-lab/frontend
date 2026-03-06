@@ -853,10 +853,6 @@ export default PrivacyPolicy;
 
 
 
-
-
-
-// import React, { useState } from 'react';
 // import { 
 //   FaChevronDown, 
 //   FaChevronUp, 
