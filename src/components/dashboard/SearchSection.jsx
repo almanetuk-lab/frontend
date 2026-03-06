@@ -748,6 +748,7 @@ export default function AdvancedSearch() {
           </div>
 
           {/* Search Results */}
+          {/* Search Results */}
           {searchResults.length > 0 && (
             <div className="mt-6 border-t pt-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">
@@ -758,20 +759,43 @@ export default function AdvancedSearch() {
                 {searchResults.map((profile) => (
                   <div
                     key={profile.user_id || profile.id}
-                    className="bg-white border border-gray-200 rounded-lg p-4"
+                    className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition"
                   >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-semibold text-gray-800">
+                    <div className="flex items-start gap-5">
+                      {/* Profile Image */}
+                      <div className="flex-shrink-0">
+                        <img
+                          src={
+                            profile.image_url && profile.image_url !== ""
+                              ? profile.image_url.startsWith("http")
+                                ? profile.image_url
+                                : `${import.meta.env.VITE_API_BASE_URL}${profile.image_url}`
+                              : `https://ui-avatars.com/api/?name=${profile.first_name}+${profile.last_name}`
+                          }
+                          onError={(e) => {
+                            e.target.src = `https://ui-avatars.com/api/?name=${profile.first_name}+${profile.last_name}`;
+                          }}
+                          alt="profile"
+                          className="w-24 h-24 rounded-full object-cover border"
+                        />
+                      </div>
+
+                      {/* Profile Info */}
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-gray-800">
                           {profile.first_name} {profile.last_name}
                         </h4>
-                        <p className="text-gray-600 text-sm">
+
+                        <p className="text-gray-600 text-sm mt-1">
                           {profile.profession} • {profile.city}
                         </p>
-                        <p className="text-gray-500 text-sm mt-1">
+
+                        <p className="text-gray-500 text-sm mt-2 line-clamp-2">
                           {profile.about}
                         </p>
                       </div>
+
+                      {/* Right Side Stats */}
                       <div className="text-right text-sm text-gray-500">
                         <p>{profile.age} years</p>
                         <p>{profile.experience} yrs exp</p>
@@ -783,9 +807,16 @@ export default function AdvancedSearch() {
             </div>
           )}
 
+          {/* No Results Message */}
           {!loading && searchResults.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               No results found. Try adjusting your search criteria.
+            </div>
+          )}
+
+          {!loading && searchResults.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              {/* No results found. Try adjusting your search criteria. */}
             </div>
           )}
         </div>

@@ -184,6 +184,24 @@ export default function Sidebar({
                 setSidebarOpen(false);
               }}
             />
+              {/* <SidebarItem
+              icon="⚙️"
+              label="Settings"
+              onClick={() => {
+                // navigate("/dashboard/plans");
+                setSidebarOpen(false);
+              }}
+            /> */}
+            
+            <SidebarItem
+  icon="⚙️"
+  label="Settings"
+  active={activeSection === "settings"}
+  onClick={() => {
+    navigate("/dashboard/settings");
+    setSidebarOpen(false);
+  }}
+/>
           </nav>
         </div>
 

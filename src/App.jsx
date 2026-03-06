@@ -54,6 +54,7 @@ import NotRenewedUsers from "./components/pages/NotRenewedUsers";
 import LinkedInCallback from "./components/social/LinkedInCallback";
 import AdminModelDetails from "./components/admin/AdminModelDetails";
 import ResetPassword from "./components/pages/ResetPassword";
+import Settings from "./components/pages/Settings";
 
 // Protected Route Component (For regular users)
 const UserProtectedRoute = ({ children }) => {
@@ -286,6 +287,15 @@ export default function App() {
             </MainLayout>
           }
         />
+
+        {/*user settings routes */}
+
+        <Route
+       path="/dashboard/settings"
+        element={<Settings/>} 
+        />
+
+
         {/* Matches Routes */}
         <Route
           path="/matches"
