@@ -87,6 +87,7 @@ export default function ProfilePage() {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const hasTrackedRef = useRef(false);
   const [activeTab, setActiveTab] = useState(0); // 0: Basic, 1: Lifestyle, 2: Life Rhythms
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
     if (!currentUserProfile) return;
@@ -127,6 +128,20 @@ export default function ProfilePage() {
 
     fetchUserData(viewedId);
   }, [userId, location.state, currentUserProfile]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsLightboxOpen(false);
+      }
+    };
+    if (isLightboxOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isLightboxOpen]);
 
   const fetchCurrentUserData = async () => {
     try {
@@ -292,7 +307,8 @@ export default function ProfilePage() {
             <img
               src={displayProfile.image_url}
               alt="Profile"
-              className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+              className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => setIsLightboxOpen(true)}
             />
           ) : (
             <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-4 border-white shadow-lg">
@@ -1190,6 +1206,35 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
+
+      {/* Lightbox / Modal for Profile Picture Preview */}
+      {isLightboxOpen && displayProfile.image_url && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 p-4 transition-opacity duration-300"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Close button (X) */}
+          <button
+            className="absolute top-4 right-4 text-white text-4xl font-semibold hover:text-gray-300 transition-colors focus:outline-none z-50"
+            onClick={() => setIsLightboxOpen(false)}
+            aria-label="Close"
+          >
+            &times;
+          </button>
+          
+          {/* Lightbox Image Container */}
+          <div
+            className="relative max-w-full max-h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={displayProfile.image_url}
+              alt="Profile Full Preview"
+              className="max-w-[90vw] max-h-[85vh] object-contain rounded shadow-2xl border border-gray-800"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

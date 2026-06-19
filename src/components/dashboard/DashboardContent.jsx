@@ -18,6 +18,21 @@ export default function DashboardHome({ profile }) {
   const [suggestedMatches, setSuggestedMatches] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsLightboxOpen(false);
+      }
+    };
+    if (isLightboxOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isLightboxOpen]);
 
   // State for dynamic data
   const [profileViews, setProfileViews] = useState(0);
@@ -433,18 +448,14 @@ export default function DashboardHome({ profile }) {
                                     ? user.image_url.startsWith("http")
                                       ? user.image_url
                                       : `${import.meta.env.VITE_API_BASE_URL}${user.image_url}`
-                                    : `https://ui-avatars.com/api/?name=${
-                                        user.name || user.first_name || "User"
-                                      }+${
-                                        user.last_name || ""
-                                      }&background=6366f1&color=fff&bold=true`
+                                    : `https://ui-avatars.com/api/?name=${user.name || user.first_name || "User"
+                                    }+${user.last_name || ""
+                                    }&background=6366f1&color=fff&bold=true`
                                 }
                                 onError={(e) => {
-                                  e.target.src = `https://ui-avatars.com/api/?name=${
-                                    user.name || user.first_name || "User"
-                                  }+${
-                                    user.last_name || ""
-                                  }&background=6366f1&color=fff&bold=true`;
+                                  e.target.src = `https://ui-avatars.com/api/?name=${user.name || user.first_name || "User"
+                                    }+${user.last_name || ""
+                                    }&background=6366f1&color=fff&bold=true`;
                                 }}
                                 alt="profile"
                                 className="w-10 h-10 rounded-xl object-cover"
@@ -455,9 +466,8 @@ export default function DashboardHome({ profile }) {
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-gray-800 truncate text-sm">
                                 {user.name ||
-                                  `${user.first_name || ""} ${
-                                    user.last_name || ""
-                                  }`.trim() ||
+                                  `${user.first_name || ""} ${user.last_name || ""
+                                    }`.trim() ||
                                   "User"}
                               </p>
                               <p className="text-xs text-gray-600 truncate">
@@ -568,9 +578,8 @@ export default function DashboardHome({ profile }) {
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-800 truncate text-sm">
                             {user.name ||
-                              `${user.first_name || ""} ${
-                                user.last_name || ""
-                              }`.trim() ||
+                              `${user.first_name || ""} ${user.last_name || ""
+                                }`.trim() ||
                               "User"}
                           </p>
                           <p className="text-xs text-gray-600 truncate">
@@ -619,8 +628,9 @@ export default function DashboardHome({ profile }) {
                     <img
                       src={profile.image_url}
                       alt="Profile"
-                      className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl object-cover border-4 border-white shadow-lg"
+                      className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl object-cover border-4 border-white shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
                       loading="lazy"
+                      onClick={() => setIsLightboxOpen(true)}
                     />
                   ) : (
                     <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg flex-col">
@@ -686,7 +696,7 @@ export default function DashboardHome({ profile }) {
                   <StatCard
                     label="Profile Views"
                     value={loading ? "..." : profileViews.toString()}
-                    // trend="+12%"
+                  // trend="+12%"
                   />
                 </div>
                 {/* <div onClick={() => navigate("/dashboard/matches")}>
@@ -716,14 +726,14 @@ export default function DashboardHome({ profile }) {
                   <StatCard
                     label="Connections"
                     value={loading ? "..." : connectionsCount.toString()}
-                    // trend="+8%"
+                  // trend="+8%"
                   />
                 </div>
                 <div onClick={() => navigate("/dashboard/messages")}>
                   <StatCard
                     label="Messages"
                     value={loading ? "..." : messagesCount.toString()}
-                    // trend="+3%"
+                  // trend="+3%"
                   />
                 </div>
               </div>
@@ -742,18 +752,16 @@ export default function DashboardHome({ profile }) {
                 >
                   <ActivityItem
                     icon="👀"
-                    text={`Your profile was viewed by ${
-                      loading ? "..." : profileViews
-                    } ${
-                      profileViews === 1 ? "person" : "people"
-                    } in Last 90 Days`}
+                    text={`Your profile was viewed by ${loading ? "..." : profileViews
+                      } ${profileViews === 1 ? "person" : "people"
+                      } in Last 90 Days`}
                     time={
                       loading
                         ? "Loading..."
                         : recentViewers.length > 0
                           ? `Last viewed ${getTimeAgo(
-                              recentViewers[0]?.viewed_at,
-                            )}`
+                            recentViewers[0]?.viewed_at,
+                          )}`
                           : "No views yet"
                     }
                   />
@@ -766,9 +774,8 @@ export default function DashboardHome({ profile }) {
                   {/* New matches */}
                   <ActivityItem
                     icon="💖"
-                    text={`You have ${
-                      loading ? "..." : matchesCount || 200
-                    } new match${matchesCount !== 1 ? "es" : ""} waiting`}
+                    text={`You have ${loading ? "..." : matchesCount || 200
+                      } new match${matchesCount !== 1 ? "es" : ""} waiting`}
                     time="Today"
                   />
                 </div>
@@ -779,9 +786,8 @@ export default function DashboardHome({ profile }) {
                 >
                   <ActivityItem
                     icon="💬"
-                    text={`You received ${
-                      loading ? "..." : messagesCount
-                    } new message${messagesCount !== 1 ? "s" : ""}`}
+                    text={`You received ${loading ? "..." : messagesCount
+                      } new message${messagesCount !== 1 ? "s" : ""}`}
                     time="Today"
                   />
                 </div>
@@ -824,6 +830,35 @@ export default function DashboardHome({ profile }) {
           </div>
         </div>
       </div>
+
+      {/* Lightbox / Modal for Profile Picture Preview */}
+      {isLightboxOpen && profile?.image_url && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 p-4 transition-opacity duration-300"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Close button (X) */}
+          <button
+            className="absolute top-4 right-4 text-white text-4xl font-semibold hover:text-gray-300 transition-colors focus:outline-none z-50"
+            onClick={() => setIsLightboxOpen(false)}
+            aria-label="Close"
+          >
+            &times;
+          </button>
+          
+          {/* Lightbox Image Container */}
+          <div
+            className="relative max-w-full max-h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={profile.image_url}
+              alt="Profile Full Preview"
+              className="max-w-[90vw] max-h-[85vh] object-contain rounded shadow-2xl border border-gray-800"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
