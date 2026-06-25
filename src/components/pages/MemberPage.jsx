@@ -17,6 +17,11 @@ const MemberPage = () => {
   const [visibleCount, setVisibleCount] = useState(12);
   const [loadingProfileId, setLoadingProfileId] = useState(null); // Track which profile is loading
 
+  // CLIENT-SIDE EXTRA FILTERS
+  const [filterCity, setFilterCity] = useState("");
+  const [filterAgeMin, setFilterAgeMin] = useState("");
+  const [filterAgeMax, setFilterAgeMax] = useState("");
+
   //  ADDED: PLAN STATUS STATE
   const [planActive, setPlanActive] = useState(false);
   const [planLoading, setPlanLoading] = useState(true);
@@ -69,10 +74,10 @@ const MemberPage = () => {
     };
   }, [searchTerm]);
 
-  // Filter by gender
+  // Filter by gender + city + age (combined)
   useEffect(() => {
-    filterMembersByGender();
-  }, [selectedGender, members]);
+    applyAllFilters(members);
+  }, [selectedGender, filterCity, filterAgeMin, filterAgeMax, members]);
 
   // Fetch initial members
   const fetchMembers = async () => {
@@ -102,6 +107,53 @@ const MemberPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ===========================
+  // COMBINED CLIENT-SIDE FILTER
+  // ===========================
+
+  const applyAllFilters = (data, genderOverride, cityOverride, ageMinOverride, ageMaxOverride) => {
+    const gender = genderOverride !== undefined ? genderOverride : selectedGender;
+    const city   = cityOverride   !== undefined ? cityOverride   : filterCity;
+    const ageMin = ageMinOverride !== undefined ? ageMinOverride : filterAgeMin;
+    const ageMax = ageMaxOverride !== undefined ? ageMaxOverride : filterAgeMax;
+
+    let result = data.filter((member) => {
+      // --- Gender ---
+      if (gender !== "All") {
+        const memberGender = (member.gender || "").toLowerCase();
+        const selected = gender.toLowerCase();
+        const genderMatch =
+          memberGender === selected ||
+          (selected === "man" && memberGender === "male") ||
+          (selected === "woman" && memberGender === "female");
+        if (!genderMatch) return false;
+      }
+
+      // --- City ---
+      if (city.trim()) {
+        const memberCity = (member.city || "").toLowerCase();
+        if (!memberCity.includes(city.trim().toLowerCase())) return false;
+      }
+
+      // --- Age Min ---
+      if (ageMin !== "") {
+        const age = parseInt(member.age, 10);
+        if (isNaN(age) || age < parseInt(ageMin, 10)) return false;
+      }
+
+      // --- Age Max ---
+      if (ageMax !== "") {
+        const age = parseInt(member.age, 10);
+        if (isNaN(age) || age > parseInt(ageMax, 10)) return false;
+      }
+
+      return true;
+    });
+
+    setFilteredMembers(result.slice(0, 12));
+    setVisibleCount(12);
   };
 
   //  CORRECT: Fetch COMPLETE user profile
@@ -217,8 +269,7 @@ const MemberPage = () => {
   // Perform search using API
   const performSearch = async () => {
     if (!searchTerm.trim()) {
-      setFilteredMembers(members.slice(0, 12));
-      setVisibleCount(12);
+      applyAllFilters(members);
       return;
     }
 
@@ -238,22 +289,7 @@ const MemberPage = () => {
           : response.data.data || response.data.users || [];
 
         setMembers(searchResults);
-
-        if (selectedGender !== "All") {
-          const genderFiltered = searchResults.filter((member) => {
-            const memberGender = member.gender?.toLowerCase();
-            const selected = selectedGender.toLowerCase();
-            return (
-              memberGender === selected ||
-              (selected === "man" && memberGender === "male") ||
-              (selected === "woman" && memberGender === "female")
-            );
-          });
-          setFilteredMembers(genderFiltered.slice(0, 12));
-        } else {
-          setFilteredMembers(searchResults.slice(0, 12));
-        }
-        setVisibleCount(12);
+        applyAllFilters(searchResults);
       }
     } catch (error) {
       console.error("Search error:", error);
@@ -262,23 +298,9 @@ const MemberPage = () => {
     }
   };
 
-  // Filter members by gender
+  // Filter members by gender (kept for compatibility, delegates to applyAllFilters)
   const filterMembersByGender = () => {
-    if (selectedGender === "All") {
-      setFilteredMembers(members.slice(0, 12));
-    } else {
-      const filtered = members.filter((member) => {
-        const memberGender = member.gender?.toLowerCase();
-        const selected = selectedGender.toLowerCase();
-        return (
-          memberGender === selected ||
-          (selected === "man" && memberGender === "male") ||
-          (selected === "woman" && memberGender === "female")
-        );
-      });
-      setFilteredMembers(filtered.slice(0, 12));
-    }
-    setVisibleCount(12);
+    applyAllFilters(members);
   };
 
   // Load More function
@@ -286,25 +308,32 @@ const MemberPage = () => {
     const newVisibleCount = visibleCount + 12;
     setVisibleCount(newVisibleCount);
 
-    if (selectedGender === "All") {
-      if (searchTerm.trim()) {
-        const searchResults = members;
-        setFilteredMembers(searchResults.slice(0, newVisibleCount));
-      } else {
-        setFilteredMembers(members.slice(0, newVisibleCount));
-      }
-    } else {
-      const filtered = members.filter((member) => {
-        const memberGender = member.gender?.toLowerCase();
+    // Re-apply all filters with new visible count
+    const filtered = members.filter((member) => {
+      if (selectedGender !== "All") {
+        const memberGender = (member.gender || "").toLowerCase();
         const selected = selectedGender.toLowerCase();
-        return (
+        const genderMatch =
           memberGender === selected ||
           (selected === "man" && memberGender === "male") ||
-          (selected === "woman" && memberGender === "female")
-        );
-      });
-      setFilteredMembers(filtered.slice(0, newVisibleCount));
-    }
+          (selected === "woman" && memberGender === "female");
+        if (!genderMatch) return false;
+      }
+      if (filterCity.trim()) {
+        const memberCity = (member.city || "").toLowerCase();
+        if (!memberCity.includes(filterCity.trim().toLowerCase())) return false;
+      }
+      if (filterAgeMin !== "") {
+        const age = parseInt(member.age, 10);
+        if (isNaN(age) || age < parseInt(filterAgeMin, 10)) return false;
+      }
+      if (filterAgeMax !== "") {
+        const age = parseInt(member.age, 10);
+        if (isNaN(age) || age > parseInt(filterAgeMax, 10)) return false;
+      }
+      return true;
+    });
+    setFilteredMembers(filtered.slice(0, newVisibleCount));
   };
 
   // Handle search form submit
@@ -416,21 +445,37 @@ const MemberPage = () => {
 
   // Calculate if there are more members to load
   const hasMoreMembers = () => {
-    if (selectedGender === "All") {
-      return members.length > visibleCount;
-    } else {
-      const filtered = members.filter((member) => {
-        const memberGender = member.gender?.toLowerCase();
+    const filtered = members.filter((member) => {
+      if (selectedGender !== "All") {
+        const memberGender = (member.gender || "").toLowerCase();
         const selected = selectedGender.toLowerCase();
-        return (
+        const genderMatch =
           memberGender === selected ||
           (selected === "man" && memberGender === "male") ||
-          (selected === "woman" && memberGender === "female")
-        );
-      });
-      return filtered.length > visibleCount;
-    }
+          (selected === "woman" && memberGender === "female");
+        if (!genderMatch) return false;
+      }
+      if (filterCity.trim()) {
+        const memberCity = (member.city || "").toLowerCase();
+        if (!memberCity.includes(filterCity.trim().toLowerCase())) return false;
+      }
+      if (filterAgeMin !== "") {
+        const age = parseInt(member.age, 10);
+        if (isNaN(age) || age < parseInt(filterAgeMin, 10)) return false;
+      }
+      if (filterAgeMax !== "") {
+        const age = parseInt(member.age, 10);
+        if (isNaN(age) || age > parseInt(filterAgeMax, 10)) return false;
+      }
+      return true;
+    });
+    return filtered.length > visibleCount;
   };
+
+  // (uniqueCities dropdown removed — city filter is now a free-text input)
+
+  const isAnyExtraFilterActive =
+    filterCity.trim() || filterAgeMin !== "" || filterAgeMax !== "";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -460,7 +505,7 @@ const MemberPage = () => {
           <div className="max-w-4xl mx-auto">
             <form onSubmit={handleSearchSubmit}>
               <div className="bg-white rounded-2xl shadow-sm p-6">
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
                   {/* Search Input */}
                   <div className="flex-1 relative">
                     <input
@@ -513,6 +558,60 @@ const MemberPage = () => {
                   >
                     Search
                   </button>
+                </div>
+
+                {/* Age + City Filters Row */}
+                <div className="flex flex-wrap gap-3 items-end mb-4">
+                  {/* City Filter */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-gray-500">City</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. London, Mumbai"
+                      value={filterCity}
+                      onChange={(e) => { setFilterCity(e.target.value); setVisibleCount(12); }}
+                      className="px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  {/* Age Min */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-gray-500">Age (Min)</label>
+                    <input
+                      type="number"
+                      min="18"
+                      max="99"
+                      placeholder="Min"
+                      value={filterAgeMin}
+                      onChange={(e) => { setFilterAgeMin(e.target.value); setVisibleCount(12); }}
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  {/* Age Max */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-gray-500">Age (Max)</label>
+                    <input
+                      type="number"
+                      min="18"
+                      max="99"
+                      placeholder="Max"
+                      value={filterAgeMax}
+                      onChange={(e) => { setFilterAgeMax(e.target.value); setVisibleCount(12); }}
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  {/* Reset Extra Filters */}
+                  {isAnyExtraFilterActive && (
+                    <button
+                      type="button"
+                      onClick={() => { setFilterCity(""); setFilterAgeMin(""); setFilterAgeMax(""); setVisibleCount(12); }}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-xl hover:bg-gray-200 transition font-medium"
+                    >
+                      Clear Filters
+                    </button>
+                  )}
                 </div>
 
                 {/* Results Count */}
@@ -738,6 +837,9 @@ const MemberPage = () => {
               onClick={() => {
                 setSearchTerm("");
                 setSelectedGender("All");
+                setFilterCity("");
+                setFilterAgeMin("");
+                setFilterAgeMax("");
                 setVisibleCount(12);
                 fetchMembers();
               }}

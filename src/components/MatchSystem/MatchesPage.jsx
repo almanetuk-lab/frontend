@@ -16,6 +16,14 @@ export default function MatchesPage() {
   const [loadingMore, setLoadingMore] = useState(false);
 
   // ==============================
+  // CLIENT-SIDE FILTER STATE
+  // ==============================
+  const [filterGender, setFilterGender] = useState("");
+  const [filterCity, setFilterCity] = useState("");
+  const [filterAgeMin, setFilterAgeMin] = useState("");
+  const [filterAgeMax, setFilterAgeMax] = useState("");
+
+  // ==============================
   // API FUNCTIONS
   // ==============================
 
@@ -362,6 +370,56 @@ const fetchCompleteProfile = async (userId, currentUserId) => {
     setVisibleCount(20);
   };
 
+  // ==============================
+  // CLIENT-SIDE FILTER LOGIC
+  // ==============================
+
+  const applyFilters = (data) => {
+    return data.filter((user) => {
+      // Gender filter
+      if (filterGender) {
+        const userGender = (user.gender || "").toLowerCase();
+        const selected = filterGender.toLowerCase();
+        const match =
+          userGender === selected ||
+          (selected === "male" && userGender === "man") ||
+          (selected === "female" && userGender === "woman") ||
+          (selected === "man" && userGender === "male") ||
+          (selected === "woman" && userGender === "female");
+        if (!match) return false;
+      }
+
+      // City filter
+      if (filterCity.trim()) {
+        const userCity = (user.city || "").toLowerCase();
+        if (!userCity.includes(filterCity.trim().toLowerCase())) return false;
+      }
+
+      // Age filter
+      if (filterAgeMin !== "") {
+        const age = parseInt(user.age, 10);
+        if (isNaN(age) || age < parseInt(filterAgeMin, 10)) return false;
+      }
+      if (filterAgeMax !== "") {
+        const age = parseInt(user.age, 10);
+        if (isNaN(age) || age > parseInt(filterAgeMax, 10)) return false;
+      }
+
+      return true;
+    });
+  };
+
+  const resetFilters = () => {
+    setFilterGender("");
+    setFilterCity("");
+    setFilterAgeMin("");
+    setFilterAgeMax("");
+    setVisibleCount(20);
+  };
+
+  const isAnyFilterActive =
+    filterGender || filterCity.trim() || filterAgeMin !== "" || filterAgeMax !== "";
+
   const debugUserData = (user) => {
     console.log("=== USER DATA DEBUG ===");
     console.log("ID:", user.id);
@@ -393,15 +451,26 @@ const fetchCompleteProfile = async (userId, currentUserId) => {
   // CALCULATIONS
   // ==============================
 
-  const visibleMatches = matches.slice(0, visibleCount);
-  const hasMore = visibleCount < matches.length;
-  const remaining = matches.length - visibleCount;
-  const totalMatches = matches.length;
-  const onlineNow = matches.filter((match) => match.is_active === true).length;
-  const verifiedProfiles = matches.filter((match) => match.is_submitted === true).length;
-  const averageMatchScore = matches.length > 0
-    ? Math.round(matches.reduce((sum, match) => sum + (match.match_score || 0), 0) / matches.length)
+  // Apply client-side filters to the full matches array
+  const filteredMatches = applyFilters(matches);
+
+  const visibleMatches = filteredMatches.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredMatches.length;
+  const remaining = filteredMatches.length - visibleCount;
+  const totalMatches = filteredMatches.length;
+  const allTotal = matches.length;
+  const onlineNow = filteredMatches.filter((match) => match.is_active === true).length;
+  const verifiedProfiles = filteredMatches.filter((match) => match.is_submitted === true).length;
+  const averageMatchScore = filteredMatches.length > 0
+    ? Math.round(filteredMatches.reduce((sum, match) => sum + (match.match_score || 0), 0) / filteredMatches.length)
     : 0;
+
+  // (uniqueCities dropdown removed — city filter is now a free-text input)
+
+  // Unique gender list
+  const uniqueGenders = [...new Set(
+    matches.map((m) => m.gender).filter((g) => g && g.trim())
+  )].sort();
 
   // ==============================
   // RENDER
@@ -443,14 +512,86 @@ const fetchCompleteProfile = async (userId, currentUserId) => {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">My Matches</h1>
           <p className="text-gray-600">Find Your Perfect Match</p>
 
-          <div className="mt-4 p-3 bg-white rounded-lg border shadow-sm">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+          {/* ── CLIENT-SIDE FILTER PANEL ── */}
+          <div className="mt-4 p-4 bg-white rounded-lg border shadow-sm">
+            <div className="flex flex-wrap gap-3 items-end">
+              {/* Gender Filter */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-gray-500">Gender</label>
+                <select
+                  value={filterGender}
+                  onChange={(e) => { setFilterGender(e.target.value); setVisibleCount(20); }}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all"
+                >
+                  <option value="">All Genders</option>
+                  {uniqueGenders.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* City Filter */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-gray-500">City</label>
+                <input
+                  type="text"
+                  placeholder="e.g. London, Mumbai"
+                  value={filterCity}
+                  onChange={(e) => { setFilterCity(e.target.value); setVisibleCount(20); }}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all"
+                />
+              </div>
+
+              {/* Age Min */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-gray-500">Age (Min)</label>
+                <input
+                  type="number"
+                  min="18"
+                  max="99"
+                  placeholder="Min"
+                  value={filterAgeMin}
+                  onChange={(e) => { setFilterAgeMin(e.target.value); setVisibleCount(20); }}
+                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all"
+                />
+              </div>
+
+              {/* Age Max */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-gray-500">Age (Max)</label>
+                <input
+                  type="number"
+                  min="18"
+                  max="99"
+                  placeholder="Max"
+                  value={filterAgeMax}
+                  onChange={(e) => { setFilterAgeMax(e.target.value); setVisibleCount(20); }}
+                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all"
+                />
+              </div>
+
+              {/* Reset Button */}
+              {isAnyFilterActive && (
+                <button
+                  onClick={resetFilters}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition font-medium"
+                >
+                  Reset Filters
+                </button>
+              )}
+            </div>
+
+            {/* Results count row */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-3 pt-3 border-t border-gray-100">
               <div className="text-sm">
                 <span className="text-gray-600">Showing </span>
                 <span className="font-bold text-indigo-600">{Math.min(visibleCount, totalMatches)}</span>
                 <span className="text-gray-600"> of </span>
                 <span className="font-bold">{totalMatches}</span>
                 <span className="text-gray-600"> matches</span>
+                {isAnyFilterActive && (
+                  <span className="ml-2 text-indigo-500 text-xs">(filtered from {allTotal} total)</span>
+                )}
                 {hasMore && (
                   <span className="ml-2 text-green-600">({remaining} more available)</span>
                 )}
@@ -505,14 +646,27 @@ const fetchCompleteProfile = async (userId, currentUserId) => {
         {visibleMatches.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow-sm border">
             <div className="text-gray-400 text-5xl mb-4">👥</div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No matches found</h3>
-            <p className="text-gray-500 mb-6">The API returned 0 matches</p>
-            <button
-              onClick={fetchMatches}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-            >
-              Refresh API Call
-            </button>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              {isAnyFilterActive ? "No matches found for selected filters" : "No matches found"}
+            </h3>
+            <p className="text-gray-500 mb-6">
+              {isAnyFilterActive ? "Try adjusting or resetting your filters" : "The API returned 0 matches"}
+            </p>
+            {isAnyFilterActive ? (
+              <button
+                onClick={resetFilters}
+                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+              >
+                Reset Filters
+              </button>
+            ) : (
+              <button
+                onClick={fetchMatches}
+                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+              >
+                Refresh API Call
+              </button>
+            )}
           </div>
         ) : (
           <>
