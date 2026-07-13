@@ -5,7 +5,7 @@ import { UserProfileProvider } from "./components/context/UseProfileContext";
 import Header from "./components/home/Header";
 import Footer from "./components/home/Footer";
 
-// Import your new AdminDashboard component (the one I just modified)
+// Import your newww AdminDashboard component (the one I just modified)
 // import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminDashboard from "./components/admin/AdminPage";
 
@@ -109,7 +109,7 @@ export default function App() {
           path="/admin-dashboard"
           element={<Navigate to="/admin" replace />}
         />
-{/* 
+        {/* 
 {/* Redirects - }
 <Route path="/admin-reports" element={<Navigate to="/admin/reports" replace />} />
 <Route path="/admin/users/:type" element={<Navigate to="/admin/users/:type" replace />} />
@@ -124,7 +124,7 @@ export default function App() {
     */}
 
         {/* Old admin routes - keep for backward compatibility */}
-       <Route
+        <Route
           path="/admin-reports"
           element={
             <ProtectedRoute>
@@ -163,19 +163,19 @@ export default function App() {
               <NotRenewedUsers />
             </ProtectedRoute>
           }
-        /> 
+        />
 
         {/* User Details Route - IMPORTANT: Change path */}
-         <Route
+        <Route
           path="/admin/users/:userId"
           element={
             <ProtectedRoute>
               <AdminModelDetails />
             </ProtectedRoute>
           }
-        /> 
+        />
 
-         <Route
+        <Route
           path="/admin/models/:userId"
           element={
             <ProtectedRoute>
@@ -191,7 +191,7 @@ export default function App() {
               <AdminModelDetails />
             </ProtectedRoute>
           }
-        /> 
+        />
 
         {/* payment result routes */}
         <Route
@@ -211,7 +211,7 @@ export default function App() {
           }
         />
         <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
- 
+
         <Route path="/admin-plans-new" element={<PlanFormWrapper />} />
         <Route path="/admin/blogs/create" element={<CreateArticle />} />
         <Route path="/admin/blogs/edit/:id" element={<EditArticle />} />
@@ -291,13 +291,13 @@ export default function App() {
         {/*user settings routes */}
 
         <Route
-       path="/dashboard/settings"
-        element={
-             <MainLayout>
-  <Settings/>
-             </MainLayout>
-      
-      } 
+          path="/dashboard/settings"
+          element={
+            <MainLayout>
+              <Settings />
+            </MainLayout>
+
+          }
         />
 
 
