@@ -1,5 +1,6 @@
 // src/components/CTA.jsx
 import React from "react";
+import { showMaintenanceModal } from "../../utils/maintenanceModal";
 
 export default function CTA() {
   return (
@@ -13,6 +14,10 @@ export default function CTA() {
       </p>
       <a
         href="/register"
+        onClick={(e) => {
+          e.preventDefault();
+          showMaintenanceModal();
+        }}
         className="inline-block px-8 py-4 rounded-xl bg-amber-700 text-white font-semibold shadow-lg hover:scale-105 transform transition-all"
       >
         Join Free Today

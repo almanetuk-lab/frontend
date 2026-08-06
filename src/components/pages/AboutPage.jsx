@@ -1,6 +1,7 @@
 // src/pages/About.jsx
 import React from "react";
 import { Link } from "react-router-dom";
+import { showMaintenanceModal } from "../../utils/maintenanceModal";
 
 export default function About() {
 
@@ -174,6 +175,10 @@ const img1 ="./images/1.jpg";
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/register"
+              onClick={(e) => {
+                e.preventDefault();
+                showMaintenanceModal();
+              }}
               className="bg-[#4D6D9E] text-white px-8 py-3 rounded-lg font-medium hover:bg-[#3A5A8F] transition-all duration-200 inline-block"
             >
               Get Started

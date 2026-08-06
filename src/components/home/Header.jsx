@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
 import NotificationBell from "../notifybell/NotificationBell";
+import { showMaintenanceModal } from "../../utils/maintenanceModal";
 
 import bglogo from "../../assets/alternate.png";
 import { FaLinkedin, FaFacebook, FaTwitter } from "react-icons/fa";
@@ -274,6 +275,10 @@ function Header() {
 
                 <Link
                   to="/register"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    showMaintenanceModal();
+                  }}
                   className="bg-[#727bf1] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#041cfa] transition-all duration-200"
                 >
                   Register 
@@ -513,7 +518,11 @@ function Header() {
                   <Link
                     to="/register"
                     className="block py-3 px-4 text-center bg-[#FF66CC] text-white rounded-lg font-semibold hover:bg-[#ff4dc2] transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsMobileMenuOpen(false);
+                      showMaintenanceModal();
+                    }}
                   >
                     Register 
                   </Link>

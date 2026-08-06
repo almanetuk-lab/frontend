@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser } from "../services/api";
 import { useUserProfile } from "../context/UseProfileContext";
+import { showMaintenanceModal } from "../../utils/maintenanceModal";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { updateProfile } = useUserProfile() || { updateProfile: () => {} };
+  const { updateProfile } = useUserProfile() || { updateProfile: () => { } };
 
   const [form, setForm] = useState({
     first_name: "",
@@ -213,11 +214,14 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 mt-4 font-bold text-white rounded-lg shadow-md transition duration-200 ${
-              loading
+            onClick={(e) => {
+              e.preventDefault();
+              showMaintenanceModal();
+            }}
+            className={`w-full py-3 mt-4 font-bold text-white rounded-lg shadow-md transition duration-200 ${loading
                 ? "bg-blue-600 cursor-not-allowed opacity-90"
                 : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg"
-            }`}
+              }`}
           >
             {loading ? "Creating Account..." : "Create Account"}
           </button>
