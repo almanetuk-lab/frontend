@@ -4,6 +4,7 @@ import React, { useEffect ,useState } from "react";
 import AOS from "aos";
 import { FaLinkedin, FaApple, FaGoogle } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { showMaintenanceModal } from "../../utils/maintenanceModal";
 
 export default function Heroo() {
   const bannerImage = "/images/4.jpg.jpg";
@@ -177,7 +178,11 @@ export default function Heroo() {
                   />
 
                   <Link
-                    onClick={() => window.scrollTo(0, 0)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.scrollTo(0, 0);
+                      showMaintenanceModal();
+                    }}
                     to="/register"
                     className="px-4 py-2.5 md:px-6 md:py-3 bg-[#4D6D9E] text-white font-semibold rounded-lg hover:bg-[#3A5A8F] transition shadow-sm hover:shadow-md whitespace-nowrap text-sm md:text-base inline-block text-center"
                   >

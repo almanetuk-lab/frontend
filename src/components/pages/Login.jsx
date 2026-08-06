@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../services/api";
 import { useUserProfile } from "../context/UseProfileContext";
+import { showMaintenanceModal } from "../../utils/maintenanceModal";
 import { FaLinkedin } from "react-icons/fa";
 //import LinkedInLoginButton from "../social/LinkedInLoginButton";
 import LinkedInLoginButton from "../social/LinkedInLoginButton";
@@ -215,6 +216,10 @@ const handleLinkedInLogin = async () => {
             Don't have an account?{" "}
             <Link
               to="/register"
+              onClick={(e) => {
+                e.preventDefault();
+                showMaintenanceModal();
+              }}
               className="font-bold text-blue-600 hover:text-blue-800 hover:underline"
             >
               Create Account
