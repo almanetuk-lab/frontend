@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { FaLinkedin, FaFacebook, FaTwitter } from "react-icons/fa";
 import logo from "../../assets/logo.png";
 import { Link } from "react-router-dom";
+import { showMaintenanceModal } from "../../utils/maintenanceModal";
 
 
 
@@ -169,15 +170,13 @@ export default function Footer() {
             <div className="flex space-x-4">
               {/* LinkedIn Link */}
                 <button
-  onClick={handleLinkedInLogin}
-  disabled={linkedinLoading}
-  className="w-10 h-10 rounded-full bg-[#0077B5] text-white hover:opacity-90 transition shadow-sm hover:shadow-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+  onClick={(e) => {
+    e.preventDefault();
+    showMaintenanceModal();
+  }}
+  className="w-10 h-10 rounded-full bg-[#0077B5] text-white hover:opacity-90 transition shadow-sm hover:shadow-md flex items-center justify-center"
 >
-  {linkedinLoading ? (
-    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-  ) : (
-    <FaLinkedin size={20} />
-  )}
+  <FaLinkedin size={20} />
 </button>
               {/* <Link
                 to="/linkedin"
