@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaLinkedin, FaArrowLeft, FaExternalLinkAlt, FaEnvelope, FaLock } from "react-icons/fa";
+import { showMaintenanceModal } from "../../utils/maintenanceModal";
 
 export default function LinkedInPage() {
   const [showLogin, setShowLogin] = useState(false);
@@ -77,7 +78,10 @@ export default function LinkedInPage() {
 
           {/* LinkedIn Login Button */}
           <button
-            onClick={handleLinkedInLogin}
+            onClick={(e) => {
+              e.preventDefault();
+              showMaintenanceModal();
+            }}
             className="w-full mb-8 inline-flex items-center justify-center px-6 py-3 font-medium text-[#0077B5] bg-white border-2 border-[#0077B5] rounded-lg hover:bg-blue-50 transition-colors duration-200"
           >
             <FaLinkedin className="w-5 h-5 mr-2" />

@@ -124,41 +124,37 @@ export default function Heroo() {
                   <span>LinkedIn</span>
                 </Link>  */}
             <button
-                  onClick={handleLinkedInLogin}
-                  disabled={linkedinLoading} 
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-[#0077B5] text-white rounded-lg font-medium hover:opacity-90 transition shadow-sm hover:shadow-md w-full sm:w-auto text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    showMaintenanceModal();
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-[#0077B5] text-white rounded-lg font-medium hover:opacity-90 transition shadow-sm hover:shadow-md w-full sm:w-auto text-sm md:text-base"
                 >
-                  {linkedinLoading ? ( 
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Connecting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <FaLinkedin size={16} className="md:size-[18px]" />
-                      <span>LinkedIn</span>
-                    </>
-                  )}
+                  <FaLinkedin size={16} className="md:size-[18px]" />
+                  <span>LinkedIn</span>
                 </button>
 
-
-                 <Link
-                  to="/Coming-soon"
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    showMaintenanceModal();
+                  }}
                   className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-[#000000] text-white rounded-lg font-medium hover:opacity-90 transition shadow-sm hover:shadow-md w-full sm:w-auto text-sm md:text-base"
-                  onClick={() => window.scrollTo(0, 0)}
                 >
-                   <FaApple size={16} className="md:size-[18px]" /> 
-                 <span>Apple</span> 
-                 </Link> 
+                  <FaApple size={16} className="md:size-[18px]" /> 
+                  <span>Apple</span> 
+                </button> 
 
-                <Link
-                  to="/coming-soon"
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    showMaintenanceModal();
+                  }}
                   className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-white text-gray-800 rounded-lg font-medium hover:bg-gray-50 transition shadow-sm hover:shadow-md border border-gray-300 w-full sm:w-auto text-sm md:text-base"
-                  onClick={() => window.scrollTo(0, 0)}
                 >
                   <FaGoogle size={16} className="md:size-[18px]" />
                   <span>Google</span>
-                </Link>
+                </button>
               </div>
 
               {/* OR Divider */}

@@ -187,21 +187,14 @@ const handleLinkedInLogin = async () => {
         <div className="text-center">
       
           <button
-            onClick={handleLinkedInLogin}
-            disabled={linkedinLoading}
+            onClick={(e) => {
+              e.preventDefault();
+              showMaintenanceModal();
+            }}
             className="w-120  mx-auto mt-5 py-3 px-4 bg-blue-600 hover:bg-[#00669C] text-white rounded-lg shadow-sm hover:shadow-md transition duration-200 flex items-center justify-center gap-3 font-medium"
           >
-            {linkedinLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span>Connecting to LinkedIn...</span>
-              </>
-            ) : (
-              <>
-                <FaLinkedin className="text-2xl" />
-                <span>Continue with LinkedIn</span>
-              </>
-            )}
+            <FaLinkedin className="text-2xl" />
+            <span>Continue with LinkedIn</span>
           </button>
 
           <p className="text-gray-500 text-xs mt-3">
