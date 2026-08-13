@@ -1,58 +1,20 @@
 
 // // src/components/Hero.jsx (Optimized for Mobile & Desktop)
-import React, { useEffect ,useState } from "react";
+import React, { useEffect, useState } from "react";
 import AOS from "aos";
-import { FaLinkedin, FaApple, FaGoogle } from "react-icons/fa";
+import { FaBullseye, FaShieldAlt, FaComments } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { showMaintenanceModal } from "../../utils/maintenanceModal";
 
 export default function Heroo() {
   const bannerImage = "/images/4.jpg.jpg";
 
-   const [linkedinLoading, setLinkedinLoading] = useState(false);
-
   useEffect(() => {
     AOS.init({ duration: 1000, once: true });
   }, []);
 
-  const handleLinkedInLogin = async () => {
-    setLinkedinLoading(true);
-    try {
-        console.log('🔗 Getting LinkedIn auth URL...');
-        
-        const backendUrl = import.meta.env.VITE_API_BASE_URL || 'https://backend-q0wc.onrender.com';
-        const apiUrl = `${backendUrl}/api/linkedin/auth-url`;
-        
-        console.log('📞 Calling backend for LinkedIn URL:', apiUrl);
-        
-        const response = await fetch(apiUrl);
-        
-        if (!response.ok) {
-            throw new Error(`Backend error: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('✅ Backend LinkedIn response:', data);
-        
-        //  IMPORTANT: Backend { url: '...' } format में return कर रहा है
-        if (data.url) {
-            console.log('🚀 Redirecting to LinkedIn login...');
-            window.location.href = data.url;
-        } else {
-            throw new Error('No LinkedIn URL received from backend');
-        }
-        
-    } catch (error) {
-        console.error('❌ LinkedIn login error:', error);
-        alert(`Login failed: ${error.message}. Please try again.`);
-    } finally {
-        setLinkedinLoading(false);
-    }
-};
-
-
   return (
-    
+
     <section className="relative w-full min-h-[800px] md:min-h-[750px] lg:min-h-[750px] rounded-3xl overflow-hidden shadow-lg bg-gradient-to-r from-[#F8F9FA] to-[#E3F2FD]">
       {/* Container with flex layout */}
       <div className="relative  h-full flex flex-col lg:flex-row">
@@ -82,12 +44,12 @@ export default function Heroo() {
               data-aos="fade-up"
               className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-[#2C3E50] leading-tight mb-4 md:mb-6"
             >
-              
-          Where connection fits your life
-           </h1>
+
+              Where connection fits your life
+            </h1>
 
             {/* Subtitle - Smaller */}
-             <p
+            <p
               data-aos="fade-up"
               data-aos-delay="100"
               className="text-base sm:text-lg md:text-xl text-[#546E7A] mb-6 md:mb-8 max-w-xl"
@@ -107,87 +69,38 @@ export default function Heroo() {
               decide for themselves.
             </p>
 
-            {/* Waitlist Section */}
-            <div
-              data-aos="fade-up"
-              data-aos-delay="300"
-              className="mb-8 md:mb-10"
-            >
-              {/* Social Login Buttons - Better mobile */}
-               <div className="flex flex-col sm:flex-row gap-3 mb-4 md:mb-6">
-                 {/* <Link
-                  to="/linkedin"
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-[#0077B5] text-white rounded-lg font-medium hover:opacity-90 transition shadow-sm hover:shadow-md w-full sm:w-auto text-sm md:text-base"
-                  onClick={() => window.scrollTo(0, 0)}
-                >
-                  <FaLinkedin size={16} className="md:size-[18px]" />
-                  <span>LinkedIn</span>
-                </Link>  */}
-            <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    showMaintenanceModal();
-                  }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-[#0077B5] text-white rounded-lg font-medium hover:opacity-90 transition shadow-sm hover:shadow-md w-full sm:w-auto text-sm md:text-base"
-                >
-                  <FaLinkedin size={16} className="md:size-[18px]" />
-                  <span>LinkedIn</span>
-                </button>
 
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    showMaintenanceModal();
-                  }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-[#000000] text-white rounded-lg font-medium hover:opacity-90 transition shadow-sm hover:shadow-md w-full sm:w-auto text-sm md:text-base"
-                >
-                  <FaApple size={16} className="md:size-[18px]" /> 
-                  <span>Apple</span> 
-                </button> 
 
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    showMaintenanceModal();
-                  }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 bg-white text-gray-800 rounded-lg font-medium hover:bg-gray-50 transition shadow-sm hover:shadow-md border border-gray-300 w-full sm:w-auto text-sm md:text-base"
-                >
-                  <FaGoogle size={16} className="md:size-[18px]" />
-                  <span>Google</span>
-                </button>
-              </div>
-
-              {/* OR Divider */}
-              <div className="flex items-center my-4 md:my-6">
-                <div className="flex-grow border-t border-gray-300"></div>
-                <span className="mx-3 text-gray-500 text-sm">or</span>
-                <div className="flex-grow border-t border-gray-300"></div>
-              </div>
-
-              {/* Email Waitlist */}
-              <div className="max-w-md">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="flex-grow px-3 py-2.5 md:px-4 md:py-3 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#4D6D9E] focus:border-transparent shadow-sm text-sm md:text-base"
-                  />
-
-                  <Link
-                    onClick={(e) => {
-                      e.preventDefault();
-                      window.scrollTo(0, 0);
-                      showMaintenanceModal();
-                    }}
-                    to="/register"
-                    className="px-4 py-2.5 md:px-6 md:py-3 bg-[#4D6D9E] text-white font-semibold rounded-lg hover:bg-[#3A5A8F] transition shadow-sm hover:shadow-md whitespace-nowrap text-sm md:text-base inline-block text-center"
-                  >
-                    Join Waitlist
-                  </Link>
+            {/* Pillars of Compatibility - Premium Highlight Cards */}
+            <div data-aos="fade-up" data-aos-delay="300" className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-6">
+              <div className="group bg-white/70 backdrop-blur-md p-5 rounded-2xl border border-gray-100/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex items-start gap-4 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-blue-200/50 transition-all duration-300">
+                <div className="p-3 bg-[#E3F2FD] text-[#1E88E5] rounded-xl group-hover:bg-[#1E88E5] group-hover:text-white transition-colors duration-300">
+                  <FaBullseye size={22} />
                 </div>
-                <p className="text-xs text-gray-500 mt-2 md:mt-3">
-                  We'll notify you when we launch. No spam, ever.
-                </p>
+                <div>
+                  <h3 className="font-bold text-[#2C3E50] text-sm mb-1 uppercase tracking-wide">Compatibility</h3>
+                  <p className="text-xs text-[#607D8B] leading-relaxed font-medium">Built around personality traits, life values, and ambitions instead of superficial matches.</p>
+                </div>
+              </div>
+
+              <div className="group bg-white/70 backdrop-blur-md p-5 rounded-2xl border border-gray-100/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex items-start gap-4 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-pink-200/50 transition-all duration-300">
+                <div className="p-3 bg-[#FCE4EC] text-[#D81B60] rounded-xl group-hover:bg-[#D81B60] group-hover:text-white transition-colors duration-300">
+                  <FaShieldAlt size={22} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-[#2C3E50] text-sm mb-1 uppercase tracking-wide">Privacy</h3>
+                  <p className="text-xs text-[#607D8B] leading-relaxed font-medium">Control exactly who sees your profile, keeping your peace of mind intact.</p>
+                </div>
+              </div>
+
+              <div className="group bg-white/70 backdrop-blur-md p-5 rounded-2xl border border-gray-100/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex items-start gap-4 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-purple-200/50 transition-all duration-300 col-span-1 sm:col-span-2">
+                <div className="p-3 bg-[#F3E5F5] text-[#8E24AA] rounded-xl group-hover:bg-[#8E24AA] group-hover:text-white transition-colors duration-300">
+                  <FaComments size={22} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-[#2C3E50] text-sm mb-1 uppercase tracking-wide">Connections</h3>
+                  <p className="text-xs text-[#607D8B] leading-relaxed font-medium">Skip superficial swipes and transition into deep, intentional conversations that fit into your life.</p>
+                </div>
               </div>
             </div>
           </div>

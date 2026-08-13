@@ -1,6 +1,6 @@
 // src/components/home/Header.jsx (Fixed Version)
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useUserProfile } from "../context/UseProfileContext";
 import NotificationBell from "../notifybell/NotificationBell";
 import { showMaintenanceModal } from "../../utils/maintenanceModal";
@@ -24,6 +24,10 @@ function Header() {
   };
 
   const isLoggedIn = checkLoginStatus();
+  const location = useLocation();
+  const hideAuthButtons = ["/", "/about", "/contact", "/blog", "/blogs"].some(path => 
+    location.pathname === path || location.pathname.startsWith(path + "/")
+  );
 
   // FIXED: Original logout function preserved
   const handleLogout = () => {
@@ -256,7 +260,7 @@ function Header() {
                   Logout
                 </button>
               </>
-            ) : (
+            ) : !hideAuthButtons ? (
               <div className="flex items-center gap-3">
                 {/* FIXED: Original login links preserved */}
                <Link
@@ -284,7 +288,7 @@ function Header() {
                   Register 
                 </Link>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile Menu Button */}
@@ -496,7 +500,7 @@ function Header() {
                     Logout
                   </button>
                 </div>
-              ) : (
+              ) : !hideAuthButtons ? (
                 <div className="space-y-3">
                   {/* FIXED: Original Admin Login preserved */}
                   {/* <Link
@@ -527,7 +531,7 @@ function Header() {
                     Register 
                   </Link>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
