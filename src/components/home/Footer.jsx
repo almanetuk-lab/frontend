@@ -216,22 +216,25 @@ export default function Footer() {
         <div className="border-t border-gray-300 my-4"></div>{" "}
         {/* my-8 se my-4 */}
         {/* Bottom Section with Logo - Compact */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between py-2">
-          {" "}
-          {/* Added py-2 */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between py-2 gap-4">
           {/* Logo - Smaller */}
           <div className="mb-4 md:mb-0">
             <div className="text-2xl font-bold text-[#4D6D9E] tracking-wider">
-              {" "}
-              {/* text-3xl se text-2xl */}
               {/* <img src={logo} alt="logo" size={15} /> */}
             </div>
           </div>
+          {/* Clean Professional Coming Soon Footer Button */}
+          <div className="mb-4 md:mb-0">
+            <button
+              onClick={showMaintenanceModal}
+              className="px-6 py-2.5 rounded-full bg-[#4D6D9E] hover:bg-[#3B547C] text-white font-extrabold text-[10px] tracking-widest uppercase border border-[#5E7FA3] hover:border-[#4B688A] shadow-[0_2px_8px_rgba(77,109,158,0.25)] hover:shadow-[0_4px_12px_rgba(77,109,158,0.35)] transition-all duration-300 ease-out hover:-translate-y-0.5 active:translate-y-0"
+            >
+              Coming Soon — The future of meaningful connection
+            </button>
+          </div>
           {/* Copyright - Smaller text */}
           <div className="text-xs text-[#546E7A]">
-            {" "}
-            {/* text-sm se text-xs */}© 2026 Connection Platform. All rights
-            reserved.
+            © 2026 Connection Platform. All rights reserved.
           </div>
         </div>
       </div>

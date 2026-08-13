@@ -260,35 +260,17 @@ function Header() {
                   Logout
                 </button>
               </>
-            ) : !hideAuthButtons ? (
-              <div className="flex items-center gap-3">
-                {/* FIXED: Original login links preserved */}
-               <Link
-                  to="/login"
-                  className="bg-[#727bf1] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#041cfa] transition-all duration-200"
+            ) : (
+              <div className="flex items-center">
+                {/* Clean Professional Coming Soon Navbar Button */}
+                <button
+                  onClick={showMaintenanceModal}
+                  className="px-6 py-2.5 rounded-full bg-[#4D6D9E] hover:bg-[#3B547C] text-white font-extrabold text-[10px] tracking-widest uppercase border border-[#5E7FA3] hover:border-[#4B688A] shadow-[0_2px_8px_rgba(77,109,158,0.25)] hover:shadow-[0_4px_12px_rgba(77,109,158,0.35)] transition-all duration-300 ease-out hover:-translate-y-0.5 active:translate-y-0"
                 >
-                  Login
-                </Link>
-
-                {/* <Link
-                  to="/admin-login"
-                  className="text-gray-700 hover:text-[#4D6D9E] font-medium transition-colors duration-200 px-3 py-1"
-                >
-                  Admin Login
-                </Link> */}
-
-                <Link
-                  to="/register"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    showMaintenanceModal();
-                  }}
-                  className="bg-[#727bf1] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#041cfa] transition-all duration-200"
-                >
-                  Register 
-                </Link>
+                  Coming Soon — The future of meaningful connection
+                </button>
               </div>
-            ) : null}
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -500,41 +482,26 @@ function Header() {
                     Logout
                   </button>
                 </div>
-              ) : !hideAuthButtons ? (
-                <div className="space-y-3">
-                  {/* FIXED: Original Admin Login preserved */}
-                  {/* <Link
-                    to="/admin-login"
-                    className="block py-3 px-4 text-center text-gray-700 hover:text-[#4D6D9E] hover:bg-gray-50 rounded-lg border border-gray-300 transition-colors font-medium"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Admin Login
-                  </Link> */}
-
-                  <Link
-                    to="/login"
-                    className="block py-3 px-4 text-center text-gray-700 hover:text-[#4D6D9E] hover:bg-gray-50 rounded-lg border border-gray-300 transition-colors font-medium"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Login
-                  </Link>
-
-                  <Link
-                    to="/register"
-                    className="block py-3 px-4 text-center bg-[#FF66CC] text-white rounded-lg font-semibold hover:bg-[#ff4dc2] transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault();
+              ) : (
+                <div className="space-y-3 px-4">
+                  {/* Clean Professional Coming Soon Mobile Button */}
+                  <button
+                    onClick={() => {
                       setIsMobileMenuOpen(false);
                       showMaintenanceModal();
                     }}
+                    className="w-full py-3 rounded-full bg-[#4D6D9E] hover:bg-[#3B547C] text-white font-extrabold text-[10px] tracking-widest uppercase border border-[#5E7FA3] hover:border-[#4B688A] shadow-[0_2px_8px_rgba(77,109,158,0.25)] hover:shadow-[0_4px_12px_rgba(77,109,158,0.35)] transition-all duration-300 ease-out hover:-translate-y-0.5"
                   >
-                    Register 
-                  </Link>
+                    Coming Soon
+                  </button>
+                  <p className="text-center text-xs text-[#546E7A] font-semibold leading-relaxed">
+                    The future of meaningful connection
+                  </p>
                 </div>
-              ) : null}
-            </div>
+              )}
           </div>
         </div>
+      </div>
       </div>
     </header>
   );
