@@ -184,23 +184,7 @@ const handleLinkedInLogin = async () => {
             {loading ? "Logging in..." : "Login to Your Account"}
           </button>
         </form>
-        <div className="text-center">
-      
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              showMaintenanceModal();
-            }}
-            className="w-120  mx-auto mt-5 py-3 px-4 bg-blue-600 hover:bg-[#00669C] text-white rounded-lg shadow-sm hover:shadow-md transition duration-200 flex items-center justify-center gap-3 font-medium"
-          >
-            <FaLinkedin className="text-2xl" />
-            <span>Continue with LinkedIn</span>
-          </button>
 
-          <p className="text-gray-500 text-xs mt-3">
-            Secure login via LinkedIn. We'll never post without permission.
-          </p>
-        </div>
             {/* <LinkedInLoginButton/> */}
 
         {/* UI CHANGE: Create account section with blue text */}

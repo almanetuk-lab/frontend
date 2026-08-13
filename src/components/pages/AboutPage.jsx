@@ -174,20 +174,10 @@ const img1 ="./images/1.jpg";
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/register"
-              onClick={(e) => {
-                e.preventDefault();
-                showMaintenanceModal();
-              }}
+              to="/contact"
               className="bg-[#4D6D9E] text-white px-8 py-3 rounded-lg font-medium hover:bg-[#3A5A8F] transition-all duration-200 inline-block"
             >
-              Get Started
-            </Link>
-            <Link
-              to="/"
-              className="bg-white text-[#4D6D9E] px-8 py-3 rounded-lg font-medium border border-[#4D6D9E] hover:bg-gray-50 transition-all duration-200 inline-block"
-            >
-              Learn More
+              Contact Us
             </Link>
           </div>
         </section>
