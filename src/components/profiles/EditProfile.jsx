@@ -785,8 +785,6 @@ export default function EditProfilePage() {
       interested_in: profile.interested_in || "",
       relationship_goal: profile.relationship_goal || "",
 
-      interests_categories: interestsCategories,
-
       children_preference: mapToUIEnum(
         "children_preference",
         profile.children_preference,

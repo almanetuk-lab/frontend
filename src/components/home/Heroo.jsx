@@ -39,6 +39,8 @@ export default function Heroo() {
           {/* Reduced padding */}
           {/* Main Content */}
           <div className="max-w-2xl mx-auto w-full">
+
+
             {/* Main Headline - Smaller fonts */}
             <h1
               data-aos="fade-up"

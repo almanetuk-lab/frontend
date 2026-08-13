@@ -9,36 +9,41 @@ export const showMaintenanceModal = () => {
   const modalHtml = `
     <div id="maintenance-modal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <!-- Backdrop -->
-      <div id="maintenance-modal-backdrop" class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
+      <div id="maintenance-modal-backdrop" class="absolute inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300 opacity-0"></div>
       
       <!-- Modal Content Card -->
-      <div id="maintenance-modal-card" class="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 p-6 md:p-8 text-center transition-all duration-300 scale-95 opacity-0 transform">
+      <div id="maintenance-modal-card" class="relative bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 w-full max-w-md rounded-3xl shadow-[0_20px_50px_rgba(79,70,229,0.3)] border border-indigo-500/30 p-8 md:p-10 text-center transition-all duration-300 scale-95 opacity-0 transform">
+        
         <!-- Close Button (X) -->
-        <button id="maintenance-modal-close-btn-x" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none" aria-label="Close">
+        <button id="maintenance-modal-close-btn-x" class="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10 focus:outline-none" aria-label="Close">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
         <!-- Icon / Illustration -->
-        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-500 mb-6">
-          <svg class="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-indigo-500/10 text-pink-400 border border-pink-500/30 mb-6 shadow-[0_0_20px_rgba(236,72,153,0.15)]">
+          <svg class="w-10 h-10 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
 
         <!-- Title -->
-        <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-3">
-          Maintenance Notice
+        <h3 class="text-3xl font-black text-white mb-2 tracking-tight">
+          Coming soon
         </h3>
 
         <!-- Description -->
-        <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed mb-8">
-            Registration is temporarily unavailable due to scheduled maintenance. Please check back later.
+        <p class="text-pink-400 text-lg md:text-xl font-bold leading-relaxed mb-4">
+          The future of meaningful connection
+        </p>
+        
+        <p class="text-slate-300 text-sm leading-relaxed mb-8">
+          We are currently preparing the platform for launch. Registration is temporarily closed. Please check back soon.
         </p>
 
         <!-- Action Button -->
-        <button id="maintenance-modal-close-btn" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <button id="maintenance-modal-close-btn" class="w-full py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-500 hover:from-blue-700 hover:to-pink-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none">
           Got it
         </button>
       </div>

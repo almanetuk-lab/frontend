@@ -20,32 +20,29 @@ export default function FallbackPage() {
           </div>
 
           {/* Heading */}
-          <h1 className="mb-4 text-4xl font-bold text-gray-900 md:text-5xl">
-            Work in Progress
+          <h1 className="mb-4 text-4xl font-extrabold text-gray-900 md:text-6xl tracking-tight bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-500 bg-clip-text text-transparent">
+            Coming soon
           </h1>
           
           {/* Subheading */}
-          <p className="mb-6 text-xl text-gray-700">
-            We're crafting something amazing for you!
+          <p className="mb-8 text-xl md:text-2xl font-bold text-gray-700">
+            The future of meaningful connection
           </p>
 
           {/* Note Box */}
-          <div className="p-6 mb-8 bg-blue-50 border-l-4 border-blue-500 rounded-lg text-left">
+          <div className="p-6 mb-8 bg-blue-50/50 backdrop-blur-sm border-l-4 border-indigo-500 rounded-r-xl text-left shadow-sm">
             <div className="flex items-start">
-              <FaClock className="w-5 h-5 mt-1 mr-3 text-blue-600 flex-shrink-0" />
+              <FaClock className="w-5 h-5 mt-1 mr-3 text-indigo-600 flex-shrink-0" />
               <div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900">
-                  Important Note
+                <h3 className="mb-2 text-lg font-bold text-gray-900">
+                  A New Way to Connect
                 </h3>
-                <p className="text-gray-800">
-                  This section of our website is currently under development. 
-                  Our team is working diligently to bring you an enhanced experience. 
-                  We appreciate your patience and look forward to sharing the 
-                  finished product with you soon.
+                <p className="text-gray-700 leading-relaxed">
+                  We are building an intentional, compatibility-first platform designed to protect your peace of mind and help you find genuine relationships. Registration is currently closed while we finalize the experience.
                 </p>
-                <div className="flex items-center mt-3 text-sm text-gray-600">
-                  <div className="w-2 h-2 mr-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <span>Last updated: {new Date().toLocaleDateString()}</span>
+                <div className="flex items-center mt-4 text-xs font-semibold text-indigo-600">
+                  <div className="w-2 h-2 mr-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                  <span>System Launch Phase: Pre-Release</span>
                 </div>
               </div>
             </div>
